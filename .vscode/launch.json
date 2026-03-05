@@ -1,0 +1,56 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Firefox - HTTP",
+            "type": "firefox",
+            "request": "launch",
+            "url": "http://localhost:5000",
+            "webRoot": "${workspaceFolder}",
+            "pathMappings": [
+                {
+                    "url": "webpack:///./",
+                    "path": "${workspaceFolder}/"
+                }
+            ],
+            "profile": "default",
+            "keepProfileChanges": true,
+            "reAttach": true,
+            "firefoxArgs": [
+                "--start-debugger-server"
+            ]
+        },
+        {
+            "name": "Launch Firefox - HTTPS",
+            "type": "firefox",
+            "request": "launch",
+            "url": "https://localhost:5001",
+            "webRoot": "${workspaceFolder}",
+            "pathMappings": [
+                {
+                    "url": "webpack:///./",
+                    "path": "${workspaceFolder}/"
+                }
+            ],
+            "profile": "default",
+            "keepProfileChanges": true,
+            "reAttach": true,
+            "firefoxArgs": [
+                "--start-debugger-server"
+            ]
+        },
+        {
+            "name": "Attach to Firefox",
+            "type": "firefox",
+            "request": "attach",
+            "url": "http://localhost:5000",
+            "webRoot": "${workspaceFolder}",
+            "pathMappings": [
+                {
+                    "url": "webpack:///./",
+                    "path": "${workspaceFolder}/"
+                }
+            ]
+        }
+    ]
+}

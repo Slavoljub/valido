@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zxx">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>PDV Analiza</title>
+
+    <link rel="icon" href="/static/img/logo.png" type="image/png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/typeit@8.0.3/dist/index.umd.js"></script>
+
+    <style type="text/css">
+
+        .white{
+            color: white;
+        }
+        footer {
+            background-color: #ffffff;
+            color: #222222;
+            padding: 20px 0; /* Malo povećavamo padding da spustimo footer */
+            text-align: center;
+            font-size: 0.9rem;
+            border-top: 3px solid #0d6efd;
+            margin-top: auto;
+            width: 100%;
+        }
+        html, body {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            /* Stilizovanje modala */
+            #visualizationModal .modal-content {
+                border-radius: 15px;
+                overflow: hidden;
+            }
+            html, body {
+                height: 100%;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+            }
+
+            main {
+                flex: 1;
+            }
+
+/* Bolja visina i skaliranje */
+#visualizationModal .modal-body {
+    height: auto;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* Poboljšanje stila GPT analize */
+#gptAnaliza {
+    border-left: 4px solid #0c68ef;
+    padding: 15px;
+}
+
+/* Efekat otvaranja modala */
+.modal.fade .modal-dialog {
+    transform: scale(0.95);
+    transition: transform 0.3s ease-out;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1);
+}
+
+#similarityChart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+</style>
+</head>
+<body>
+    <body>
+         <!-- Navbar -->
+   <nav class="navbar navbar-expand-lg bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="{{ url_for('static', filename='img/valido.svg') }}" alt="ValidoAI Logo" height="30">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link text-white" href="/">Početna</a></li>
+                    <li class="nav-item"><a class="nav-link active text-white" href="/funkcionalnosti">Funkcionalnosti</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="#" data-bs-toggle="modal" data-bs-target="#prijavaModal">
+                            Prijavi me
+                        </a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link text-white" href="/kontakt">Kontakt</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+        <main class="flex-grow-1">
+            <div class="container mt-4">
+                <div class="white-box p-4 rounded shadow">
+                    <div class="text-center">
+                      <h1 class="fw-bold text-primary">
+                        <i class="bi bi-diagram-3-fill me-2"></i> PDV Analiza Dobavljača i Kupaca
+                    </h1>
+                    <p class="text-muted" style="max-width: 700px; margin: 0 auto;">
+                        Iskoristite moć veštačke inteligencije za obradu faktura i odnosa sa partnerima. Embedding analiza otkriva skrivene obrasce, anomalije i mogućnosti za optimizaciju PDV-a.
+                    </p>
+                </div>
+                <br><br>
+                <div class="input-group mb-3">
+                    <input type="text" id="supplierQuery" class="form-control" placeholder="Unesite naziv dobavljača...">
+                    <button id="searchBtn" class="btn btn-primary ms-1">Identifikujte ključne dobavljače</button>
+                    <button id="visualizeBtn" class="btn btn-outline-secondary ms-1">Vizuelizuj i analiziraj</button>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="supplierTable" class="table table-bordered table-hover align-middle text-center shadow-sm rounded">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Dobavljač</th>
+                                <th>Sličnost (%)</th>
+                                <th>Ukupno plaćeno (RSD)</th>
+                                <th>Neto iznos (RSD)</th>
+                                <th>PDV iznos (RSD)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="noDataMessage">
+                                <td colspan="5" class="text-muted">🔎 Unesite naziv dobavljača i kliknite na "Pretraži".</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- ✅ FOOTER -->
+        <footer class="text-center text-white p-4 border-top border-primary" style="background-color: #0c68ef;">
+          <div class="mb-3 d-flex justify-content-center flex-wrap gap-4 small">
+            <div class="d-flex flex-column align-items-center">
+              <i class="bi bi-graph-up text-white fs-5"></i>
+              <span class="mt-1">Simulacija</span>
+          </div>
+          <div class="d-flex flex-column align-items-center">
+              <i class="bi bi-file-earmark-text text-white fs-5"></i>
+              <span class="mt-1">Dokumenti</span>
+          </div>
+          <div class="d-flex flex-column align-items-center">
+              <i class="bi bi-chat-dots text-white fs-5"></i>
+              <span class="mt-1">AI komentari</span>
+          </div>
+          <div class="d-flex flex-column align-items-center">
+              <i class="bi bi-sliders text-white fs-5"></i>
+              <span class="mt-1">Propisi</span>
+          </div>
+      </div>
+      <p class="mb-0">&copy; 2025 ValidoAI. Sva prava zadržana.</p>
+  </footer>
+
+  <div class="position-fixed bottom-0 end-0 m-3 px-3 py-2 bg-primary text-white rounded shadow-sm small" 
+  style="opacity: 0.9; z-index: 1030;" 
+  data-bs-toggle="tooltip" 
+  title="Ova sekcija koristi veštačku inteligenciju za uvod, savete i preporuke.">
+  <i class="bi bi-cpu me-2"></i> AI MODE: aktivan
+</div>
+</body>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- ApexCharts Script (Obavezno pre korišćenja u kodu) -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</body>
+<div class="modal fade" id="visualizationModal" tabindex="-1">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content bg-light border-0">
+
+      <!-- Header -->
+      <div class="modal-header bg-primary text-white border-0">
+        <h1 class="modal-title w-100 fs-3 fw-bold text-center">Analiza dobavljača</h1>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body px-5 py-4">
+        <div class="container-fluid">
+          <div class="row gy-5 gx-4">
+
+            <!-- Levo: Grafikon -->
+            <div class="col-xl-7 col-lg-7 col-md-12">
+              <div class="card shadow-sm border-0 p-4 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                  <h5 class="fw-bold text-primary mb-0">Vizuelna sličnost dobavljača</h5>
+                  <i class="ti-bar-chart text-primary fs-4"></i>
+                </div>
+                <div id="apexChart" style="width: 100%; height: 450px;"></div>
+              </div>
+            </div>
+
+            <!-- Desno: GPT analiza -->
+            <div class="col-xl-5 col-lg-5 col-md-12">
+              <div class="card shadow-sm border-0 p-4 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                  <h5 class="fw-bold text-primary mb-0">AI analiza dobavljača</h5>
+                  <i class="ti-comment-alt text-primary fs-4"></i>
+                </div>
+                <div id="gptAnaliza" class="text-muted" style="max-height: 400px; overflow-y: auto; font-size: 1.1rem; line-height: 1.8;">
+                  Analiza podataka se učitava...
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer bg-white border-0 d-flex justify-content-center py-4">
+        <button type="button" class="btn btn-primary px-5 py-2 fs-6 fw-semibold" data-bs-dismiss="modal">Zatvori</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>
+<script>
+    $('#searchBtn').click(function() {
+        let query = $('#supplierQuery').val().trim();
+        if (!query) {
+            alert("Molimo unesite naziv dobavljača!");
+            return;
+        }
+
+        $.ajax({
+            url: "/api/suppliers",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ query: query }),
+            beforeSend: function() {
+                $("#supplierTable tbody").html("<tr><td colspan='5' class='text-center'>🔄 Pretraga u toku...</td></tr>");
+            },
+            success: function(response) {
+                let newTableBody = "";
+
+                if (response.message) {
+                    newTableBody += `<tr><td colspan="5" class="text-muted">${response.message}</td></tr>`;
+                } else {
+                    response.slicni_dobavljaci.forEach(item => {
+                        newTableBody += `
+                        <tr>
+                        <td>${item.Dobavljac || "N/A"}</td>
+                        <td>${item["Ukupna slicnost"] || "0"}%</td>
+                        <td>${item["Ukupno placeno"].toLocaleString('sr-RS', {minimumFractionDigits: 2})} RSD</td>
+                        <td>${item["Finansijska slicnost"]}%</td>
+                        <td>${item["Embedding slicnost"]}%</td>
+                        </tr>`;
+                    });
+                }
+
+                $("#supplierTable tbody").html(newTableBody);
+                initializeTable();
+            },
+            error: function(xhr, status, error) {
+                alert("❌ Došlo je do greške prilikom pretrage.");
+            }
+        });
+    });
+
+    function renderApexChart(labels, dataValues) {
+        if (!labels.length || !dataValues.length) {
+            console.error("❌ Podaci za grafikon nisu dostupni.");
+            return;
+        }
+
+        if (window.apexChartInstance) {
+            window.apexChartInstance.destroy();
+        }
+
+        var options = {
+            chart: {
+                type: 'bar',
+                height: 500,
+                width: '100%',
+                toolbar: { show: false },
+                animations: {
+                    enabled: true,
+                    easing: 'easeinout',
+                    speed: 800
+                }
+            },
+        colors: ['#007bff', '#ff5733', '#28a745', '#ffc107', '#6610f2'], // Različite boje stubaca
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shade: 'light',
+                type: 'vertical',
+                shadeIntensity: 0.5,
+                gradientToColors: ['#00c6ff', '#ff8c66', '#34d058', '#ffd966', '#8854d0'],
+                inverseColors: false,
+                opacityFrom: 1,
+                opacityTo: 1,
+                stops: [0, 100]
+            }
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 6,
+                horizontal: false,
+                columnWidth: '60%',
+                distributed: true // Različite boje za svaki stubac
+            }
+        },
+        tooltip: {
+            theme: 'dark',
+            y: {
+                formatter: function (val) {
+                    return val.toFixed(2) + "% sličnosti";
+                }
+            }
+        },
+        series: [{
+            name: 'Sličnost (%)',
+            data: dataValues
+        }],
+        xaxis: {
+            categories: labels,
+            labels: {
+                style: {
+                    colors: '#333',
+                    fontSize: '13px',
+                    fontWeight: 600
+                },
+                rotate: -20, // Blaga rotacija za bolju čitljivost
+                trim: false // Sprečava skraćivanje naziva
+            }
+        },
+        yaxis: {
+            max: 100,
+            labels: {
+                style: {
+                    colors: '#333',
+                    fontSize: '13px',
+                    fontWeight: 600
+                }
+            }
+        },
+        grid: {
+            borderColor: '#ddd',
+            strokeDashArray: 4
+        }
+    };
+
+    window.apexChartInstance = new ApexCharts(document.querySelector("#apexChart"), options);
+    window.apexChartInstance.render();
+}
+
+
+
+$('#visualizeBtn').click(function () {
+    let supplierName = $('#supplierQuery').val().trim();
+    if (!supplierName) {
+        alert("Molimo unesite naziv dobavljača za vizuelizaciju!");
+        return;
+    }
+
+    $.ajax({
+        url: `/api/suppliers`,
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({ query: supplierName }),
+        success: function (response) {
+            if (!response || !response.slicni_dobavljaci) {
+                alert("❌ Neočekivan odgovor API-ja.");
+                return;
+            }
+
+            let chartLabels = response.slicni_dobavljaci.map(item => item.Dobavljac);
+            let chartSimilarities = response.slicni_dobavljaci.map(item => item["Ukupna slicnost"]);
+
+            if (window.apexChartInstance) {
+                window.apexChartInstance.destroy();
+            }
+
+            var options = {
+                chart: {
+                    type: 'bar',
+                    height: 600,
+                    toolbar: { show: false },
+                    animations: {
+                        enabled: true,
+                        easing: 'easeinout',
+                        speed: 800
+                    }
+                },
+                colors: ['#5B8DEE'],
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shade: 'dark',
+                        type: 'vertical',
+                        shadeIntensity: 0.2,
+                        gradientToColors: ['#69EACB'],
+                        inverseColors: false,
+                        opacityFrom: 0.95,
+                        opacityTo: 0.85,
+                        stops: [0, 100]
+                    }
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 10,
+                        horizontal: false,
+                        columnWidth: '50%',
+                        dataLabels: {
+                            position: 'top'
+                        }
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function (val) {
+                        return val.toFixed(2) + "%";
+                    },
+                    offsetY: -20,
+                    style: {
+                        fontSize: '14px',
+                        colors: ['#000']
+                    }
+                },
+                tooltip: {
+                    theme: 'dark',
+                    style: {
+                        fontSize: '14px',
+                        fontFamily: 'inherit'
+                    },
+                    y: {
+                        formatter: function (val) {
+                            return val.toFixed(2) + "% sličnosti";
+                        }
+                    }
+                },
+                series: [{
+                    name: 'Ukupna sličnost',
+                    data: chartSimilarities
+                }],
+                xaxis: {
+                    categories: chartLabels,
+                    labels: {
+                        rotate: 0,
+                        trim: true,
+                        maxHeight: 60,
+                        style: {
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            colors: '#000'
+                        },
+                        formatter: function (val) {
+                            return val.length > 22 ? val.substring(0, 22) + "..." : val;
+                        }
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
+                },
+                yaxis: {
+                    max: 100,
+                    tickAmount: 5,
+                    labels: {
+                        style: {
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            colors: '#000'
+                        }
+                    }
+                },
+                grid: {
+                    borderColor: '#e0e0e0',
+                    strokeDashArray: 4
+                }
+            };
+
+            window.apexChartInstance = new ApexCharts(document.querySelector("#apexChart"), options);
+            window.apexChartInstance.render();
+
+            $('#gptAnaliza').html("");
+
+            if (response.gpt_analiza) {
+                setTimeout(() => {
+                    new TypeIt("#gptAnaliza", {
+                        speed: 30,
+                        waitUntilVisible: true,
+                        lifeLike: true,
+                        cursorChar: "|",
+                        afterComplete: (instance) => {
+                            instance.destroy();
+                        }
+                    }).type(response.gpt_analiza).go();
+                }, 700);
+            } else {
+                $('#gptAnaliza').html("<p>❌ GPT analiza nije dostupna.</p>");
+            }
+
+            $('#visualizationModal').modal('show');
+        },
+        error: function (xhr, status, error) {
+            alert("❌ Došlo je do greške pri vizuelizaciji podataka.");
+        }
+    });
+});
+
+
+
+</script>
+

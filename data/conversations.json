@@ -1,0 +1,80 @@
+[
+  {
+    "id": "6b693f6a-8a17-4276-8b3c-8424c569d0ff",
+    "title": "Conversation 6b693f6a",
+    "messages": [
+      {
+        "id": "b73c1049-e323-4179-9cb4-1c950850d4f0",
+        "role": "user",
+        "content": "What are the best practices for web development?",
+        "timestamp": "2025-08-30T18:57:11.026536",
+        "model": "Llama 2 7B"
+      },
+      {
+        "id": "d6a7c732-02f0-4a0d-b937-f9b46c873de0",
+        "role": "assistant",
+        "content": "Error generating response: Model Llama 2 7B not found",
+        "timestamp": "2025-08-30T18:57:11.027215",
+        "model": "Llama 2 7B"
+      },
+      {
+        "id": "eab9ab93-321c-4897-8017-af26fb876498",
+        "role": "user",
+        "content": "Hello! How can you help me today?",
+        "timestamp": "2025-08-31T01:33:59.792473",
+        "model": "Llama 2 13B"
+      },
+      {
+        "id": "58e3763a-cd67-47fb-a8d8-9e12b7b70e24",
+        "role": "assistant",
+        "content": "Error generating response: Model Llama 2 13B not found",
+        "timestamp": "2025-08-31T01:33:59.792993",
+        "model": "Llama 2 13B"
+      },
+      {
+        "id": "e4074dd4-b8cb-49f2-b48d-648be9c667d4",
+        "role": "user",
+        "content": "Explain machine learning in simple terms",
+        "timestamp": "2025-08-31T01:34:16.288715",
+        "model": "Mistral 7B"
+      },
+      {
+        "id": "fcc1de79-ed47-4689-80a2-312985c6744f",
+        "role": "assistant",
+        "content": "Error generating response: Model Mistral 7B not found",
+        "timestamp": "2025-08-31T01:34:16.289040",
+        "model": "Mistral 7B"
+      }
+    ],
+    "system_message": "You are a helpful AI assistant. Provide clear, accurate, and helpful responses.",
+    "created_at": "2025-08-30T18:57:11.026514",
+    "last_updated": "2025-08-31T01:34:16.289049",
+    "message_count": 6,
+    "model": null
+  },
+  {
+    "id": "7085c35d-6350-4fe1-9a19-1212fb0f3ca6",
+    "title": "Conversation 7085c35d",
+    "messages": [
+      {
+        "id": "070f1c5c-9993-4f79-813c-c0200d823310",
+        "role": "user",
+        "content": "Hello! How can you help me today?",
+        "timestamp": "2025-08-31T21:56:50.359195",
+        "model": "Llama 2 13B"
+      },
+      {
+        "id": "3e576353-c433-4371-a425-348a6c7bca9b",
+        "role": "assistant",
+        "content": "Error generating response: Model Llama 2 13B not found",
+        "timestamp": "2025-08-31T21:56:50.359625",
+        "model": "Llama 2 13B"
+      }
+    ],
+    "system_message": "You are a helpful AI assistant. Provide clear, accurate, and helpful responses.",
+    "created_at": "2025-08-31T21:56:50.359173",
+    "last_updated": "2025-08-31T21:56:50.359634",
+    "message_count": 2,
+    "model": null
+  }
+]

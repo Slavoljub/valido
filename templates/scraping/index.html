@@ -1,0 +1,119 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Web Scraping Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">Web Scraping Dashboard</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5>Quick Scrape</h5>
+                                    <form id="scrapeForm">
+                                        <div class="mb-3">
+                                            <label for="url" class="form-label">URL to Scrape</label>
+                                            <input type="url" class="form-control" id="url" name="url"
+                                                   placeholder="https://example.com" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Scrape URL</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5>Scraping Statistics</h5>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="text-center">
+                                                <h3 class="text-primary">0</h3>
+                                                <small class="text-muted">Pages Scraped</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="text-center">
+                                                <h3 class="text-success">0</h3>
+                                                <small class="text-muted">Data Points</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Recent Scraping Results</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="resultsContainer">
+                                        <p class="text-muted">No scraping results yet. Try scraping a URL above.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('scrapeForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const url = document.getElementById('url').value;
+    const resultsContainer = document.getElementById('resultsContainer');
+
+    resultsContainer.innerHTML = '<p class="text-info">Scraping in progress...</p>';
+
+    try {
+        const response = await fetch('/scraping/test-url', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({ url: url })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            resultsContainer.innerHTML = `
+                <div class="alert alert-success">
+                    <h6>Scraping successful!</h6>
+                    <p><strong>URL:</strong> ${data.url}</p>
+                    <p><strong>Data:</strong> ${JSON.stringify(data.data, null, 2)}</p>
+                </div>
+            `;
+        } else {
+            resultsContainer.innerHTML = `
+                <div class="alert alert-danger">
+                    <h6>Scraping failed</h6>
+                    <p>${data.message}</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        resultsContainer.innerHTML = `
+            <div class="alert alert-danger">
+                <h6>Error occurred</h6>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+});
+</script>
+{% endblock %}

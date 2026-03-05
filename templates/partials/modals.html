@@ -1,0 +1,236 @@
+<!-- Dynamic Modal System Partials -->
+
+<!-- Notification Panel -->
+<div 
+    id="notification-panel"
+    x-show="notificationsOpen" 
+    @click.away="notificationsOpen = false"
+    x-transition:enter="transition ease-out duration-100"
+    x-transition:enter-start="transform opacity-0 scale-95"
+    x-transition:enter-end="transform opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-75"
+    x-transition:leave-start="transform opacity-100 scale-100"
+    x-transition:leave-end="transform opacity-0 scale-95"
+    class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-neutral-200 py-1 z-50"
+>
+    <div class="px-4 py-2 border-b border-neutral-200">
+        <h3 class="text-sm font-semibold text-neutral-900">Notifications</h3>
+    </div>
+    
+    <div class="max-h-64 overflow-y-auto">
+        <!-- Notification Item -->
+        <div class="px-4 py-3 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0">
+            <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-check text-green-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-neutral-900">New transaction</p>
+                    <p class="text-xs text-neutral-500">Payment received from Client XYZ</p>
+                    <p class="text-xs text-neutral-400 mt-1">2 minutes ago</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notification Item -->
+        <div class="px-4 py-3 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0">
+            <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-info text-blue-600 text-sm"></i>
+                    </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-neutral-900">System update</p>
+                    <p class="text-xs text-neutral-500">New features available</p>
+                    <p class="text-xs text-neutral-400 mt-1">1 hour ago</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="px-4 py-2 border-t border-neutral-200">
+        <a href="/notifications" class="text-sm text-primary-600 hover:text-primary-700 font-medium">View all notifications</a>
+    </div>
+</div>
+
+<!-- Dynamic Modal Container -->
+<div 
+    id="modal-container"
+    x-show="modalOpen" 
+    @click="closeModal()"
+    class="modal-overlay"
+>
+    <div class="modal-container" :class="modalSize" @click.stop>
+            <!-- Modal Header -->
+            <div class="modal-header" x-show="modalTitle">
+                <h3 class="modal-title" x-text="modalTitle"></h3>
+                <button 
+                    @click="closeModal()" 
+                    class="modal-close"
+                    aria-label="Close modal"
+                >
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Content -->
+            <div id="modal-content" class="modal-body">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="modal-footer" x-show="modalActions">
+                <button 
+                    @click="closeModal()" 
+                    class="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-md hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                    Cancel
+                </button>
+                <button 
+                    @click="executeModalAction()" 
+                    class="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    x-text="modalActionText || 'Confirm'"
+                >
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div 
+    id="toast-container"
+    class="toast-container"
+>
+    <!-- Toasts will be dynamically inserted here -->
+</div>
+
+<!-- Search Modal -->
+<div 
+    x-show="searchOpen" 
+    @click.away="searchOpen = false"
+    class="modal-overlay"
+>
+    <div class="modal-container modal-2xl">
+            <div class="modal-header">
+                <div class="flex items-center space-x-3 w-full">
+                    <i class="fas fa-search text-neutral-400"></i>
+                    <input 
+                        type="text" 
+                        placeholder="Search anything..." 
+                        class="flex-1 border-0 focus:ring-0 text-lg"
+                        x-ref="searchInput"
+                        @keydown.escape="searchOpen = false"
+                    >
+                    <button @click="searchOpen = false" class="modal-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="modal-body">
+                <div class="text-sm text-neutral-500 mb-4">Quick actions</div>
+                <div class="space-y-2">
+                    <button class="w-full text-left p-3 rounded-lg hover:bg-neutral-50 flex items-center space-x-3">
+                        <i class="fas fa-plus text-neutral-400"></i>
+                        <span>Create new transaction</span>
+                    </button>
+                    <button class="w-full text-left p-3 rounded-lg hover:bg-neutral-50 flex items-center space-x-3">
+                        <i class="fas fa-file-alt text-neutral-400"></i>
+                        <span>Generate report</span>
+                    </button>
+                    <button class="w-full text-left p-3 rounded-lg hover:bg-neutral-50 flex items-center space-x-3">
+                        <i class="fas fa-user-plus text-neutral-400"></i>
+                        <span>Add new user</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Templates (Hidden) -->
+<div id="modal-templates" class="hidden">
+    <!-- Quick Actions Modal Template -->
+    <template id="quick-actions-template">
+        <div class="space-y-4">
+            <p class="text-sm text-neutral-600">Choose a quick action to perform:</p>
+            <div class="space-y-3">
+                <button onclick="showToast('info', 'New transaction created')" class="w-full text-left p-3 rounded-lg border border-neutral-200 hover:bg-neutral-50 transition-colors duration-200">
+                    <i class="fas fa-plus mr-2 text-primary-600"></i>
+                    New Transaction
+                </button>
+                <button onclick="showToast('info', 'Report generated')" class="w-full text-left p-3 rounded-lg border border-neutral-200 hover:bg-neutral-50 transition-colors duration-200">
+                    <i class="fas fa-file-alt mr-2 text-primary-600"></i>
+                    Generate Report
+                </button>
+                <button onclick="showToast('warning', 'Backup started')" class="w-full text-left p-3 rounded-lg border border-neutral-200 hover:bg-neutral-50 transition-colors duration-200">
+                    <i class="fas fa-download mr-2 text-primary-600"></i>
+                    Backup Data
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <!-- Dashboard Examples Modal Template -->
+    <template id="dashboard-examples-template">
+        <div class="space-y-4">
+            <p class="text-sm text-neutral-600">Choose a dashboard layout:</p>
+            <div class="space-y-3">
+                <a href="/dashboard/banking" class="block p-3 rounded-lg border border-neutral-200 hover:bg-neutral-50 transition-colors duration-200">
+                    <i class="fas fa-university mr-2 text-primary-600"></i>
+                    Banking Dashboard
+                </a>
+                <a href="/dashboard/compact" class="block p-3 rounded-lg border border-neutral-200 hover:bg-neutral-50 transition-colors duration-200">
+                    <i class="fas fa-compress-alt mr-2 text-primary-600"></i>
+                    Compact Dashboard
+                </a>
+                <a href="/dashboard" class="block p-3 rounded-lg border border-neutral-200 hover:bg-neutral-50 transition-colors duration-200">
+                    <i class="fas fa-chart-line mr-2 text-primary-600"></i>
+                    Overview Dashboard
+                </a>
+            </div>
+        </div>
+    </template>
+
+    <!-- Confirmation Modal Template -->
+    <template id="confirmation-template">
+        <div class="space-y-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                </div>
+                <div>
+                    <h4 class="text-lg font-medium text-neutral-900" x-text="modalData.title || 'Confirm Action'"></h4>
+                    <p class="text-sm text-neutral-600" x-text="modalData.message || 'Are you sure you want to proceed?'"></p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Form Modal Template -->
+    <template id="form-template">
+        <div class="space-y-4">
+            <p class="text-sm text-neutral-600" x-text="modalData.description || 'Please fill out the form below:'"></p>
+            <form id="modal-form" class="space-y-4">
+                <!-- Dynamic form fields will be inserted here -->
+            </form>
+        </div>
+    </template>
+
+    <!-- Loading Modal Template -->
+    <template id="loading-template">
+        <div class="space-y-4 text-center">
+            <div class="w-16 h-16 mx-auto bg-primary-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-spinner fa-spin text-primary-600 text-xl"></i>
+            </div>
+            <div>
+                <h4 class="text-lg font-medium text-neutral-900" x-text="modalData.title || 'Loading...'"></h4>
+                <p class="text-sm text-neutral-600" x-text="modalData.message || 'Please wait while we process your request.'"></p>
+            </div>
+        </div>
+    </template>
+</div>

@@ -1,0 +1,325 @@
+{
+  "site": {
+    "name": "ValidoAI",
+    "description": "Advanced AI-powered database platform with real-time analytics and comprehensive administration tools",
+    "url": "https://valido.ai",
+    "locale": "en_US",
+    "logo": "/static/images/logo.png",
+    "twitter": "@validoai",
+    "facebook": "validoai",
+    "instagram": "@validoai",
+    "linkedin": "company/validoai",
+    "youtube": "@validoai",
+    "phone": "+1-555-0123",
+    "email": "admin@valido.ai",
+    "address": {
+      "street": "123 Tech Street",
+      "city": "San Francisco",
+      "state": "CA",
+      "zip": "94105",
+      "country": "USA"
+    }
+  },
+  "pages": {
+    "dashboard": {
+      "title": "Analytics Dashboard - Real-time Business Insights | ValidoAI",
+      "description": "Comprehensive analytics dashboard with real-time data visualization, business intelligence tools, and advanced reporting features for modern businesses",
+      "keywords": ["dashboard", "analytics", "business intelligence", "data visualization", "real-time", "reporting", "business insights", "data analytics"],
+      "canonical": "/dashboard",
+      "og_image": "/static/images/dashboard-preview.png",
+      "structured_data": "WebApplication"
+    },
+    "admin": {
+      "title": "Administration Panel - Complete System Management | ValidoAI",
+      "description": "Complete administration interface for managing users, databases, system settings, and all administrative functions with advanced security",
+      "keywords": ["admin", "administration", "system management", "user management", "database management", "system settings", "security", "control panel"],
+      "canonical": "/admin",
+      "og_image": "/static/images/admin-preview.png",
+      "structured_data": "WebApplication"
+    },
+    "settings": {
+      "title": "Settings - System Configuration & Preferences | ValidoAI",
+      "description": "Configure system settings, user preferences, security options, and application parameters with comprehensive control",
+      "keywords": ["settings", "configuration", "preferences", "system settings", "user preferences", "security settings", "application settings"],
+      "canonical": "/settings",
+      "og_image": "/static/images/settings-preview.png",
+      "structured_data": "WebPage"
+    },
+    "companies": {
+      "title": "Company Management - Business Database | ValidoAI",
+      "description": "Manage company records, business information, and corporate data with advanced CRUD operations and comprehensive business intelligence",
+      "keywords": ["companies", "business management", "corporate database", "business records", "company data", "business intelligence", "corporate management"],
+      "canonical": "/companies",
+      "og_image": "/static/images/companies-preview.png",
+      "structured_data": "CollectionPage"
+    },
+    "users": {
+      "title": "User Management - Access Control & Permissions | ValidoAI",
+      "description": "Complete user management system with role-based access control, permissions management, and user activity monitoring",
+      "keywords": ["users", "user management", "access control", "permissions", "user roles", "authentication", "user accounts"],
+      "canonical": "/users",
+      "og_image": "/static/images/users-preview.png",
+      "structured_data": "CollectionPage"
+    },
+    "financial": {
+      "title": "Financial Analytics - Business Intelligence & Reporting | ValidoAI",
+      "description": "Advanced financial analytics with machine learning insights, predictive modeling, and comprehensive business intelligence reporting",
+      "keywords": ["financial", "analytics", "business intelligence", "financial reporting", "data analysis", "machine learning", "predictive analytics"],
+      "canonical": "/financial",
+      "og_image": "/static/images/financial-preview.png",
+      "structured_data": "WebApplication"
+    },
+    "notifications": {
+      "title": "Notification Center - Real-time Alerts & Updates | ValidoAI",
+      "description": "Centralized notification system with real-time alerts, system updates, and comprehensive communication management",
+      "keywords": ["notifications", "alerts", "real-time", "system updates", "communication", "notification center", "alert system"],
+      "canonical": "/notifications",
+      "og_image": "/static/images/notifications-preview.png",
+      "structured_data": "WebApplication"
+    },
+    "reports": {
+      "title": "Advanced Reports - Data Analysis & Visualization | ValidoAI",
+      "description": "Generate comprehensive reports with advanced data analysis, custom visualizations, and export capabilities for business intelligence",
+      "keywords": ["reports", "data analysis", "visualization", "business reports", "data export", "analytics reports", "reporting tools"],
+      "canonical": "/reports",
+      "og_image": "/static/images/reports-preview.png",
+      "structured_data": "WebApplication"
+    }
+  },
+  "seo": {
+    "robots": {
+      "user-agent": "*",
+      "allow": ["/", "/dashboard", "/admin", "/settings"],
+      "disallow": ["/admin/private/", "/api/private/", "/temp/", "/cache/"],
+      "sitemap": "https://valido.ai/sitemap.xml",
+      "crawl-delay": 1
+    },
+    "sitemap": {
+      "priority": {
+        "/": 1.0,
+        "/dashboard": 0.9,
+        "/admin": 0.8,
+        "/settings": 0.7,
+        "/companies": 0.7,
+        "/users": 0.7,
+        "/financial": 0.6,
+        "/notifications": 0.5,
+        "/reports": 0.6
+      },
+      "changefreq": {
+        "/": "daily",
+        "/dashboard": "hourly",
+        "/admin": "daily",
+        "/settings": "weekly",
+        "/companies": "daily",
+        "/users": "daily",
+        "/financial": "hourly",
+        "/notifications": "hourly",
+        "/reports": "daily"
+      }
+    },
+    "meta": {
+      "charset": "UTF-8",
+      "viewport": "width=device-width, initial-scale=1.0, maximum-scale=5.0",
+      "theme-color": "#3b82f6",
+      "msapplication-TileColor": "#3b82f6",
+      "apple-mobile-web-app-capable": "yes",
+      "apple-mobile-web-app-status-bar-style": "default",
+      "apple-mobile-web-app-title": "ValidoAI Admin",
+      "mobile-web-app-capable": "yes",
+      "format-detection": "telephone=no"
+    }
+  },
+  "sem": {
+    "google_analytics": {
+      "measurement_id": "GA_MEASUREMENT_ID",
+      "config": {
+        "anonymize_ip": true,
+        "allow_ad_features": false,
+        "send_page_view": true
+      }
+    },
+    "google_tag_manager": {
+      "container_id": "GTM_CONTAINER_ID",
+      "data_layer_name": "dataLayer"
+    },
+    "facebook_pixel": {
+      "pixel_id": "FB_PIXEL_ID",
+      "events": ["PageView", "Lead", "CompleteRegistration", "Purchase"]
+    },
+    "meta_pixel": {
+      "pixel_id": "META_PIXEL_ID",
+      "events": ["PageView", "Lead", "CompleteRegistration"]
+    },
+    "linkedin_insight": {
+      "partner_id": "LINKEDIN_PARTNER_ID",
+      "events": ["PageView", "Lead"]
+    },
+    "twitter_pixel": {
+      "pixel_id": "TWITTER_PIXEL_ID",
+      "events": ["PageView", "Lead"]
+    },
+    "hotjar": {
+      "site_id": "HOTJAR_SITE_ID",
+      "version": "v1"
+    },
+    "intercom": {
+      "app_id": "INTERCOM_APP_ID",
+      "settings": {
+        "alignment": "right",
+        "horizontal_padding": 20,
+        "vertical_padding": 20
+      }
+    },
+    "crisp": {
+      "website_id": "CRISP_WEBSITE_ID"
+    },
+    "drift": {
+      "embed_id": "DRIFT_EMBED_ID"
+    }
+  },
+  "localization": {
+    "default_locale": "en_US",
+    "supported_locales": ["en_US", "es_ES", "fr_FR", "de_DE", "it_IT", "pt_BR", "ru_RU", "zh_CN", "ja_JP", "ko_KR"],
+    "rtl_locales": ["ar_SA", "he_IL", "fa_IR"],
+    "hreflang": {
+      "en_US": "en",
+      "es_ES": "es",
+      "fr_FR": "fr",
+      "de_DE": "de",
+      "it_IT": "it",
+      "pt_BR": "pt-br",
+      "ru_RU": "ru",
+      "zh_CN": "zh-cn",
+      "ja_JP": "ja",
+      "ko_KR": "ko"
+    }
+  },
+  "performance": {
+    "critical_css": {
+      "dashboard": true,
+      "admin": true,
+      "settings": false,
+      "companies": false,
+      "users": false
+    },
+    "preload_resources": {
+      "fonts": ["Inter:wght@300;400;500;600;700"],
+      "images": ["/static/images/logo.png"],
+      "scripts": ["https://cdn.jsdelivr.net/npm/chart.js"]
+    },
+    "lazy_load": {
+      "images": true,
+      "components": true,
+      "scripts": true
+    },
+    "compression": {
+      "gzip": true,
+      "brotli": true,
+      "webp": true
+    },
+    "caching": {
+      "static_assets": "1 year",
+      "images": "6 months",
+      "css": "1 month",
+      "js": "1 month"
+    }
+  },
+  "security": {
+    "content_security_policy": {
+      "default-src": ["'self'"],
+      "script-src": ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://www.googletagmanager.com", "https://www.google-analytics.com", "https://connect.facebook.net"],
+      "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      "font-src": ["'self'", "https://fonts.gstatic.com"],
+      "img-src": ["'self'", "data:", "https:", "http:"],
+      "connect-src": ["'self'", "https://www.google-analytics.com", "https://www.googletagmanager.com"]
+    },
+    "headers": {
+      "X-Frame-Options": "DENY",
+      "X-Content-Type-Options": "nosniff",
+      "X-XSS-Protection": "1; mode=block",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+      "Permissions-Policy": "camera=(), microphone=(), geolocation=()"
+    }
+  },
+  "accessibility": {
+    "wcag_level": "AA",
+    "features": {
+      "high_contrast": true,
+      "reduced_motion": true,
+      "large_text": true,
+      "keyboard_navigation": true,
+      "screen_reader": true,
+      "focus_management": true,
+      "skip_links": true,
+      "aria_labels": true
+    },
+    "testing": {
+      "automated_tools": ["axe-core", "pa11y", "lighthouse"],
+      "manual_testing": ["keyboard_navigation", "screen_reader", "color_contrast"],
+      "frequency": "weekly"
+    }
+  },
+  "mobile": {
+    "pwa": {
+      "enabled": true,
+      "manifest": {
+        "name": "ValidoAI Admin",
+        "short_name": "ValidoAI",
+        "description": "Advanced AI-powered database platform administration",
+        "start_url": "/admin",
+        "display": "standalone",
+        "background_color": "#ffffff",
+        "theme_color": "#3b82f6",
+        "orientation": "portrait-primary",
+        "scope": "/",
+        "lang": "en-US"
+      },
+      "icons": [
+        {
+          "src": "/static/favicons/icon-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "maskable any"
+        },
+        {
+          "src": "/static/favicons/icon-512x512.png",
+          "sizes": "512x512",
+          "type": "image/png",
+          "purpose": "maskable any"
+        }
+      ],
+      "service_worker": {
+        "enabled": true,
+        "cache_strategy": "network-first",
+        "offline_page": "/offline.html"
+      }
+    },
+    "responsive": {
+      "breakpoints": {
+        "xs": 320,
+        "sm": 640,
+        "md": 768,
+        "lg": 1024,
+        "xl": 1280,
+        "2xl": 1536
+      },
+      "touch_targets": {
+        "min_size": 44,
+        "spacing": 8
+      }
+    },
+    "gestures": {
+      "swipe": true,
+      "pinch": true,
+      "double_tap": true,
+      "long_press": true
+    },
+    "optimization": {
+      "image_sizing": true,
+      "lazy_loading": true,
+      "touch_optimization": true,
+      "memory_management": true
+    }
+  }
+}

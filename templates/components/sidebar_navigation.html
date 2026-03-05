@@ -1,0 +1,847 @@
+{% comment %}
+Enhanced Sidebar Navigation Component
+Supports icons, categories, and modern UI
+{% endcomment %}
+
+<!-- Sidebar Navigation -->
+<div class="sidebar-navigation" x-data="sidebarNavigation()">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            <i class="fas fa-brain text-blue-500 text-2xl"></i>
+            <span class="sidebar-title">ValidoAI</span>
+        </div>
+        <button class="sidebar-toggle" @click="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <nav class="sidebar-nav">
+        <!-- Search Box -->
+        <div class="sidebar-search">
+            <div class="search-input-container">
+                <i class="fas fa-search search-icon"></i>
+                <input
+                    type="text"
+                    class="search-input"
+                    placeholder="Search navigation..."
+                    x-model="searchQuery"
+                    @input="filterNavigation()"
+                >
+                <button class="clear-search" @click="clearSearch()" x-show="searchQuery">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <div class="navigation-menu">
+            <template x-for="category in filteredMenu" :key="category.category">
+                <div class="nav-category">
+                    <div class="category-header" @click="toggleCategory(category.category)">
+                        <div class="category-info">
+                            <i :class="category.icon" class="category-icon"></i>
+                            <span class="category-title" x-text="category.title"></span>
+                        </div>
+                        <i class="fas fa-chevron-down category-toggle"
+                           :class="{ 'rotated': expandedCategories.includes(category.category) }"></i>
+                    </div>
+
+                    <div class="category-routes"
+                         x-show="expandedCategories.includes(category.category)"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 max-h-0"
+                         x-transition:enter-end="opacity-100 max-h-screen"
+                         x-transition:leave="transition ease-in duration-300"
+                         x-transition:leave-start="opacity-100 max-h-screen"
+                         x-transition:leave-end="opacity-0 max-h-0">
+
+                        <template x-for="route in category.routes" :key="route.path">
+                            <a :href="route.path" class="nav-route"
+                               :class="{ 'active': isCurrentRoute(route.path) }"
+                               :title="route.description || route.title">
+                                <div class="route-info">
+                                    <i :class="route.icon" class="route-icon"></i>
+                                    <span class="route-title" x-text="route.title"></span>
+                                </div>
+                                <div class="route-indicator" x-show="isCurrentRoute(route.path)">
+                                    <i class="fas fa-circle text-xs text-blue-500"></i>
+                                </div>
+                            </a>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="sidebar-actions">
+            <div class="action-group">
+                <h4 class="action-group-title">Quick Actions</h4>
+                <div class="action-buttons">
+                    <a href="/chat" class="action-button" title="AI Chat Assistant">
+                        <i class="fas fa-comments"></i>
+                        <span>Chat</span>
+                    </a>
+                    <a href="/dashboard" class="action-button" title="Dashboard">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="/settings" class="action-button" title="Settings">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="sidebar-status">
+            <div class="status-item">
+                <div class="status-dot" :class="{ 'online': systemStatus.online }"></div>
+                <span class="status-text">System Online</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-users status-icon"></i>
+                <span class="status-text" x-text="`Active: ${activeUsers}`"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="user-details">
+                <div class="user-name">{{ current_user.name if current_user.name else 'Guest' }}</div>
+                <div class="user-role">Administrator</div>
+            </div>
+        </div>
+        <div class="footer-actions">
+            <a href="/profile" class="footer-action" title="Profile">
+                <i class="fas fa-user-circle"></i>
+            </a>
+            <a href="/logout" class="footer-action" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Sidebar Navigation Styles -->
+<style>
+/* Sidebar Container */
+.sidebar-navigation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.sidebar-navigation.collapsed {
+    width: 70px;
+}
+
+.sidebar-navigation.collapsed .sidebar-title,
+.sidebar-navigation.collapsed .category-title,
+.sidebar-navigation.collapsed .route-title,
+.sidebar-navigation.collapsed .search-input,
+.sidebar-navigation.collapsed .action-group-title,
+.sidebar-navigation.collapsed .status-text,
+.sidebar-navigation.collapsed .user-details {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.sidebar-navigation.collapsed .category-toggle,
+.sidebar-navigation.collapsed .clear-search {
+    display: none;
+}
+
+/* Sidebar Header */
+.sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.sidebar-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    color: #cbd5e1;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+}
+
+/* Sidebar Navigation */
+.sidebar-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.navigation-menu {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 0;
+}
+
+/* Search Box */
+.sidebar-search {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-input-container {
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    color: #f8fafc;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.search-input::placeholder {
+    color: #94a3b8;
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 0.875rem;
+}
+
+.clear-search {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.clear-search:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+}
+
+/* Navigation Categories */
+.nav-category {
+    margin-bottom: 0.5rem;
+}
+
+.category-header {
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+    border-radius: 0 0.5rem 0.5rem 0;
+    margin: 0 0.5rem;
+}
+
+.category-header:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.category-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.category-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #3b82f6;
+}
+
+.category-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #f8fafc;
+    transition: opacity 0.3s ease;
+}
+
+.category-toggle {
+    color: #94a3b8;
+    font-size: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.category-toggle.rotated {
+    transform: rotate(180deg);
+}
+
+/* Category Routes */
+.category-routes {
+    overflow: hidden;
+}
+
+.nav-route {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1.5rem 0.5rem 3rem;
+    color: #cbd5e1;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-radius: 0 0.5rem 0.5rem 0;
+    margin: 0.125rem 0.5rem;
+}
+
+.nav-route:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+}
+
+.nav-route.active {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: #f8fafc;
+    font-weight: 600;
+}
+
+.route-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.route-icon {
+    width: 1rem;
+    height: 1rem;
+    color: #94a3b8;
+}
+
+.nav-route:hover .route-icon,
+.nav-route.active .route-icon {
+    color: #f8fafc;
+}
+
+.route-title {
+    font-size: 0.8125rem;
+    transition: opacity 0.3s ease;
+}
+
+.route-indicator {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.nav-route.active .route-indicator {
+    opacity: 1;
+}
+
+/* Sidebar Actions */
+.sidebar-actions {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.action-group {
+    margin-bottom: 1rem;
+}
+
+.action-group:last-child {
+    margin-bottom: 0;
+}
+
+.action-group-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    transition: opacity 0.3s ease;
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+.action-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.75rem 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    color: #cbd5e1;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.action-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #f8fafc;
+    transform: translateY(-2px);
+}
+
+.action-button i {
+    font-size: 1rem;
+}
+
+.action-button span {
+    font-size: 0.6875rem;
+    font-weight: 500;
+}
+
+/* System Status */
+.sidebar-status {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.status-item:last-child {
+    margin-bottom: 0;
+}
+
+.status-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #ef4444;
+    transition: background-color 0.3s ease;
+}
+
+.status-dot.online {
+    background: #10b981;
+}
+
+.status-text {
+    font-size: 0.75rem;
+    color: #cbd5e1;
+    transition: opacity 0.3s ease;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+    padding: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.user-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f8fafc;
+    font-size: 1rem;
+}
+
+.user-details {
+    flex: 1;
+}
+
+.user-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #f8fafc;
+    margin-bottom: 0.125rem;
+}
+
+.user-role {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.footer-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.footer-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.375rem;
+    color: #cbd5e1;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.footer-action:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #f8fafc;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 1024px) {
+    .sidebar-navigation {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar-navigation.mobile-open {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        display: none;
+    }
+
+    .sidebar-overlay.show {
+        display: block;
+    }
+}
+
+@media (max-width: 640px) {
+    .sidebar-navigation {
+        width: 100%;
+    }
+
+    .sidebar-navigation.collapsed {
+        width: 100%;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .sidebar-navigation {
+        background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    }
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+    .sidebar-navigation {
+        border-right: 2px solid #f8fafc;
+    }
+
+    .nav-route,
+    .action-button,
+    .footer-action {
+        border: 1px solid;
+    }
+
+    .category-header:hover,
+    .nav-route:hover,
+    .action-button:hover,
+    .footer-action:hover {
+        outline: 2px solid #f8fafc;
+        outline-offset: 2px;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .sidebar-navigation,
+    .category-header,
+    .nav-route,
+    .action-button,
+    .footer-action,
+    .sidebar-toggle {
+        transition: none;
+    }
+
+    .category-toggle.rotated {
+        transform: none;
+    }
+
+    .category-routes {
+        transition: none;
+    }
+}
+</style>
+
+<!-- Sidebar Navigation JavaScript -->
+<script>
+function sidebarNavigation() {
+    return {
+        searchQuery: '',
+        expandedCategories: ['ai', 'dashboard', 'main'], // Default expanded categories
+        menu: [],
+        filteredMenu: [],
+        systemStatus: { online: true },
+        activeUsers: 1,
+        isCollapsed: false,
+
+        init() {
+            this.loadMenu();
+            this.updateSystemStatus();
+            this.setupKeyboardShortcuts();
+            console.log('Sidebar Navigation initialized');
+        },
+
+        async loadMenu() {
+            try {
+                // Load menu from the backend
+                const response = await fetch('/api/menu/sidebar');
+                if (response.ok) {
+                    this.menu = await response.json();
+                } else {
+                    // Fallback to default menu structure
+                    this.menu = this.getDefaultMenu();
+                }
+                this.filteredMenu = this.menu;
+                this.expandDefaultCategories();
+            } catch (error) {
+                console.error('Error loading menu:', error);
+                this.menu = this.getDefaultMenu();
+                this.filteredMenu = this.menu;
+            }
+        },
+
+        getDefaultMenu() {
+            return [
+                {
+                    category: 'main',
+                    title: 'Main',
+                    icon: 'fas fa-home',
+                    routes: [
+                        { path: '/', title: 'Dashboard', icon: 'fas fa-chart-line' },
+                        { path: '/profile', title: 'Profile', icon: 'fas fa-user' }
+                    ]
+                },
+                {
+                    category: 'ai',
+                    title: 'AI & ML',
+                    icon: 'fas fa-brain',
+                    routes: [
+                        { path: '/chat', title: 'AI Chat Assistant', icon: 'fas fa-comments', description: 'Advanced AI-powered business assistant' },
+                        { path: '/ai-models', title: 'AI Models', icon: 'fas fa-robot', description: 'Manage AI models and configurations' },
+                        { path: '/ml-demo', title: 'ML Demo', icon: 'fas fa-magic', description: 'Machine learning demonstrations' }
+                    ]
+                },
+                {
+                    category: 'finance',
+                    title: 'Finance',
+                    icon: 'fas fa-dollar-sign',
+                    routes: [
+                        { path: '/companies', title: 'Companies', icon: 'fas fa-building' },
+                        { path: '/financial', title: 'Financial Analysis', icon: 'fas fa-chart-bar' }
+                    ]
+                },
+                {
+                    category: 'settings',
+                    title: 'Settings',
+                    icon: 'fas fa-cog',
+                    routes: [
+                        { path: '/settings', title: 'General Settings', icon: 'fas fa-sliders-h' },
+                        { path: '/settings/database', title: 'Database', icon: 'fas fa-database' },
+                        { path: '/settings/ai-models', title: 'AI Models', icon: 'fas fa-brain' }
+                    ]
+                }
+            ];
+        },
+
+        expandDefaultCategories() {
+            // Expand categories that should be open by default
+            this.expandedCategories = ['ai', 'dashboard', 'main'];
+        },
+
+        toggleCategory(category) {
+            const index = this.expandedCategories.indexOf(category);
+            if (index > -1) {
+                this.expandedCategories.splice(index, 1);
+            } else {
+                this.expandedCategories.push(category);
+            }
+        },
+
+        filterNavigation() {
+            if (!this.searchQuery.trim()) {
+                this.filteredMenu = this.menu;
+                return;
+            }
+
+            const query = this.searchQuery.toLowerCase();
+            this.filteredMenu = this.menu.map(category => ({
+                ...category,
+                routes: category.routes.filter(route =>
+                    route.title.toLowerCase().includes(query) ||
+                    (route.description && route.description.toLowerCase().includes(query))
+                )
+            })).filter(category => category.routes.length > 0);
+        },
+
+        clearSearch() {
+            this.searchQuery = '';
+            this.filteredMenu = this.menu;
+        },
+
+        isCurrentRoute(path) {
+            return window.location.pathname === path;
+        },
+
+        toggleSidebar() {
+            this.isCollapsed = !this.isCollapsed;
+            document.querySelector('.sidebar-navigation').classList.toggle('collapsed');
+        },
+
+        async updateSystemStatus() {
+            try {
+                const response = await fetch('/api/system/status');
+                if (response.ok) {
+                    const data = await response.json();
+                    this.systemStatus = data;
+                }
+            } catch (error) {
+                console.error('Error updating system status:', error);
+            }
+        },
+
+        setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // Ctrl/Cmd + B to toggle sidebar
+                if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+                    e.preventDefault();
+                    this.toggleSidebar();
+                }
+
+                // Ctrl/Cmd + K to focus search
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    document.querySelector('.search-input').focus();
+                }
+            });
+        },
+
+        // Utility methods
+        showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-6 right-6 z-50 p-4 rounded-xl shadow-2xl max-w-sm transform transition-all duration-300 ${
+                type === 'success' ? 'bg-green-100 border border-green-500 text-green-700' :
+                type === 'error' ? 'bg-red-100 border border-red-500 text-red-700' :
+                type === 'warning' ? 'bg-yellow-100 border border-yellow-500 text-yellow-700' :
+                'bg-blue-100 border border-blue-500 text-blue-700'
+            }`;
+
+            notification.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : 'info'}-circle"></i>
+                    <span class="flex-1">${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+    };
+}
+
+// Auto-initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Add mobile overlay for sidebar
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    document.body.appendChild(overlay);
+
+    // Handle mobile sidebar toggle
+    const sidebar = document.querySelector('.sidebar-navigation');
+    if (sidebar) {
+        const toggleBtn = sidebar.querySelector('.sidebar-toggle');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('mobile-open');
+                overlay.classList.toggle('show');
+            });
+        }
+
+        // Close sidebar when clicking overlay
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.remove('show');
+        });
+    }
+
+    console.log('Enhanced Sidebar Navigation loaded successfully');
+});
+</script>

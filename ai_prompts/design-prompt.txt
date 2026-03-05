@@ -1,0 +1,98 @@
+Create a comprehensive, modern financial website design using HTML, CSS (via Tailwind CSS), JavaScript, HTMX for dynamic interactions, and Jinja2 templating specifically for a Flask-based Python backend application. The website should be a responsive financial dashboard or landing page for a banking/fintech app, optimized for mobile-first design to prioritize Apple devices (iOS and Safari compatibility). Ensure all components are touch-friendly, use Tailwind's built-in responsive utilities (e.g., sm:, md:, lg:, xl:, 2xl:, 3xl: prefixes with min-width breakpoints), and address Safari quirks like grid-gap support by adding fallback styles if needed. Extend responsiveness to support very large screens (e.g., 2xl: min-width 1536px for wide desktops, 3xl: custom min-width 1920px+ via tailwind.config.js extend for ultra-wide monitors), especially for data-heavy elements like tables and charts—e.g., wider columns, additional side panels, or expanded views on detection (use media queries in Tailwind for auto-detection, no JS needed unless for dynamic resizing; ensure tables use overflow-x-auto on smaller screens but full-width grid on 2xl+ with more visible columns by default). Structure the project with a dedicated route and folder named "UI-examples" where all components, pages, and demos are housed, accessible via a single demo page at /UI-examples that showcases everything in an extensive, scrollable layout with sections for each feature group. This page should be exhaustive, demonstrating all possible elements, configurations, and functionalities in one place for easy reference and testing, including self-documentation of the entire project (e.g., a "Project Overview" section explaining the structure, setup instructions, and how to extend it).
+
+**CRITICAL INPUT VALIDATION REQUIREMENTS:**
+- Implement comprehensive input validation for ALL forms, API endpoints, and user inputs
+- Validate data types (string, integer, float, decimal, boolean, date, datetime, email, URL, phone, IP address, JSON, list, dict, file, password, currency, percentage, UUID, color, credit card, postal code, Serbian PIB, Serbian Matični broj)
+- Apply validation rules: required fields, min/max length, min/max values, pattern matching, allowed values, custom validators
+- Include Serbian-specific validations: PIB (Poreski identifikacioni broj) with checksum validation, Matični broj with checksum validation, postal codes (5 digits), phone numbers
+- Implement real-time client-side validation with immediate feedback
+- Server-side validation with detailed error messages
+- File upload validation: file type, size limits, virus scanning
+- API input validation with proper error responses
+- Form validation with visual feedback and error highlighting
+- Input sanitization and XSS protection
+- CSRF protection for all forms
+- Rate limiting for API endpoints
+- Input length limits and character restrictions
+- Email format validation with domain checking
+- Password strength validation (uppercase, lowercase, digits, special characters)
+- Credit card validation using Luhn algorithm
+- Currency validation with proper decimal handling
+- Date range validation (from/to dates)
+- Numeric range validation (min/max amounts)
+- URL validation with protocol checking
+- Phone number validation with international format support
+- JSON schema validation for complex data structures
+- Custom validation for business logic (e.g., financial calculations)
+- Validation error logging and monitoring
+- Input validation performance optimization
+- Accessibility considerations for validation messages
+- Multi-language validation error messages (Serbian/English)
+
+To implement this prompt, use a multi-iteration chunked approach for development by the coding AI. Divide the implementation into sequential chunks, where each chunk builds upon the previous one incrementally but allows for "big jump" style—meaning the AI can make significant leaps in completing large sections at once if confident, skipping minor details for later refinement, while ensuring the overall structure remains cohesive. Provide progress reports after each chunk, and allow for revisions based on simulated testing. The chunks are:
+
+Iteration Chunk 1: Project Setup and Base Structure (Big Jump: Complete full Flask app skeleton and Tailwind config in one go)
+
+Set up the Flask application in app.py: Import necessary modules (flask, flask_babel, sqlite3, pyotp, authlib, time for delays), configure app (secret_key, Babel with default_locale='en'), create SQLite database (database.db) with tables (e.g., transactions: id, date, description, amount, status; users: id, username, password_hash), and seed initial data (e.g., 50 sample transactions).
+Define base Jinja2 template (templates/base.html.j2) with HTMX CDN, Flowbite JS CDN, Alpine.js CDN, Tailwind output.css link, and basic HTML structure (html, head, body with dark mode data-theme).
+Configure Tailwind: Provide package.json with scripts, tailwind.config.js with extended breakpoints (add 3xl: '1920px'), custom colors, plugins (daisyui, flowbite/plugin), themes, and content paths. Include input.css with @tailwind directives.
+Set up /UI-examples route to render the main demo page (index.html.j2), with sections placeholders.
+**INPUT VALIDATION SETUP**: Implement comprehensive validation system with src/validation/validators.py, src/validation/decorators.py, src/validation/forms.py, including all data types, Serbian-specific validations, and validation decorators for routes.
+Big Jump Option: If ready, implement multilanguage support fully here (Babel config, translation macros, locale selector form with HTMX post to set cookie).
+
+Iteration Chunk 2: Header, Sidebars, and Dashboard Variants (Big Jump: Implement all variants and toggles dynamically with HTMX in one sweep)
+
+Implement sticky header: Class="sticky top-0 z-50", with variants (basic, search-enabled, transparent, colored, notifications). Use a select dropdown on /UI-examples to switch variants via HTMX hx-get="/UI-examples/header-variant?type=basic" returning partial template.
+Add sidebar demos: Left, right, both; icon-only, collapsible, fixed/sticky. Use DaisyUI drawer for mobile. Toggle via buttons hx-swap to reload layout.
+Dashboard layouts: Section with toggles to switch top-menu, left-sidebar, etc., using HTMX to replace main content grid (e.g., on 2xl+ screens, add extra columns like analytics widgets via 2xl:grid-cols-4 3xl:grid-cols-5).
+Integrate chat widget: Bottom-fixed DaisyUI chat bubble, input hx-post to Flask route (simulate responses with example questions like "How to view data on large screens?" pre-filled buttons).
+**INPUT VALIDATION FORMS**: Create comprehensive form validation examples with real-time feedback, error highlighting, and Serbian-specific validations (PIB, Matični broj, postal codes, phone numbers).
+Big Jump Option: Fully wire security features (reCAPTCHA, 2FA sim) into login forms within sidebars with complete input validation.
+
+Iteration Chunk 3: Core Components - Buttons, Forms, Tables, Charts (Big Jump: Populate all demos with data from SQLite via HTMX, including large-screen optimizations)
+
+Buttons demo: Grid showing all DaisyUI/Flowbite variants, sizes (xs to xl), colors, states; each with rendered example + code block (pre/code with copy button JS: function copyCode(el) { navigator.clipboard.writeText(el.previousSibling.textContent); }).
+Forms: Contact, transaction input with HTMX submit; add large-screen support (e.g., 3xl:flex-row for multi-column forms). **COMPREHENSIVE VALIDATION**: Implement all validation types with real-time feedback, error messages in Serbian/English, visual indicators, and accessibility features.
+Tables: Flowbite with HTMX for CRUD (sorting, pagination, search, column select); on 3xl+, show all columns by default without scroll (3xl:overflow-visible).
+Charts: All free libraries (Chart.js, ApexCharts, Plotly, ECharts); 10+ types in demo section, HTMX load data from Flask (query SQLite, return JSON); on large screens, increase chart width (2xl:w-full 3xl:w-3/4 mx-auto).
+Date/Time Pickers: Flowbite integrated with filters, responsive (inline on lg+).
+**VALIDATION INTEGRATION**: Integrate validation system with all forms, API endpoints, and user inputs. Include file upload validation, API rate limiting, and comprehensive error handling.
+Big Jump Option: Implement full CRUD for transactions here, with Flask routes handling SQLite ops (insert, update, delete with soft flag), and simulate loading delays (time.sleep(1)). Include complete input validation for all operations.
+
+Iteration Chunk 4: Advanced Features - Modals, Alerts, Security, Config/Automation (Big Jump: Integrate all dynamic and security elements with HTMX polling and simulations)
+
+Modals/Alerts/Accordions/Tooltips: Demos with variants, triggered via HTMX.
+Security: reCAPTCHA in forms (verify in Flask), Not-a-Bot JS puzzle, 2FA with pyotp (generate/verify TOTP), Keycloak guide (authlib OAuth setup snippet).
+Config/Automation: Form for theme/language (HTMX post), "schedule" button to insert timed data into SQLite, poll every 30s for updates.
+Loading sim: HTMX indicators with DaisyUI spinners, fake delays in Flask.
+Various elements: Colors swatches, pickers, formats (JS Intl.NumberFormat for currency).
+**SECURITY VALIDATION**: Implement CSRF protection, XSS prevention, input sanitization, rate limiting, and comprehensive security validations for all user inputs.
+Big Jump Option: Add very large screen specifics everywhere (e.g., media queries for 3xl: text-lg, wider paddings for data readability). Include complete validation system with security features.
+
+Iteration Chunk 5: Final Integration, Responsiveness, and Self-Documentation (Big Jump: Optimize for performance and complete project overview)
+
+Ensure all pages (CRUD sub-routes) inherit base, keep chat/examples.
+Test responsiveness: Mobile-first to 3xl (e.g., tables stack on sm-, full on 3xl+).
+Performance: HTMX hx-lazy, minify in Tailwind build.
+Project Overview section: Explain setup (pip install, npm install, flask run), folder structure, extension guide.
+**VALIDATION DOCUMENTATION**: Complete documentation of validation system, usage examples, error handling, and best practices. Include validation testing and monitoring.
+Output all files: app.py, templates (base, index, partials), static (output.css, js), db schema.
+Big Jump Option: If all prior chunks are solid, leap to generating a full zipped project export sim in code comments.
+
+Key requirements across all chunks:
+
+Backend Focus on Flask: Complete app.py with routes, Babel for multilang (detect via headers, macros like {% trans %}).
+Styling: Production Tailwind build, utility classes only.
+Components: Flowbite, DaisyUI, HyperUI/Preline customized.
+Responsiveness: Mobile-first, Apple-optimized, now with 2xl/3xl for data (wider grids, larger fonts on detection).
+CRUD: HTMX-driven, SQLite-backed, soft deletes.
+**INPUT VALIDATION**: Comprehensive validation system for all user inputs, forms, and API endpoints with Serbian-specific validations, real-time feedback, and security features.
+Usage Examples: Snippets in sections (Jinja2 macros, rendered HTML/JS, Flask routes).
+Output Format: After all chunks, provide full code files with comments. Be extensive: List every variant/class precisely. Inspire from Tailwind/Flowbite/fintech templates. Color scheme: blues/greens.
+
+### Next Steps
+- Integrate local LLM models (Llama 2, Mistral, Phi-2, Gemma) for AI-powered responses
+- Implement AI chat functionality with financial context
+- Add more Flowbite components for advanced UI patterns
+- Create AI-powered form generation and validation
+- Develop automated UI component generation from LLM prompts

@@ -1,0 +1,51 @@
+/* Monokai Theme - Main CSS */
+
+:root {
+    /* Primary Colors */
+    --primary-500: #f92672;
+    --primary-600: #f92672;
+    
+    /* Background Colors */
+    --bg-primary: #272822;
+    --bg-secondary: #272822;
+    --bg-surface: #272822;
+    
+    /* Text Colors */
+    --text-primary: #f8f8f2;
+    --text-secondary: #f8f8f2;
+    
+    /* Typography */
+    --font-family-sans: 'Monaco', system-ui, sans-serif;
+}
+
+[data-theme="monokai"] {
+    color-scheme: dark;
+}
+
+[data-theme="monokai"] body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-family-sans);
+}
+
+[data-theme="monokai"] .card {
+    background-color: var(--bg-surface);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+}
+
+[data-theme="monokai"] .btn-primary {
+    background-color: var(--primary-500);
+    color: white;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 150ms ease-out;
+}
+
+[data-theme="monokai"] .btn-primary:hover {
+    background-color: var(--primary-600);
+    transform: translateY(-1px);
+}

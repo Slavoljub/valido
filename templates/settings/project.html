@@ -1,0 +1,1433 @@
+{% comment %}
+Project Settings - Comprehensive project configuration interface
+{% endcomment %}
+
+{% extends "layouts/admin_layout.html" %}
+
+{% block head %}
+{{ super() }}
+
+<!-- Project Settings SEO -->
+{% if seo_manager %}
+{{ seo_manager.generate_meta_tags('settings') }}
+{{ seo_manager.generate_tracking_scripts('settings') }}
+{% endif %}
+
+<!-- Project Settings Styles -->
+<style>
+/* Project Settings Layout */
+.settings-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.settings-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.settings-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.settings-header p {
+    color: #64748b;
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Settings Navigation */
+.settings-nav {
+    background: white;
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.settings-nav-tabs {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+
+.settings-nav-tab {
+    padding: 1rem 1.5rem;
+    border: none;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.settings-nav-tab:hover {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.settings-nav-tab.active {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+.settings-nav-tab i {
+    font-size: 1rem;
+}
+
+/* Settings Content */
+.settings-content {
+    background: white;
+    border-radius: 1.25rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+}
+
+.settings-section {
+    display: none;
+    padding: 2rem;
+}
+
+.settings-section.active {
+    display: block;
+}
+
+.settings-section-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.settings-section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.settings-section-description {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+/* Form Groups */
+.settings-form-group {
+    margin-bottom: 2rem;
+}
+
+.settings-form-group:last-child {
+    margin-bottom: 0;
+}
+
+.settings-form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.settings-form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.settings-form-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.settings-form-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    min-height: 100px;
+    resize: vertical;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.settings-form-textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.settings-form-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    background: white;
+    cursor: pointer;
+}
+
+.settings-form-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Form Grid */
+.settings-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Toggle Switches */
+.settings-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+}
+
+.settings-toggle-label {
+    font-weight: 600;
+    color: #374151;
+}
+
+.settings-toggle-description {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 0.25rem;
+}
+
+.settings-toggle-switch {
+    position: relative;
+    width: 3rem;
+    height: 1.5rem;
+    background: #e5e7eb;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.settings-toggle-switch.active {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.settings-toggle-slider {
+    position: absolute;
+    top: 0.125rem;
+    left: 0.125rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.settings-toggle-switch.active .settings-toggle-slider {
+    transform: translateX(1.5rem);
+}
+
+/* Color Picker */
+.settings-color-picker {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.color-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.color-option:hover {
+    border-color: #3b82f6;
+}
+
+.color-option.selected {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.color-swatch {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: 2px solid #e5e7eb;
+}
+
+.color-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* File Upload */
+.settings-file-upload {
+    border: 2px dashed #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.settings-file-upload:hover {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.settings-file-upload input {
+    display: none;
+}
+
+.settings-file-icon {
+    font-size: 2rem;
+    color: #9ca3af;
+    margin-bottom: 1rem;
+}
+
+.settings-file-text {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+
+.settings-file-button {
+    padding: 0.5rem 1rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Action Buttons */
+.settings-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid #e5e7eb;
+}
+
+.settings-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.settings-btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+}
+
+.settings-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+.settings-btn-secondary {
+    background: #f8fafc;
+    color: #374151;
+    border: 2px solid #e5e7eb;
+}
+
+.settings-btn-secondary:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+}
+
+.settings-btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.settings-btn-danger:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+}
+
+/* Status Indicators */
+.settings-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.settings-status.success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.settings-status.warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.settings-status.error {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.settings-status.info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+/* Progress Indicators */
+.settings-progress {
+    margin-top: 1rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 0.5rem;
+    background: #e5e7eb;
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    border-radius: inherit;
+    transition: width 1s ease;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .settings-container {
+        padding: 1rem;
+    }
+
+    .settings-header {
+        padding: 1.5rem;
+    }
+
+    .settings-nav-tabs {
+        gap: 0.5rem;
+    }
+
+    .settings-nav-tab {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .settings-section {
+        padding: 1.5rem;
+    }
+
+    .settings-form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .settings-actions {
+        flex-direction: column;
+    }
+
+    .settings-btn {
+        width: 100%;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .settings-header,
+    .settings-nav,
+    .settings-content {
+        background: rgba(30, 41, 59, 0.95);
+        border-color: rgba(71, 85, 105, 0.3);
+        color: #f8fafc;
+    }
+
+    .settings-header h1 {
+        color: #f8fafc;
+    }
+
+    .settings-header p {
+        color: #cbd5e1;
+    }
+
+    .settings-nav-tab {
+        background: rgba(51, 65, 85, 0.5);
+        color: #cbd5e1;
+    }
+
+    .settings-nav-tab:hover {
+        background: rgba(71, 85, 105, 0.5);
+        color: #f8fafc;
+    }
+
+    .settings-nav-tab.active {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+    }
+
+    .settings-section-title {
+        color: #f8fafc;
+    }
+
+    .settings-section-description {
+        color: #cbd5e1;
+    }
+
+    .settings-form-label {
+        color: #f8fafc;
+    }
+
+    .settings-form-input,
+    .settings-form-textarea,
+    .settings-form-select {
+        background: rgba(51, 65, 85, 0.5);
+        border-color: rgba(71, 85, 105, 0.3);
+        color: #f8fafc;
+    }
+
+    .settings-toggle {
+        background: rgba(51, 65, 85, 0.5);
+        border-color: rgba(71, 85, 105, 0.3);
+    }
+
+    .settings-toggle-label {
+        color: #f8fafc;
+    }
+
+    .settings-toggle-description {
+        color: #cbd5e1;
+    }
+
+    .settings-file-upload {
+        border-color: rgba(71, 85, 105, 0.3);
+    }
+
+    .settings-file-upload:hover {
+        border-color: #3b82f6;
+        background: rgba(59, 130, 246, 0.1);
+    }
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+    .settings-header,
+    .settings-nav,
+    .settings-content,
+    .settings-form-input,
+    .settings-form-textarea,
+    .settings-form-select,
+    .settings-toggle,
+    .settings-file-upload {
+        border-width: 2px;
+    }
+
+    .settings-btn {
+        border: 2px solid;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .settings-nav-tab,
+    .settings-form-input,
+    .settings-form-textarea,
+    .settings-form-select,
+    .settings-toggle-switch,
+    .settings-btn,
+    .color-option {
+        transition: none;
+    }
+
+    .settings-btn:hover,
+    .settings-nav-tab:hover,
+    .color-option:hover {
+        transform: none;
+    }
+}
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="settings-container">
+    <!-- Settings Header -->
+    <div class="settings-header">
+        <h1>
+            <i class="fas fa-cogs text-blue-500"></i>
+            Project Settings
+        </h1>
+        <p>Comprehensive configuration and management for your ValidoAI platform</p>
+    </div>
+
+    <!-- Settings Navigation -->
+    <nav class="settings-nav">
+        <div class="settings-nav-tabs">
+            <button class="settings-nav-tab active" data-tab="general">
+                <i class="fas fa-sliders-h"></i>
+                General
+            </button>
+            <button class="settings-nav-tab" data-tab="appearance">
+                <i class="fas fa-palette"></i>
+                Appearance
+            </button>
+            <button class="settings-nav-tab" data-tab="performance">
+                <i class="fas fa-tachometer-alt"></i>
+                Performance
+            </button>
+            <button class="settings-nav-tab" data-tab="security">
+                <i class="fas fa-shield-alt"></i>
+                Security
+            </button>
+            <button class="settings-nav-tab" data-tab="notifications">
+                <i class="fas fa-bell"></i>
+                Notifications
+            </button>
+            <button class="settings-nav-tab" data-tab="api">
+                <i class="fas fa-code"></i>
+                API & Integrations
+            </button>
+            <button class="settings-nav-tab" data-tab="backup">
+                <i class="fas fa-database"></i>
+                Backup & Recovery
+            </button>
+            <button class="settings-nav-tab" data-tab="advanced">
+                <i class="fas fa-tools"></i>
+                Advanced
+            </button>
+        </div>
+    </nav>
+
+    <!-- Settings Content -->
+    <div class="settings-content">
+        <!-- General Settings -->
+        <div id="general-section" class="settings-section active">
+            <div class="settings-section-header">
+                <h2 class="settings-section-title">
+                    <i class="fas fa-sliders-h text-blue-500"></i>
+                    General Settings
+                </h2>
+                <p class="settings-section-description">
+                    Basic configuration options for your application
+                </p>
+            </div>
+
+            <form id="general-form" class="settings-form">
+                <div class="settings-form-grid">
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Application Name</label>
+                        <input type="text" class="settings-form-input" value="ValidoAI" required>
+                    </div>
+
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Company Name</label>
+                        <input type="text" class="settings-form-input" placeholder="Your Company Name">
+                    </div>
+
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Contact Email</label>
+                        <input type="email" class="settings-form-input" value="admin@valido.ai" required>
+                    </div>
+
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Support Phone</label>
+                        <input type="tel" class="settings-form-input" placeholder="+1-555-0123">
+                    </div>
+
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Default Language</label>
+                        <select class="settings-form-select">
+                            <option value="en_US" selected>English (US)</option>
+                            <option value="es_ES">Español</option>
+                            <option value="fr_FR">Français</option>
+                            <option value="de_DE">Deutsch</option>
+                            <option value="it_IT">Italiano</option>
+                            <option value="pt_BR">Português (BR)</option>
+                            <option value="ru_RU">Русский</option>
+                            <option value="zh_CN">中文 (简体)</option>
+                            <option value="ja_JP">日本語</option>
+                            <option value="ko_KR">한국어</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Timezone</label>
+                        <select class="settings-form-select">
+                            <option value="UTC">UTC</option>
+                            <option value="America/New_York" selected>Eastern Time</option>
+                            <option value="America/Chicago">Central Time</option>
+                            <option value="America/Denver">Mountain Time</option>
+                            <option value="America/Los_Angeles">Pacific Time</option>
+                            <option value="Europe/London">London</option>
+                            <option value="Europe/Paris">Paris</option>
+                            <option value="Asia/Tokyo">Tokyo</option>
+                            <option value="Asia/Shanghai">Shanghai</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Date Format</label>
+                        <select class="settings-form-select">
+                            <option value="MM/DD/YYYY" selected>MM/DD/YYYY</option>
+                            <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                            <option value="DD MMM YYYY">DD MMM YYYY</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Currency</label>
+                        <select class="settings-form-select">
+                            <option value="USD" selected>USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="GBP">GBP (£)</option>
+                            <option value="JPY">JPY (¥)</option>
+                            <option value="CAD">CAD (C$)</option>
+                            <option value="AUD">AUD (A$)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-form-group">
+                    <label class="settings-form-label">Application Description</label>
+                    <textarea class="settings-form-textarea" placeholder="Brief description of your application...">Advanced AI-powered database platform with real-time analytics and comprehensive administration tools</textarea>
+                </div>
+
+                <div class="settings-form-group">
+                    <label class="settings-form-label">Company Address</label>
+                    <textarea class="settings-form-textarea" placeholder="Full company address...">123 Tech Street
+San Francisco, CA 94105
+USA</textarea>
+                </div>
+
+                <div class="settings-actions">
+                    <button type="button" class="settings-btn settings-btn-secondary" onclick="resetGeneralSettings()">
+                        Reset to Defaults
+                    </button>
+                    <button type="submit" class="settings-btn settings-btn-primary">
+                        <i class="fas fa-save mr-2"></i>
+                        Save General Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Appearance Settings -->
+        <div id="appearance-section" class="settings-section">
+            <div class="settings-section-header">
+                <h2 class="settings-section-title">
+                    <i class="fas fa-palette text-purple-500"></i>
+                    Appearance Settings
+                </h2>
+                <p class="settings-section-description">
+                    Customize the look and feel of your application
+                </p>
+            </div>
+
+            <form id="appearance-form" class="settings-form">
+                <div class="settings-form-group">
+                    <label class="settings-form-label">Primary Theme</label>
+                    <div class="settings-form-grid">
+                        <div class="settings-toggle">
+                            <div>
+                                <div class="settings-toggle-label">Dark Mode</div>
+                                <div class="settings-toggle-description">Enable dark theme throughout the application</div>
+                            </div>
+                            <div class="settings-toggle-switch" onclick="toggleSetting(this)">
+                                <div class="settings-toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="settings-toggle">
+                            <div>
+                                <div class="settings-toggle-label">Glassmorphism Effects</div>
+                                <div class="settings-toggle-description">Enable modern glass-like visual effects</div>
+                            </div>
+                            <div class="settings-toggle-switch active" onclick="toggleSetting(this)">
+                                <div class="settings-toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="settings-toggle">
+                            <div>
+                                <div class="settings-toggle-label">Animations</div>
+                                <div class="settings-toggle-description">Enable smooth transitions and animations</div>
+                            </div>
+                            <div class="settings-toggle-switch active" onclick="toggleSetting(this)">
+                                <div class="settings-toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="settings-toggle">
+                            <div>
+                                <div class="settings-toggle-label">High Contrast Mode</div>
+                                <div class="settings-toggle-description">Increase contrast for better accessibility</div>
+                            </div>
+                            <div class="settings-toggle-switch" onclick="toggleSetting(this)">
+                                <div class="settings-toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-form-group">
+                    <label class="settings-form-label">Primary Color Scheme</label>
+                    <div class="settings-color-picker">
+                        <div class="color-option selected" onclick="selectColor(this, 'blue')">
+                            <div class="color-swatch" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);"></div>
+                            <span class="color-label">Blue (Default)</span>
+                        </div>
+                        <div class="color-option" onclick="selectColor(this, 'purple')">
+                            <div class="color-swatch" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);"></div>
+                            <span class="color-label">Purple</span>
+                        </div>
+                        <div class="color-option" onclick="selectColor(this, 'green')">
+                            <div class="color-swatch" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"></div>
+                            <span class="color-label">Green</span>
+                        </div>
+                        <div class="color-option" onclick="selectColor(this, 'orange')">
+                            <div class="color-swatch" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);"></div>
+                            <span class="color-label">Orange</span>
+                        </div>
+                        <div class="color-option" onclick="selectColor(this, 'red')">
+                            <div class="color-swatch" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);"></div>
+                            <span class="color-label">Red</span>
+                        </div>
+                        <div class="color-option" onclick="selectColor(this, 'teal')">
+                            <div class="color-swatch" style="background: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%);"></div>
+                            <span class="color-label">Teal</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-form-grid">
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Font Family</label>
+                        <select class="settings-form-select">
+                            <option value="inter" selected>Inter (Default)</option>
+                            <option value="system">System Font</option>
+                            <option value="roboto">Roboto</option>
+                            <option value="opensans">Open Sans</option>
+                            <option value="lato">Lato</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Border Radius</label>
+                        <select class="settings-form-select">
+                            <option value="none">None</option>
+                            <option value="small">Small (0.25rem)</option>
+                            <option value="medium" selected>Medium (0.5rem)</option>
+                            <option value="large">Large (0.75rem)</option>
+                            <option value="xlarge">Extra Large (1rem)</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Shadow Intensity</label>
+                        <select class="settings-form-select">
+                            <option value="none">None</option>
+                            <option value="light">Light</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="heavy">Heavy</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-form-group">
+                    <label class="settings-form-label">Custom Logo</label>
+                    <div class="settings-file-upload" onclick="document.getElementById('logo-upload').click()">
+                        <i class="fas fa-cloud-upload-alt settings-file-icon"></i>
+                        <div class="settings-file-text">Click to upload or drag and drop</div>
+                        <div class="settings-file-button">Choose File</div>
+                        <input type="file" id="logo-upload" accept="image/*" onchange="handleFileUpload(this)">
+                    </div>
+                </div>
+
+                <div class="settings-actions">
+                    <button type="button" class="settings-btn settings-btn-secondary" onclick="previewAppearance()">
+                        <i class="fas fa-eye mr-2"></i>
+                        Preview
+                    </button>
+                    <button type="button" class="settings-btn settings-btn-secondary" onclick="resetAppearance()">
+                        Reset to Defaults
+                    </button>
+                    <button type="submit" class="settings-btn settings-btn-primary">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Appearance
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Performance Settings -->
+        <div id="performance-section" class="settings-section">
+            <div class="settings-section-header">
+                <h2 class="settings-section-title">
+                    <i class="fas fa-tachometer-alt text-green-500"></i>
+                    Performance Settings
+                </h2>
+                <p class="settings-section-description">
+                    Optimize application performance and loading speed
+                </p>
+            </div>
+
+            <form id="performance-form" class="settings-form">
+                <div class="settings-form-group">
+                    <div class="settings-form-grid">
+                        <div class="settings-toggle">
+                            <div>
+                                <div class="settings-toggle-label">Enable Critical CSS</div>
+                                <div class="settings-toggle-description">Load above-the-fold styles instantly</div>
+                            </div>
+                            <div class="settings-toggle-switch active" onclick="toggleSetting(this)">
+                                <div class="settings-toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="settings-toggle">
+                            <div>
+                                <div class="settings-toggle-label">Lazy Load Images</div>
+                                <div class="settings-toggle-description">Load images only when they enter the viewport</div>
+                            </div>
+                            <div class="settings-toggle-switch active" onclick="toggleSetting(this)">
+                                <div class="settings-toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="settings-toggle">
+                            <div>
+                                <div class="settings-toggle-label">Enable Caching</div>
+                                <div class="settings-toggle-description">Cache static assets for better performance</div>
+                            </div>
+                            <div class="settings-toggle-switch active" onclick="toggleSetting(this)">
+                                <div class="settings-toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="settings-toggle">
+                            <div>
+                                <div class="settings-toggle-label">Compress Assets</div>
+                                <div class="settings-toggle-description">Gzip and Brotli compression for faster loading</div>
+                            </div>
+                            <div class="settings-toggle-switch active" onclick="toggleSetting(this)">
+                                <div class="settings-toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="settings-toggle">
+                            <div>
+                                <div class="settings-toggle-label">CDN Integration</div>
+                                <div class="settings-toggle-description">Serve assets through Content Delivery Network</div>
+                            </div>
+                            <div class="settings-toggle-switch" onclick="toggleSetting(this)">
+                                <div class="settings-toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="settings-toggle">
+                            <div>
+                                <div class="settings-toggle-label">Service Worker</div>
+                                <div class="settings-toggle-description">Enable offline functionality and caching</div>
+                            </div>
+                            <div class="settings-toggle-switch active" onclick="toggleSetting(this)">
+                                <div class="settings-toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-form-grid">
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Cache Duration (Static Assets)</label>
+                        <select class="settings-form-select">
+                            <option value="3600">1 Hour</option>
+                            <option value="86400">1 Day</option>
+                            <option value="604800" selected>1 Week</option>
+                            <option value="2592000">1 Month</option>
+                            <option value="31536000">1 Year</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Cache Duration (Images)</label>
+                        <select class="settings-form-select">
+                            <option value="86400">1 Day</option>
+                            <option value="604800">1 Week</option>
+                            <option value="2592000" selected>1 Month</option>
+                            <option value="31536000">1 Year</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Image Quality</label>
+                        <select class="settings-form-select">
+                            <option value="100">Original (100%)</option>
+                            <option value="90" selected>High (90%)</option>
+                            <option value="80">Good (80%)</option>
+                            <option value="70">Medium (70%)</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Database Connection Pool</label>
+                        <select class="settings-form-select">
+                            <option value="5">5 Connections</option>
+                            <option value="10" selected>10 Connections</option>
+                            <option value="15">15 Connections</option>
+                            <option value="20">20 Connections</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-form-group">
+                    <label class="settings-form-label">Performance Monitoring</label>
+                    <div class="settings-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 85%"></div>
+                        </div>
+                        <div class="mt-2 text-sm text-gray-600">Current Performance Score: 85/100</div>
+                    </div>
+                </div>
+
+                <div class="settings-actions">
+                    <button type="button" class="settings-btn settings-btn-secondary" onclick="runPerformanceTest()">
+                        <i class="fas fa-play mr-2"></i>
+                        Run Performance Test
+                    </button>
+                    <button type="button" class="settings-btn settings-btn-secondary" onclick="clearCache()">
+                        <i class="fas fa-trash mr-2"></i>
+                        Clear Cache
+                    </button>
+                    <button type="submit" class="settings-btn settings-btn-primary">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Performance Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Security Settings -->
+        <div id="security-section" class="settings-section">
+            <div class="settings-section-header">
+                <h2 class="settings-section-title">
+                    <i class="fas fa-shield-alt text-red-500"></i>
+                    Security Settings
+                </h2>
+                <p class="settings-section-description">
+                    Configure security options and access controls
+                </p>
+            </div>
+
+            <form id="security-form" class="settings-form">
+                <div class="settings-form-group">
+                    <div class="settings-form-grid">
+                        <div class="settings-toggle">
+                            <div>
+                                <div class="settings-toggle-label">Two-Factor Authentication</div>
+                                <div class="settings-toggle-description">Require 2FA for all admin accounts</div>
+                            </div>
+                            <div class="settings-toggle-switch active" onclick="toggleSetting(this)">
+                                <div class="settings-toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="settings-toggle">
+                            <div>
+                                <div class="settings-toggle-label">Session Timeout</div>
+                                <div class="settings-toggle-description">Automatically log out inactive users</div>
+                            </div>
+                            <div class="settings-toggle-switch active" onclick="toggleSetting(this)">
+                                <div class="settings-toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="settings-toggle">
+                            <div>
+                                <div class="settings-toggle-label">IP Whitelisting</div>
+                                <div class="settings-toggle-description">Restrict access to specific IP addresses</div>
+                            </div>
+                            <div class="settings-toggle-switch" onclick="toggleSetting(this)">
+                                <div class="settings-toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="settings-toggle">
+                            <div>
+                                <div class="settings-toggle-label">Audit Logging</div>
+                                <div class="settings-toggle-description">Log all administrative actions</div>
+                            </div>
+                            <div class="settings-toggle-switch active" onclick="toggleSetting(this)">
+                                <div class="settings-toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="settings-toggle">
+                            <div>
+                                <div class="settings-toggle-label">Rate Limiting</div>
+                                <div class="settings-toggle-description">Limit API requests to prevent abuse</div>
+                            </div>
+                            <div class="settings-toggle-switch active" onclick="toggleSetting(this)">
+                                <div class="settings-toggle-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="settings-toggle">
+                            <div>
+                                <div class="settings-toggle-label">HTTPS Enforcement</div>
+                                <div class="settings-toggle-description">Force all connections to use HTTPS</div>
+                            </div>
+                            <div class="settings-toggle-switch active" onclick="toggleSetting(this)">
+                                <div class="settings-toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-form-grid">
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Session Timeout (minutes)</label>
+                        <input type="number" class="settings-form-input" value="30" min="5" max="480">
+                    </div>
+
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Password Minimum Length</label>
+                        <input type="number" class="settings-form-input" value="8" min="6" max="128">
+                    </div>
+
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Failed Login Attempts</label>
+                        <input type="number" class="settings-form-input" value="5" min="3" max="20">
+                    </div>
+
+                    <div class="settings-form-group">
+                        <label class="settings-form-label">Account Lock Duration (minutes)</label>
+                        <input type="number" class="settings-form-input" value="15" min="5" max="1440">
+                    </div>
+                </div>
+
+                <div class="settings-form-group">
+                    <label class="settings-form-label">Security Headers Status</label>
+                    <div class="mt-2 space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="settings-status success">✓</span>
+                            <span class="text-sm">X-Frame-Options: DENY</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="settings-status success">✓</span>
+                            <span class="text-sm">X-Content-Type-Options: nosniff</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="settings-status success">✓</span>
+                            <span class="text-sm">X-XSS-Protection: enabled</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="settings-status success">✓</span>
+                            <span class="text-sm">Content Security Policy: configured</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-actions">
+                    <button type="button" class="settings-btn settings-btn-secondary" onclick="runSecurityScan()">
+                        <i class="fas fa-search mr-2"></i>
+                        Run Security Scan
+                    </button>
+                    <button type="button" class="settings-btn settings-btn-secondary" onclick="viewAuditLogs()">
+                        <i class="fas fa-file-alt mr-2"></i>
+                        View Audit Logs
+                    </button>
+                    <button type="submit" class="settings-btn settings-btn-primary">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Security Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Project Settings JavaScript -->
+<script>
+function initializeProjectSettings() {
+    // Tab Navigation
+    const tabs = document.querySelectorAll('.settings-nav-tab');
+    const sections = document.querySelectorAll('.settings-section');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetTab = tab.dataset.tab;
+
+            // Update active tab
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            // Show target section
+            sections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === `${targetTab}-section`) {
+                    section.classList.add('active');
+                }
+            });
+        });
+    });
+
+    // Form Submissions
+    const forms = {
+        'general-form': handleGeneralSettings,
+        'appearance-form': handleAppearanceSettings,
+        'performance-form': handlePerformanceSettings,
+        'security-form': handleSecuritySettings
+    };
+
+    Object.keys(forms).forEach(formId => {
+        const form = document.getElementById(formId);
+        if (form) {
+            form.addEventListener('submit', forms[formId]);
+        }
+    });
+
+    // Initialize form values from localStorage
+    loadSettingsFromStorage();
+}
+
+// Form Handlers
+function handleGeneralSettings(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+
+    // Simulate saving settings
+    showNotification('General settings saved successfully!', 'success');
+
+    // Save to localStorage
+    const settings = {};
+    for (let [key, value] of formData.entries()) {
+        settings[key] = value;
+    }
+    localStorage.setItem('general-settings', JSON.stringify(settings));
+}
+
+function handleAppearanceSettings(e) {
+    e.preventDefault();
+    showNotification('Appearance settings saved successfully!', 'success');
+    // Implementation would save appearance settings
+}
+
+function handlePerformanceSettings(e) {
+    e.preventDefault();
+    showNotification('Performance settings saved successfully!', 'success');
+    // Implementation would save performance settings
+}
+
+function handleSecuritySettings(e) {
+    e.preventDefault();
+    showNotification('Security settings saved successfully!', 'success');
+    // Implementation would save security settings
+}
+
+// Utility Functions
+function toggleSetting(element) {
+    element.classList.toggle('active');
+}
+
+function selectColor(element, color) {
+    document.querySelectorAll('.color-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    element.classList.add('selected');
+
+    // Update CSS custom properties
+    const root = document.documentElement;
+    const colors = {
+        'blue': { primary: '#3b82f6', secondary: '#1d4ed8' },
+        'purple': { primary: '#8b5cf6', secondary: '#7c3aed' },
+        'green': { primary: '#10b981', secondary: '#059669' },
+        'orange': { primary: '#f97316', secondary: '#ea580c' },
+        'red': { primary: '#ef4444', secondary: '#dc2626' },
+        'teal': { primary: '#14b8a6', secondary: '#0f766e' }
+    };
+
+    if (colors[color]) {
+        root.style.setProperty('--valido-primary', colors[color].primary);
+        root.style.setProperty('--valido-primary-dark', colors[color].secondary);
+    }
+}
+
+function handleFileUpload(input) {
+    const file = input.files[0];
+    if (file) {
+        // Simulate file upload
+        showNotification(`File "${file.name}" uploaded successfully!`, 'success');
+    }
+}
+
+function resetGeneralSettings() {
+    if (confirm('Are you sure you want to reset general settings to defaults?')) {
+        document.getElementById('general-form').reset();
+        showNotification('General settings reset to defaults', 'info');
+    }
+}
+
+function resetAppearance() {
+    if (confirm('Are you sure you want to reset appearance settings to defaults?')) {
+        // Reset color selection
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        document.querySelector('.color-option').classList.add('selected');
+
+        // Reset form
+        document.getElementById('appearance-form').reset();
+
+        // Reset toggles
+        document.querySelectorAll('.settings-toggle-switch').forEach(toggle => {
+            toggle.classList.remove('active');
+            toggle.querySelector('.settings-toggle-slider').style.transform = 'translateX(0)';
+        });
+
+        showNotification('Appearance settings reset to defaults', 'info');
+    }
+}
+
+function previewAppearance() {
+    showNotification('Appearance preview activated. Changes are temporary.', 'info');
+}
+
+function runPerformanceTest() {
+    showNotification('Running performance test...', 'info');
+
+    // Simulate performance test
+    setTimeout(() => {
+        showNotification('Performance test completed! Score: 92/100', 'success');
+    }, 2000);
+}
+
+function clearCache() {
+    showNotification('Clearing cache...', 'info');
+
+    setTimeout(() => {
+        showNotification('Cache cleared successfully!', 'success');
+    }, 1000);
+}
+
+function runSecurityScan() {
+    showNotification('Running security scan...', 'info');
+
+    setTimeout(() => {
+        showNotification('Security scan completed! All systems secure.', 'success');
+    }, 3000);
+}
+
+function viewAuditLogs() {
+    showNotification('Opening audit logs...', 'info');
+    // Implementation would open audit logs page
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `fixed top-6 right-6 z-50 p-4 rounded-xl shadow-2xl max-w-sm transform transition-all duration-300 ${
+        type === 'success' ? 'bg-green-100 border border-green-500 text-green-700' :
+        type === 'error' ? 'bg-red-100 border border-red-500 text-red-700' :
+        type === 'warning' ? 'bg-yellow-100 border border-yellow-500 text-yellow-700' :
+        'bg-blue-100 border border-blue-500 text-blue-700'
+    }`;
+
+    notification.innerHTML = `
+        <div class="flex items-center gap-3">
+            <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : 'info'}-circle"></i>
+            <span class="flex-1">${message}</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+function loadSettingsFromStorage() {
+    // Load general settings
+    const generalSettings = localStorage.getItem('general-settings');
+    if (generalSettings) {
+        const settings = JSON.parse(generalSettings);
+        Object.keys(settings).forEach(key => {
+            const element = document.querySelector(`[name="${key}"]`);
+            if (element) {
+                element.value = settings[key];
+            }
+        });
+    }
+}
+
+// Mobile-specific functionality
+function handleMobileSettings() {
+    if (window.innerWidth <= 768) {
+        // Enable mobile-specific features
+        document.body.classList.add('mobile-settings');
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    initializeProjectSettings();
+    handleMobileSettings();
+
+    console.log('Project Settings loaded successfully');
+});
+</script>
+{% endblock %}

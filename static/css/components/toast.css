@@ -1,0 +1,117 @@
+/* Toast Component Styles */
+.toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1050;
+    pointer-events: none;
+}
+
+.toast {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    margin-bottom: 0.5rem;
+    max-width: 24rem;
+    min-width: 18rem;
+    padding: 1rem;
+    pointer-events: auto;
+    border-left: 4px solid #3b82f6;
+    animation: slideInRight 0.3s ease-out;
+}
+
+.toast.toast-success {
+    border-left-color: #059669;
+}
+
+.toast.toast-warning {
+    border-left-color: #d97706;
+}
+
+.toast.toast-error {
+    border-left-color: #dc2626;
+}
+
+.toast.toast-info {
+    border-left-color: #0891b2;
+}
+
+.toast-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.toast-title {
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 1.25rem;
+    padding: 0;
+    line-height: 1;
+}
+
+.toast-close:hover {
+    color: #374151;
+}
+
+.toast-body {
+    color: #4b5563;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.toast-icon {
+    margin-right: 0.5rem;
+    font-size: 1.125rem;
+}
+
+.toast.toast-success .toast-icon {
+    color: #059669;
+}
+
+.toast.toast-warning .toast-icon {
+    color: #d97706;
+}
+
+.toast.toast-error .toast-icon {
+    color: #dc2626;
+}
+
+.toast.toast-info .toast-icon {
+    color: #0891b2;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.toast.fade-out {
+    animation: slideOutRight 0.3s ease-in forwards;
+}

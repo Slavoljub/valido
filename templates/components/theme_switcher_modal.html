@@ -1,0 +1,376 @@
+<!-- Reusable Theme Switcher Modal Component -->
+<div id="themeSwitcherModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                    <i class="fas fa-palette text-indigo-600 dark:text-indigo-400"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Choose Theme</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">Select your preferred theme and appearance</p>
+                </div>
+            </div>
+            <button onclick="closeThemeModal()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200">
+                <i class="fas fa-times text-gray-500 dark:text-gray-400"></i>
+            </button>
+        </div>
+
+        <div class="p-6 overflow-y-auto max-h-[70vh]">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Valido White Theme -->
+                <div class="theme-card relative group cursor-pointer rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-200 p-4"
+                     onclick="switchTheme('valido-white')">
+                    <div class="theme-preview bg-white rounded-lg p-4 mb-3 shadow-sm">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-home text-white text-xs"></i>
+                            </div>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="h-2 bg-gray-200 rounded w-3/4"></div>
+                            <div class="h-2 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 dark:text-white">Valido White</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Clean & Professional</p>
+                        </div>
+                        <div class="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 rounded-full flex items-center justify-center">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Valido Dark Theme -->
+                <div class="theme-card relative group cursor-pointer rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-200 p-4"
+                     onclick="switchTheme('valido-dark')">
+                    <div class="theme-preview bg-gray-900 rounded-lg p-4 mb-3 shadow-sm">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-home text-white text-xs"></i>
+                            </div>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="h-2 bg-gray-700 rounded w-3/4"></div>
+                            <div class="h-2 bg-gray-700 rounded w-1/2"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 dark:text-white">Valido Dark</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Easy on Eyes</p>
+                        </div>
+                        <div class="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 rounded-full flex items-center justify-center">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dracula Theme -->
+                <div class="theme-card relative group cursor-pointer rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-200 p-4"
+                     onclick="switchTheme('dracula')">
+                    <div class="theme-preview bg-gradient-to-br from-purple-900 to-pink-900 rounded-lg p-4 mb-3 shadow-sm">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-home text-white text-xs"></i>
+                            </div>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="h-2 bg-purple-700 rounded w-3/4"></div>
+                            <div class="h-2 bg-purple-700 rounded w-1/2"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 dark:text-white">Dracula</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Dark & Gothic</p>
+                        </div>
+                        <div class="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 rounded-full flex items-center justify-center">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Material Dark Theme -->
+                <div class="theme-card relative group cursor-pointer rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-200 p-4"
+                     onclick="switchTheme('material-dark')">
+                    <div class="theme-preview bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg p-4 mb-3 shadow-sm">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-home text-white text-xs"></i>
+                            </div>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="h-2 bg-gray-600 rounded w-3/4"></div>
+                            <div class="h-2 bg-gray-600 rounded w-1/2"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 dark:text-white">Material Dark</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Material Design</p>
+                        </div>
+                        <div class="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 rounded-full flex items-center justify-center">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Material Light Theme -->
+                <div class="theme-card relative group cursor-pointer rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-200 p-4"
+                     onclick="switchTheme('material-light')">
+                    <div class="theme-preview bg-gradient-to-br from-blue-50 to-white rounded-lg p-4 mb-3 shadow-sm border border-blue-200">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-home text-white text-xs"></i>
+                            </div>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="h-2 bg-blue-200 rounded w-3/4"></div>
+                            <div class="h-2 bg-blue-200 rounded w-1/2"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 dark:text-white">Material Light</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Bright & Airy</p>
+                        </div>
+                        <div class="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 rounded-full flex items-center justify-center">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monokai Theme -->
+                <div class="theme-card relative group cursor-pointer rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-200 p-4"
+                     onclick="switchTheme('monokai')">
+                    <div class="theme-preview bg-gradient-to-br from-gray-900 to-orange-900 rounded-lg p-4 mb-3 shadow-sm">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-home text-white text-xs"></i>
+                            </div>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="h-2 bg-gray-700 rounded w-3/4"></div>
+                            <div class="h-2 bg-gray-700 rounded w-1/2"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 dark:text-white">Monokai</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Classic Code Theme</p>
+                        </div>
+                        <div class="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 rounded-full flex items-center justify-center">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nord Theme -->
+                <div class="theme-card relative group cursor-pointer rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-200 p-4"
+                     onclick="switchTheme('nord')">
+                    <div class="theme-preview bg-gradient-to-br from-blue-900 to-cyan-900 rounded-lg p-4 mb-3 shadow-sm">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-home text-white text-xs"></i>
+                            </div>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="h-2 bg-blue-700 rounded w-3/4"></div>
+                            <div class="h-2 bg-blue-700 rounded w-1/2"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 dark:text-white">Nord</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Arctic & Clean</p>
+                        </div>
+                        <div class="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 rounded-full flex items-center justify-center">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Solarized Light Theme -->
+                <div class="theme-card relative group cursor-pointer rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-200 p-4"
+                     onclick="switchTheme('solarized-light')">
+                    <div class="theme-preview bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg p-4 mb-3 shadow-sm border border-yellow-200">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-home text-white text-xs"></i>
+                            </div>
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="h-2 bg-yellow-200 rounded w-3/4"></div>
+                            <div class="h-2 bg-yellow-200 rounded w-1/2"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 dark:text-white">Solarized Light</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Warm & Cozy</p>
+                        </div>
+                        <div class="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 rounded-full flex items-center justify-center">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700">
+            <div class="text-sm text-gray-600 dark:text-gray-300">
+                <i class="fas fa-info-circle mr-2"></i>
+                Theme changes are saved automatically
+            </div>
+            <button onclick="closeThemeModal()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200">
+                Done
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Theme Switcher Modal Functions
+function openThemeModal() {
+    const modal = document.getElementById('themeSwitcherModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function closeThemeModal() {
+    const modal = document.getElementById('themeSwitcherModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
+
+// Close modal when clicking outside
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('themeSwitcherModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeThemeModal();
+            }
+        });
+    }
+
+    // Add keyboard shortcut (Ctrl/Cmd + T) to open theme modal
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 't') {
+            e.preventDefault();
+            openThemeModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeThemeModal();
+        }
+    });
+});
+
+// Enhanced theme switching function
+function switchTheme(themeName) {
+    // Update data-theme attribute
+    document.documentElement.setAttribute('data-theme', themeName);
+
+    // Update theme CSS variables
+    const root = document.documentElement;
+
+    // Get theme colors from CSS custom properties
+    const computedStyle = getComputedStyle(root);
+
+    // Update background colors
+    document.body.style.backgroundColor = computedStyle.getPropertyValue('--bg-primary');
+    document.body.style.color = computedStyle.getPropertyValue('--text-primary');
+
+    // Update CSS custom properties for all elements
+    const cssVars = [
+        '--bg-primary', '--bg-secondary', '--bg-tertiary',
+        '--text-primary', '--text-secondary', '--text-muted',
+        '--border-color', '--border-hover', '--shadow', '--shadow-lg',
+        '--primary-500', '--primary-600', '--primary-700', '--accent-vibrant'
+    ];
+
+    cssVars.forEach(varName => {
+        const value = computedStyle.getPropertyValue(varName);
+        if (value) {
+            document.documentElement.style.setProperty(varName, value);
+        }
+    });
+
+    // Update logo based on theme
+    const logoImg = document.querySelector('.logo-img');
+    if (logoImg) {
+        if (themeName.includes('dark') || themeName === 'dracula' || themeName === 'monokai' ||
+            themeName === 'tokyo-night' || themeName === 'one-dark' || themeName === 'gruvbox-dark' ||
+            themeName === 'catppuccin-mocha' || themeName === 'rose-pine-moon' || themeName === 'ayu-dark') {
+            logoImg.src = '/static/img/logo-horizontal-white.svg';
+        } else {
+            logoImg.src = '/static/img/logo-horizontal-dark.svg';
+        }
+    }
+
+    // Store theme preference
+    localStorage.setItem('valido-theme', themeName);
+
+    // Show success toast
+    if (window.showToast) {
+        showToast('success', `Theme switched to ${themeName.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`);
+    }
+
+    // Dispatch theme change event
+    window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: themeName } }));
+
+    // Close modal
+    closeThemeModal();
+}
+</script>

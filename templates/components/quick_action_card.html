@@ -1,0 +1,19 @@
+<!-- Reusable Quick Action Card Component -->
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="p-2 {{ icon_bg }} rounded-lg">
+            <i class="{{ icon }} text-{{ icon_color }}-400"></i>
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ title or 'Quick Actions' }}</h3>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {% for action in actions %}
+        <a href="{{ action.href }}" class="group flex flex-col items-center gap-3 p-4 bg-gradient-to-br {{ action.gradient }} rounded-xl border {{ action.border }} hover:shadow-lg hover:scale-105 transition-all duration-200 text-decoration-none">
+            <div class="p-3 {{ action.button_bg }} rounded-lg group-hover:{{ action.hover_bg }} transition-colors duration-200">
+                <i class="{{ action.icon }} text-white text-lg"></i>
+            </div>
+            <span class="text-sm font-medium {{ action.text_color }} text-center">{{ action.label }}</span>
+        </a>
+        {% endfor %}
+    </div>
+</div>

@@ -1,0 +1,821 @@
+{% extends "layouts/base.html"" %}
+
+{% block title %}External AI Chat - ValidoAI{% endblock %}
+
+{% block description %}Chat with external AI models using temporary or stored API keys{% endblock %}
+
+{% block content %}
+<div class="chat-container" x-data="{ 
+    messages: [],
+    currentMessage: '',
+    selectedModel: 'gpt-4',
+    apiKey: '',
+    tempKey: '',
+    showTempKeyInput: false,
+    tempKeyExpiry: 5,
+    isLoading: false,
+    isKeyValidating: false,
+    keyValidationResult: null
+}">
+    <!-- Chat Header -->
+    <div class="chat-header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="chat-title">🤖 External AI Chat</h1>
+                <p class="chat-subtitle">Connect to external AI services with flexible API key management</p>
+            </div>
+            
+            <div class="header-right">
+                <button @click="clearChat()" class="btn-outline">
+                    <i class="fas fa-trash mr-2"></i>
+                    Clear Chat
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model and API Configuration -->
+    <div class="config-panel">
+        <div class="config-grid">
+            <!-- Model Selection -->
+            <div class="config-item">
+                <label class="config-label">AI Model</label>
+                <select x-model="selectedModel" class="config-select">
+                    {% for model in external_models %}
+                    <option value="{{ model.id }}">{{ model.name }} ({{ model.provider }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- API Key Management -->
+            <div class="config-item">
+                <label class="config-label">API Key</label>
+                <div class="api-key-input-group">
+                    <input type="password" 
+                           x-model="apiKey" 
+                           placeholder="Enter your API key"
+                           class="api-key-input"
+                           :disabled="showTempKeyInput">
+                    
+                    <button @click="showTempKeyInput = !showTempKeyInput" 
+                            class="temp-key-toggle"
+                            :class="{ 'active': showTempKeyInput }">
+                        <i class="fas fa-clock mr-1"></i>
+                        Temp Key
+                    </button>
+                </div>
+            </div>
+
+            <!-- Temporary Key Input -->
+            <div x-show="showTempKeyInput" class="config-item temp-key-section">
+                <label class="config-label">Temporary API Key (5 minutes)</label>
+                <div class="temp-key-input-group">
+                    <input type="password" 
+                           x-model="tempKey" 
+                           placeholder="Enter temporary API key"
+                           class="temp-key-input">
+                    
+                    <select x-model="tempKeyExpiry" class="temp-key-expiry">
+                        <option value="1">1 min</option>
+                        <option value="5">5 min</option>
+                        <option value="10">10 min</option>
+                        <option value="15">15 min</option>
+                    </select>
+                </div>
+                <span class="temp-key-help">This key will expire automatically after the selected time</span>
+            </div>
+
+            <!-- Key Validation -->
+            <div class="config-item">
+                <button @click="validateApiKey()" 
+                        :disabled="isKeyValidating || (!apiKey && !tempKey)"
+                        class="btn-secondary">
+                    <i class="fas fa-check mr-2" x-show="!isKeyValidating"></i>
+                    <i class="fas fa-spinner fa-spin mr-2" x-show="isKeyValidating"></i>
+                    Validate Key
+                </button>
+                
+                <div x-show="keyValidationResult" class="validation-result">
+                    <div x-show="keyValidationResult.success" class="validation-success">
+                        <i class="fas fa-check-circle"></i>
+                        <span x-text="keyValidationResult.message"></span>
+                    </div>
+                    <div x-show="!keyValidationResult.success" class="validation-error">
+                        <i class="fas fa-times-circle"></i>
+                        <span x-text="keyValidationResult.message"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Interface -->
+    <div class="chat-interface">
+        <!-- Messages Area -->
+        <div class="messages-container" id="messagesContainer">
+            <div x-show="messages.length === 0" class="empty-chat">
+                <div class="empty-chat-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3>Start a conversation</h3>
+                <p>Select an AI model and enter your message to begin chatting</p>
+            </div>
+            
+            <template x-for="(message, index) in messages" :key="index">
+                <div class="message" :class="message.role">
+                    <div class="message-avatar">
+                        <i :class="message.role === 'user' ? 'fas fa-user' : 'fas fa-robot'"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="message-author" x-text="message.role === 'user' ? 'You' : 'AI Assistant'"></span>
+                            <span class="message-time" x-text="message.timestamp"></span>
+                        </div>
+                        <div class="message-text" x-text="message.content"></div>
+                        <div x-show="message.model" class="message-meta">
+                            <span class="model-used" x-text="'Model: ' + message.model"></span>
+                            <span x-show="message.tokens" class="tokens-used" x-text="'Tokens: ' + message.tokens"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+            <div class="input-container">
+                <textarea x-model="currentMessage"
+                          @keydown.enter.prevent="sendMessage()"
+                          placeholder="Type your message here..."
+                          class="message-input"
+                          :disabled="isLoading"
+                          rows="3"></textarea>
+                
+                <div class="input-actions">
+                    <button @click="sendMessage()" 
+                            :disabled="isLoading || !currentMessage.trim() || (!apiKey && !tempKey)"
+                            class="send-button">
+                        <i class="fas fa-paper-plane mr-2" x-show="!isLoading"></i>
+                        <i class="fas fa-spinner fa-spin mr-2" x-show="isLoading"></i>
+                        Send
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Information Panel -->
+    <div class="model-info-panel">
+        <div class="info-header">
+            <h3>Model Information</h3>
+        </div>
+        <div class="info-content">
+            <template x-for="model in {{ external_models | tojson }}">
+                <div x-show="selectedModel === model.id" class="model-info">
+                    <div class="info-item">
+                        <span class="info-label">Provider:</span>
+                        <span class="info-value" x-text="model.provider"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Max Tokens:</span>
+                        <span class="info-value" x-text="model.max_tokens.toLocaleString()"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Status:</span>
+                        <span class="info-value status-available">Available</span>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Chat functionality
+window.chatMethods = {
+    async sendMessage() {
+        if (!this.currentMessage.trim() || this.isLoading) return;
+        
+        const message = this.currentMessage.trim();
+        this.currentMessage = '';
+        
+        // Add user message
+        this.messages.push({
+            role: 'user',
+            content: message,
+            timestamp: new Date().toLocaleTimeString()
+        });
+        
+        this.isLoading = true;
+        this.scrollToBottom();
+        
+        try {
+            const response = await fetch('/chat-external/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    model_id: this.selectedModel,
+                    api_key: this.apiKey,
+                    temp_key: this.tempKey
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Add AI response
+                this.messages.push({
+                    role: 'assistant',
+                    content: data.response,
+                    model: data.model_used,
+                    tokens: data.tokens_used,
+                    timestamp: new Date().toLocaleTimeString()
+                });
+            } else {
+                // Add error message
+                this.messages.push({
+                    role: 'assistant',
+                    content: `Error: ${data.message}`,
+                    timestamp: new Date().toLocaleTimeString()
+                });
+            }
+        } catch (error) {
+            this.messages.push({
+                role: 'assistant',
+                content: 'Error: Failed to send message',
+                timestamp: new Date().toLocaleTimeString()
+            });
+        }
+        
+        this.isLoading = false;
+        this.scrollToBottom();
+    },
+    
+    async validateApiKey() {
+        const keyToValidate = this.tempKey || this.apiKey;
+        if (!keyToValidate) return;
+        
+        this.isKeyValidating = true;
+        this.keyValidationResult = null;
+        
+        try {
+            const response = await fetch('/chat-external/validate-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    api_key: keyToValidate,
+                    provider: this.getSelectedModelProvider()
+                })
+            });
+            
+            const data = await response.json();
+            this.keyValidationResult = data;
+            
+            if (data.success) {
+                showToast('success', 'API key validated successfully');
+            } else {
+                showToast('error', data.message);
+            }
+        } catch (error) {
+            this.keyValidationResult = {
+                success: false,
+                message: 'Failed to validate API key'
+            };
+            showToast('error', 'Failed to validate API key');
+        }
+        
+        this.isKeyValidating = false;
+    },
+    
+    getSelectedModelProvider() {
+        const models = {{ external_models | tojson }};
+        const selectedModel = models.find(m => m.id === this.selectedModel);
+        return selectedModel ? selectedModel.provider : 'Unknown';
+    },
+    
+    clearChat() {
+        this.messages = [];
+        this.keyValidationResult = null;
+    },
+    
+    scrollToBottom() {
+        setTimeout(() => {
+            const container = document.getElementById('messagesContainer');
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }, 100);
+    }
+};
+</script>
+{% endblock %}
+
+{% block custom_css %}
+<style>
+/* Chat Container */
+.chat-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 2rem;
+    height: calc(100vh - 120px);
+}
+
+/* Chat Header */
+.chat-header {
+    grid-column: 1 / -1;
+    background: var(--surface-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.chat-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.chat-subtitle {
+    color: var(--text-secondary);
+    margin: 0.25rem 0 0 0;
+    font-size: 0.875rem;
+}
+
+/* Configuration Panel */
+.config-panel {
+    grid-column: 1 / -1;
+    background: var(--surface-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+}
+
+.config-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    align-items: end;
+}
+
+.config-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.config-label {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.config-select {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+/* API Key Input */
+.api-key-input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.api-key-input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.temp-key-toggle {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--surface-secondary);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.temp-key-toggle:hover,
+.temp-key-toggle.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Temporary Key Section */
+.temp-key-section {
+    grid-column: 1 / -1;
+}
+
+.temp-key-input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.temp-key-input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.temp-key-expiry {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--surface-secondary);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    min-width: 100px;
+}
+
+.temp-key-help {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+}
+
+/* Validation Result */
+.validation-result {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+}
+
+.validation-success {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #10B981;
+}
+
+.validation-error {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #EF4444;
+}
+
+/* Chat Interface */
+.chat-interface {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+/* Messages Container */
+.messages-container {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    max-height: 500px;
+}
+
+.empty-chat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.empty-chat-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-chat h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.empty-chat p {
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+/* Messages */
+.message {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.message.user {
+    flex-direction: row-reverse;
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.message.user .message-avatar {
+    background: var(--secondary-color);
+}
+
+.message-content {
+    flex: 1;
+    max-width: 70%;
+}
+
+.message.user .message-content {
+    text-align: right;
+}
+
+.message-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.message.user .message-header {
+    justify-content: flex-end;
+}
+
+.message-author {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.message-time {
+    color: var(--text-tertiary);
+    font-size: 0.75rem;
+}
+
+.message-text {
+    background: var(--surface-secondary);
+    padding: 1rem;
+    border-radius: 12px;
+    color: var(--text-primary);
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+
+.message.user .message-text {
+    background: var(--primary-color);
+    color: white;
+}
+
+.message-meta {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+}
+
+.message.user .message-meta {
+    text-align: right;
+}
+
+.model-used,
+.tokens-used {
+    margin-right: 1rem;
+}
+
+/* Input Area */
+.input-area {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    background: var(--surface-secondary);
+}
+
+.input-container {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.message-input {
+    flex: 1;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--surface-color);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    resize: none;
+    min-height: 60px;
+    max-height: 120px;
+}
+
+.message-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+.input-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.send-button {
+    padding: 1rem 1.5rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.send-button:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Model Info Panel */
+.model-info-panel {
+    background: var(--surface-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.info-header {
+    padding: 1rem 1.5rem;
+    background: var(--surface-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.info-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.info-content {
+    padding: 1.5rem;
+}
+
+.model-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.info-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.info-value {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.status-available {
+    color: #10B981;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .chat-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .model-info-panel {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .chat-container {
+        padding: 0.5rem;
+        height: calc(100vh - 80px);
+    }
+    
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .config-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .api-key-input-group,
+    .temp-key-input-group {
+        flex-direction: column;
+    }
+    
+    .message {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .message.user {
+        flex-direction: column;
+    }
+    
+    .message-content {
+        max-width: 100%;
+    }
+    
+    .message.user .message-content {
+        text-align: left;
+    }
+    
+    .message.user .message-header {
+        justify-content: flex-start;
+    }
+    
+    .message.user .message-meta {
+        text-align: left;
+    }
+    
+    .input-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .input-actions {
+        justify-content: flex-end;
+    }
+}
+</style>
+{% endblock %}

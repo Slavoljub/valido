@@ -1,0 +1,499 @@
+<!-- Chat Error Reporting Component -->
+<div class="chat-error-reporter-wrapper" x-data="chatErrorReporterComponent()">
+    <!-- Error Report Button -->
+    <button @click="showReportModal()"
+            class="error-report-btn fixed bottom-4 right-4 z-40 bg-red-500 hover:bg-red-600 text-white rounded-full p-3 shadow-lg transition-all duration-200"
+            :class="{ 'animate-pulse': hasRecentErrors }">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span x-show="errorCount > 0" class="error-count absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+            <span x-text="errorCount"></span>
+        </span>
+    </button>
+
+    <!-- Error Report Modal -->
+    <div x-show="showModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" @click="closeModal()">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                                <i class="fas fa-bug mr-2 text-red-500"></i>
+                                Report Chat Issue
+                            </h3>
+
+                            <!-- Error Details -->
+                            <div x-show="currentError" class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
+                                <h4 class="text-sm font-medium text-red-800 dark:text-red-200 mb-2">Current Error</h4>
+                                <p class="text-sm text-red-700 dark:text-red-300" x-text="currentError.message"></p>
+                                <p class="text-xs text-red-600 dark:text-red-400 mt-1" x-text="`Time: ${currentError.timestamp}`"></p>
+                            </div>
+
+                            <!-- Report Form -->
+                            <form @submit.prevent="submitReport()" class="space-y-4">
+                                <!-- Issue Type -->
+                                <div>
+                                    <label class="form-label required">Issue Type</label>
+                                    <select x-model="reportData.issueType" required class="form-input">
+                                        <option value="">Select issue type</option>
+                                        <option value="wrong_answer">Wrong Answer</option>
+                                        <option value="no_response">No Response</option>
+                                        <option value="slow_response">Slow Response</option>
+                                        <option value="confusing_answer">Confusing Answer</option>
+                                        <option value="inappropriate_response">Inappropriate Response</option>
+                                        <option value="technical_error">Technical Error</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                <!-- Expected vs Actual -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="form-label">What you expected</label>
+                                        <textarea x-model="reportData.expected" rows="3" class="form-input" placeholder="What did you expect to happen?"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="form-label">What actually happened</label>
+                                        <textarea x-model="reportData.actual" rows="3" class="form-input" placeholder="What actually happened?"></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Original Query -->
+                                <div>
+                                    <label class="form-label">Your Original Question</label>
+                                    <textarea x-model="reportData.originalQuery" rows="2" class="form-input" placeholder="What was your question?"></textarea>
+                                </div>
+
+                                <!-- AI Response -->
+                                <div>
+                                    <label class="form-label">AI Response (if any)</label>
+                                    <textarea x-model="reportData.aiResponse" rows="3" class="form-input" placeholder="What did the AI respond with?"></textarea>
+                                </div>
+
+                                <!-- Additional Details -->
+                                <div>
+                                    <label class="form-label">Additional Details</label>
+                                    <textarea x-model="reportData.details" rows="3" class="form-input" placeholder="Any additional context or details..."></textarea>
+                                </div>
+
+                                <!-- Severity Level -->
+                                <div>
+                                    <label class="form-label">Severity Level</label>
+                                    <select x-model="reportData.severity" class="form-input">
+                                        <option value="low">Low - Minor issue</option>
+                                        <option value="medium" selected>Medium - Affects usability</option>
+                                        <option value="high">High - Blocks functionality</option>
+                                        <option value="critical">Critical - System broken</option>
+                                    </select>
+                                </div>
+
+                                <!-- Contact Information -->
+                                <div x-show="showContactInfo">
+                                    <label class="form-label">Contact Email (Optional)</label>
+                                    <input type="email" x-model="reportData.contactEmail" class="form-input" placeholder="your.email@example.com">
+                                    <p class="text-xs text-gray-500 mt-1">We'll only contact you if we need clarification</p>
+                                </div>
+
+                                <!-- Attachments -->
+                                <div>
+                                    <label class="form-label">Screenshots (Optional)</label>
+                                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
+                                        <i class="fas fa-camera text-2xl text-gray-400 mb-2"></i>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Drag & drop screenshots or click to browse</p>
+                                        <input type="file" multiple accept="image/*" @change="handleFileSelect" class="hidden" ref="fileInput">
+                                        <button type="button" @click="$refs.fileInput.click()" class="btn-secondary">
+                                            Choose Files
+                                        </button>
+                                    </div>
+
+                                    <!-- Selected Files -->
+                                    <div x-show="reportData.attachments.length > 0" class="mt-3 space-y-2">
+                                        <template x-for="(file, index) in reportData.attachments" :key="index">
+                                            <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                                <div class="flex items-center space-x-3">
+                                                    <i class="fas fa-image text-green-500"></i>
+                                                    <span class="text-sm text-gray-900 dark:text-gray-100" x-text="file.name"></span>
+                                                </div>
+                                                <button type="button" @click="removeAttachment(index)" class="text-red-500 hover:text-red-700">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <!-- Privacy Notice -->
+                                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
+                                    <div class="flex items-start">
+                                        <i class="fas fa-info-circle text-blue-400 mt-0.5 mr-3"></i>
+                                        <div class="text-sm text-blue-700 dark:text-blue-300">
+                                            <p class="font-medium mb-1">Privacy Notice</p>
+                                            <p>Your report helps us improve the AI system. We may use this information to train and improve our models, but we won't share your personal details with third parties.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button @click="submitReport()" :disabled="isSubmitting" class="btn-primary sm:ml-3">
+                        <i class="fas fa-paper-plane mr-2" x-show="!isSubmitting"></i>
+                        <i class="fas fa-spinner fa-spin mr-2" x-show="isSubmitting"></i>
+                        <span x-text="isSubmitting ? 'Submitting...' : 'Submit Report'"></span>
+                    </button>
+                    <button @click="closeModal()" class="btn-secondary">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div x-show="showSuccessToast" x-transition class="fixed top-4 right-4 z-50 max-w-sm">
+        <div class="bg-green-500 text-white rounded-lg shadow-lg p-4">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-3"></i>
+                <div>
+                    <p class="font-medium">Report Submitted!</p>
+                    <p class="text-sm opacity-90">Thank you for helping us improve.</p>
+                </div>
+                <button @click="closeSuccessToast()" class="ml-4 text-green-200 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function chatErrorReporterComponent() {
+    return {
+        showModal: false,
+        showSuccessToast: false,
+        showContactInfo: false,
+        isSubmitting: false,
+        errorCount: 0,
+        hasRecentErrors: false,
+        currentError: null,
+        recentErrors: [],
+
+        reportData: {
+            issueType: '',
+            expected: '',
+            actual: '',
+            originalQuery: '',
+            aiResponse: '',
+            details: '',
+            severity: 'medium',
+            contactEmail: '',
+            attachments: []
+        },
+
+        init() {
+            // Listen for chat errors
+            window.addEventListener('chatError', this.handleChatError.bind(this));
+
+            // Check for recent errors every 30 seconds
+            setInterval(() => {
+                this.checkForRecentErrors();
+            }, 30000);
+        },
+
+        handleChatError(event) {
+            const error = {
+                message: event.detail.message,
+                timestamp: new Date().toISOString(),
+                type: event.detail.type || 'general',
+                query: event.detail.query || '',
+                response: event.detail.response || ''
+            };
+
+            this.currentError = error;
+            this.recentErrors.push(error);
+            this.errorCount = this.recentErrors.length;
+            this.hasRecentErrors = true;
+
+            // Auto-populate form if we have query/response data
+            if (error.query) {
+                this.reportData.originalQuery = error.query;
+            }
+            if (error.response) {
+                this.reportData.aiResponse = error.response;
+            }
+
+            // Auto-show modal for critical errors
+            if (error.type === 'critical') {
+                this.showModal = true;
+            }
+
+            // Clear recent errors flag after 5 minutes
+            setTimeout(() => {
+                this.hasRecentErrors = false;
+            }, 300000);
+        },
+
+        checkForRecentErrors() {
+            // Remove errors older than 24 hours
+            const cutoff = new Date();
+            cutoff.setHours(cutoff.getHours() - 24);
+
+            this.recentErrors = this.recentErrors.filter(error => {
+                return new Date(error.timestamp) > cutoff;
+            });
+
+            this.errorCount = this.recentErrors.length;
+        },
+
+        showReportModal() {
+            this.showModal = true;
+        },
+
+        closeModal() {
+            this.showModal = false;
+            this.currentError = null;
+        },
+
+        closeSuccessToast() {
+            this.showSuccessToast = false;
+        },
+
+        handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            files.forEach(file => {
+                if (file.size <= 5 * 1024 * 1024 && file.type.startsWith('image/')) { // 5MB limit, images only
+                    this.reportData.attachments.push({
+                        file: file,
+                        name: file.name,
+                        size: file.size,
+                        type: file.type
+                    });
+                }
+            });
+        },
+
+        removeAttachment(index) {
+            this.reportData.attachments.splice(index, 1);
+        },
+
+        async submitReport() {
+            if (!this.reportData.issueType) {
+                this.showError('Please select an issue type');
+                return;
+            }
+
+            this.isSubmitting = true;
+
+            try {
+                const formData = new FormData();
+
+                // Add report data
+                Object.keys(this.reportData).forEach(key => {
+                    if (key === 'attachments') return; // Handle separately
+                    formData.append(key, this.reportData[key]);
+                });
+
+                // Add current error if exists
+                if (this.currentError) {
+                    formData.append('currentError', JSON.stringify(this.currentError));
+                }
+
+                // Add attachments
+                this.reportData.attachments.forEach((attachment, index) => {
+                    formData.append(`attachment_${index}`, attachment.file);
+                });
+
+                const response = await fetch('/api/chat/report-error', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    this.showSuccessToast = true;
+                    this.closeModal();
+
+                    // Reset form
+                    this.reportData = {
+                        issueType: '',
+                        expected: '',
+                        actual: '',
+                        originalQuery: '',
+                        aiResponse: '',
+                        details: '',
+                        severity: 'medium',
+                        contactEmail: '',
+                        attachments: []
+                    };
+
+                    // Clear current error
+                    this.currentError = null;
+
+                    setTimeout(() => {
+                        this.showSuccessToast = false;
+                    }, 5000);
+                } else {
+                    this.showError(result.message || 'Failed to submit report');
+                }
+            } catch (error) {
+                console.error('Error submitting report:', error);
+                this.showError('Failed to submit report');
+            } finally {
+                this.isSubmitting = false;
+            }
+        },
+
+        showError(message) {
+            if (window.showToast) {
+                window.showToast('Error', message, 'error');
+            } else {
+                alert('Error: ' + message);
+            }
+        },
+
+        // Public API methods
+        reportError(errorData) {
+            this.handleChatError({ detail: errorData });
+        },
+
+        getErrorCount() {
+            return this.errorCount;
+        },
+
+        clearErrors() {
+            this.recentErrors = [];
+            this.errorCount = 0;
+            this.hasRecentErrors = false;
+        }
+    }
+}
+</script>
+
+<style>
+/* Chat Error Reporter Styles */
+.chat-error-reporter-wrapper {
+    @apply w-full;
+}
+
+/* Error Report Button */
+.error-report-btn {
+    @apply shadow-lg transform hover:scale-110 transition-all duration-200;
+}
+
+.error-count {
+    @apply text-xs font-bold;
+}
+
+/* Error Report Modal */
+.chat-error-reporter-wrapper [x-cloak] {
+    display: none !important;
+}
+
+/* Form Styles */
+.chat-error-reporter-wrapper .form-label {
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2;
+}
+
+.chat-error-reporter-wrapper .form-input {
+    @apply mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 sm:text-sm;
+}
+
+.chat-error-reporter-wrapper textarea.form-input {
+    @apply resize-vertical min-h-[80px];
+}
+
+/* Success Toast Animation */
+.chat-error-reporter-wrapper [x-transition] {
+    transition: all 0.3s ease-in-out;
+}
+
+.chat-error-reporter-wrapper [x-transition]:enter {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.chat-error-reporter-wrapper [x-transition]:enter-end {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* File Drop Zone */
+.chat-error-reporter-wrapper .border-dashed {
+    @apply cursor-pointer transition-colors;
+}
+
+/* Severity Level Colors */
+.chat-error-reporter-wrapper select option[value="critical"] {
+    @apply text-red-600;
+}
+
+.chat-error-reporter-wrapper select option[value="high"] {
+    @apply text-orange-600;
+}
+
+.chat-error-reporter-wrapper select option[value="medium"] {
+    @apply text-yellow-600;
+}
+
+.chat-error-reporter-wrapper select option[value="low"] {
+    @apply text-green-600;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .error-report-btn {
+        @apply bottom-2 right-2;
+    }
+
+    .chat-error-reporter-wrapper .sm\\:max-w-2xl {
+        @apply mx-4 max-w-none;
+    }
+
+    .chat-error-reporter-wrapper .grid-cols-1 {
+        @apply grid-cols-1;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .error-report-btn {
+        @apply border-2 border-white;
+    }
+
+    .chat-error-reporter-wrapper .form-input {
+        @apply border-2 border-gray-700;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .error-report-btn {
+        transition: none;
+        transform: none;
+    }
+
+    .error-report-btn:hover {
+        transform: none;
+    }
+
+    .chat-error-reporter-wrapper [x-transition] {
+        transition: none;
+    }
+}
+
+/* Dark Mode Support */
+.dark .error-report-btn {
+    @apply bg-red-600 hover:bg-red-700;
+}
+
+.dark .error-count {
+    @apply bg-red-700;
+}
+</style>

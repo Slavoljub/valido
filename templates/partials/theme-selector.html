@@ -1,0 +1,618 @@
+<!-- Enhanced Centered Theme Switcher Modal -->
+<div x-data="{
+    isOpen: false,
+    selectedTheme: localStorage.getItem('valido-theme') || 'valido-white',
+    searchQuery: '',
+    selectedLanguage: localStorage.getItem('valido-language') || 'en',
+    languageSearchQuery: '',
+    systemThemeEnabled: localStorage.getItem('valido-system-theme') !== 'false',
+    activeTab: 'themes',
+
+    // Methods
+    init() {
+        this.selectedTheme = localStorage.getItem('valido-theme') || 'valido-white';
+        this.selectedLanguage = localStorage.getItem('valido-language') || 'en';
+        this.systemThemeEnabled = localStorage.getItem('valido-system-theme') !== 'false';
+    },
+
+    matchesSearch(theme, query) {
+        if (!query) return true;
+        const themeData = this.themeData[theme] || {};
+        return theme.toLowerCase().includes(query.toLowerCase()) ||
+               (themeData.name && themeData.name.toLowerCase().includes(query.toLowerCase())) ||
+               (themeData.description && themeData.description.toLowerCase().includes(query.toLowerCase()));
+    },
+
+    matchesLanguageSearch(language, query) {
+        if (!query) return true;
+        return language.name.toLowerCase().includes(query.toLowerCase()) ||
+               language.nativeName.toLowerCase().includes(query.toLowerCase()) ||
+               language.country.toLowerCase().includes(query.toLowerCase());
+    },
+
+    formatThemeName(theme) {
+        return theme.split('-').map(word =>
+            word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+    },
+
+    selectTheme(theme) {
+        this.selectedTheme = theme;
+    },
+
+    selectLanguage(language) {
+        this.selectedLanguage = language;
+    },
+
+    applyTheme() {
+        if (window.switchTheme) {
+            window.switchTheme(this.selectedTheme);
+        }
+        localStorage.setItem('valido-theme', this.selectedTheme);
+        this.isOpen = false;
+
+        if (window.showToast) {
+            showToast('success', `Theme switched to ${this.formatThemeName(this.selectedTheme)}`);
+        }
+    },
+
+    applyLanguage() {
+        localStorage.setItem('valido-language', this.selectedLanguage);
+
+        if (window.showToast) {
+            const language = this.languages[this.selectedLanguage];
+            showToast('success', `Language switched to ${language.name}`);
+        }
+
+        // Reload page to apply language changes
+        setTimeout(() => {
+            window.location.reload();
+        }, 500);
+    },
+
+    toggleSystemTheme() {
+        localStorage.setItem('valido-system-theme', this.systemThemeEnabled);
+    },
+
+    open() {
+        this.isOpen = true;
+    },
+
+    close() {
+        this.isOpen = false;
+    },
+    themeCategories: {
+        light: ['valido-white', 'material-light', 'nord', 'solarized-light'],
+        dark: ['valido-dark', 'material-dark', 'dracula', 'monokai']
+    },
+    // Language support data
+    languages: {
+        'en': { name: 'English', flagCode: 'us', nativeName: 'English', country: 'United States' },
+        'es': { name: 'Spanish', flagCode: 'es', nativeName: 'Español', country: 'Spain' },
+        'fr': { name: 'French', flagCode: 'fr', nativeName: 'Français', country: 'France' },
+        'de': { name: 'German', flagCode: 'de', nativeName: 'Deutsch', country: 'Germany' },
+        'it': { name: 'Italian', flagCode: 'it', nativeName: 'Italiano', country: 'Italy' },
+        'pt': { name: 'Portuguese', flagCode: 'pt', nativeName: 'Português', country: 'Portugal' },
+        'ru': { name: 'Russian', flagCode: 'ru', nativeName: 'Русский', country: 'Russia' },
+        'zh': { name: 'Chinese', flagCode: 'cn', nativeName: '中文', country: 'China' },
+        'ja': { name: 'Japanese', flagCode: 'jp', nativeName: '日本語', country: 'Japan' },
+        'sr': { name: 'Serbian', flagCode: 'rs', nativeName: 'Српски', country: 'Serbia' },
+        'sk': { name: 'Slovak', flagCode: 'sk', nativeName: 'Slovenčina', country: 'Slovakia' },
+        'sl': { name: 'Slovenian', flagCode: 'si', nativeName: 'Slovenščina', country: 'Slovenia' },
+        'nl': { name: 'Dutch', flagCode: 'nl', nativeName: 'Nederlands', country: 'Netherlands' },
+        'se': { name: 'Swedish', flagCode: 'se', nativeName: 'Svenska', country: 'Sweden' },
+        'no': { name: 'Norwegian', flagCode: 'no', nativeName: 'Norsk', country: 'Norway' },
+        'dk': { name: 'Danish', flagCode: 'dk', nativeName: 'Dansk', country: 'Denmark' },
+        'fi': { name: 'Finnish', flagCode: 'fi', nativeName: 'Suomi', country: 'Finland' },
+        'pl': { name: 'Polish', flagCode: 'pl', nativeName: 'Polski', country: 'Poland' },
+        'cz': { name: 'Czech', flagCode: 'cz', nativeName: 'Čeština', country: 'Czech Republic' },
+        'hu': { name: 'Hungarian', flagCode: 'hu', nativeName: 'Magyar', country: 'Hungary' },
+        'gr': { name: 'Greek', flagCode: 'gr', nativeName: 'Ελληνικά', country: 'Greece' },
+        'tr': { name: 'Turkish', flagCode: 'tr', nativeName: 'Türkçe', country: 'Turkey' },
+        'ar': { name: 'Arabic', flagCode: 'sa', nativeName: 'العربية', country: 'Saudi Arabia' },
+        'kr': { name: 'Korean', flagCode: 'kr', nativeName: '한국어', country: 'South Korea' },
+        'br': { name: 'Brazilian Portuguese', flagCode: 'br', nativeName: 'Português Brasileiro', country: 'Brazil' },
+        'mx': { name: 'Mexican Spanish', flagCode: 'mx', nativeName: 'Español Mexicano', country: 'Mexico' },
+        'ca': { name: 'Canadian English', flagCode: 'ca', nativeName: 'English (Canada)', country: 'Canada' },
+        'au': { name: 'Australian English', flagCode: 'au', nativeName: 'English (Australia)', country: 'Australia' },
+        'gb': { name: 'British English', flagCode: 'gb', nativeName: 'English (UK)', country: 'United Kingdom' },
+        'in': { name: 'Hindi', flagCode: 'in', nativeName: 'हिन्दी', country: 'India' },
+        'th': { name: 'Thai', flagCode: 'th', nativeName: 'ไทย', country: 'Thailand' },
+        'vn': { name: 'Vietnamese', flagCode: 'vn', nativeName: 'Tiếng Việt', country: 'Vietnam' },
+        'ph': { name: 'Filipino', flagCode: 'ph', nativeName: 'Filipino', country: 'Philippines' },
+        'my': { name: 'Malay', flagCode: 'my', nativeName: 'Bahasa Melayu', country: 'Malaysia' },
+        'id': { name: 'Indonesian', flagCode: 'id', nativeName: 'Bahasa Indonesia', country: 'Indonesia' },
+        'sg': { name: 'Singapore English', flagCode: 'sg', nativeName: 'English (Singapore)', country: 'Singapore' },
+        'hk': { name: 'Cantonese', flagCode: 'hk', nativeName: '廣東話', country: 'Hong Kong' },
+        'tw': { name: 'Traditional Chinese', flagCode: 'tw', nativeName: '中文 (繁體)', country: 'Taiwan' },
+        'ua': { name: 'Ukrainian', flagCode: 'ua', nativeName: 'Українська', country: 'Ukraine' },
+        'ro': { name: 'Romanian', flagCode: 'ro', nativeName: 'Română', country: 'Romania' },
+        'bg': { name: 'Bulgarian', flagCode: 'bg', nativeName: 'Български', country: 'Bulgaria' },
+        'hr': { name: 'Croatian', flagCode: 'hr', nativeName: 'Hrvatski', country: 'Croatia' },
+        'rs': { name: 'Serbian (Cyrillic)', flagCode: 'rs', nativeName: 'Српски', country: 'Serbia' },
+        'ba': { name: 'Bosnian', flagCode: 'ba', nativeName: 'Bosanski', country: 'Bosnia and Herzegovina' },
+        'mk': { name: 'Macedonian', flagCode: 'mk', nativeName: 'Македонски', country: 'North Macedonia' },
+        'al': { name: 'Albanian', flagCode: 'al', nativeName: 'Shqip', country: 'Albania' },
+        'ee': { name: 'Estonian', flagCode: 'ee', nativeName: 'Eesti', country: 'Estonia' },
+        'lv': { name: 'Latvian', flagCode: 'lv', nativeName: 'Latviešu', country: 'Latvia' },
+        'lt': { name: 'Lithuanian', flagCode: 'lt', nativeName: 'Lietuvių', country: 'Lithuania' },
+        'is': { name: 'Icelandic', flagCode: 'is', nativeName: 'Íslenska', country: 'Iceland' },
+        'mt': { name: 'Maltese', flagCode: 'mt', nativeName: 'Malti', country: 'Malta' },
+        'cy': { name: 'Welsh', flagCode: 'gb', nativeName: 'Cymraeg', country: 'Wales' },
+        'ga': { name: 'Irish', flagCode: 'ie', nativeName: 'Gaeilge', country: 'Ireland' },
+        'gd': { name: 'Scottish Gaelic', flagCode: 'gb', nativeName: 'Gàidhlig', country: 'Scotland' }
+    },
+
+    themeData: {
+        'valido-white': {
+            name: 'Valido White',
+            description: 'Clean and modern light theme',
+            colors: { primary: '#3b82f6', background: '#ffffff', surface: '#f8fafc', text: '#111827', border: '#e2e8f0' }
+        },
+        'material-light': {
+            name: 'Material Light',
+            description: 'Google Material Design light theme',
+            colors: { primary: '#2196f3', background: '#ffffff', surface: '#f5f5f5', text: '#212121', border: '#e0e0e0' }
+        },
+        'nord': {
+            name: 'Nord',
+            description: 'Arctic-inspired light theme',
+            colors: { primary: '#5e81ac', background: '#eceff4', surface: '#e5e9f0', text: '#4c566a', border: '#d8dee9' }
+        },
+        'solarized-light': {
+            name: 'Solarized Light',
+            description: 'Low contrast light theme',
+            colors: { primary: '#268bd2', background: '#fdf6e3', surface: '#faf3dc', text: '#586e75', border: '#eee8d5' }
+        },
+        'valido-dark': {
+            name: 'Valido Dark',
+            description: 'Clean and modern dark theme',
+            colors: { primary: '#3b82f6', background: '#0f172a', surface: '#1e293b', text: '#f8fafc', border: '#334155' }
+        },
+        'material-dark': {
+            name: 'Material Dark',
+            description: 'Google Material Design dark theme',
+            colors: { primary: '#64b5f6', background: '#212121', surface: '#424242', text: '#ffffff', border: '#616161' }
+        },
+        'dracula': {
+            name: 'Dracula',
+            description: 'Dark theme for the colorblind',
+            colors: { primary: '#bd93f9', background: '#282a36', surface: '#44475a', text: '#f8f8f2', border: '#6272a4' }
+        },
+        'monokai': {
+            name: 'Monokai',
+            description: 'Classic dark theme',
+            colors: { primary: '#fd971f', background: '#272822', surface: '#3e3d32', text: '#f8f8f2', border: '#75715e' }
+        }
+    }
+}"
+x-show="isOpen"
+@click="isOpen = false"
+class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/50"
+x-transition:enter="transition-all duration-300 ease-out"
+x-transition:enter-start="opacity-0 backdrop-blur-none"
+x-transition:enter-end="opacity-100 backdrop-blur-sm"
+x-transition:leave="transition-all duration-200 ease-in"
+x-transition:leave-start="opacity-100 backdrop-blur-sm"
+x-transition:leave-end="opacity-0 backdrop-blur-none">
+
+    <!-- Modal Container -->
+    <div @click.stop
+         class="bg-white dark:bg-neutral-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden"
+         x-transition:enter="transition-all duration-300 ease-out"
+         x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+         x-transition:leave="transition-all duration-200 ease-in"
+         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+         x-transition:leave-end="opacity-0 scale-95 translate-y-4">
+
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-6 border-b border-neutral-200 dark:border-neutral-700">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/20 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-palette text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-neutral-900 dark:text-white">Settings</h2>
+                    <p class="text-sm text-neutral-500 dark:text-neutral-400">Customize your experience</p>
+                </div>
+            </div>
+            <button @click="isOpen = false"
+                    class="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors duration-200">
+                <i class="fas fa-times text-neutral-500 dark:text-neutral-400"></i>
+            </button>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="px-6 border-b border-neutral-200 dark:border-neutral-700">
+            <nav class="flex space-x-8">
+                <button @click="activeTab = 'themes'"
+                        :class="{ 'border-primary-500 text-primary-600 dark:text-primary-400': activeTab === 'themes', 'border-transparent text-neutral-500 hover:text-neutral-700 dark:text-neutral-400': activeTab !== 'themes' }"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
+                    <i class="fas fa-palette mr-2"></i>
+                    Themes
+                </button>
+                <button @click="activeTab = 'languages'"
+                        :class="{ 'border-primary-500 text-primary-600 dark:text-primary-400': activeTab === 'languages', 'border-transparent text-neutral-500 hover:text-neutral-700 dark:text-neutral-400': activeTab !== 'languages' }"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200">
+                    <i class="fas fa-globe mr-2"></i>
+                    Languages
+                </button>
+            </nav>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 max-h-96 overflow-y-auto">
+            <!-- Themes Tab Content -->
+            <div x-show="activeTab === 'themes'" x-transition:enter="transition-all duration-300 ease-in-out" x-transition:leave="transition-all duration-300 ease-in-out">
+                <!-- Search Box -->
+                <div class="mb-6">
+                    <div class="relative">
+                        <input type="text"
+                               x-model="searchQuery"
+                               placeholder="Search themes..."
+                               class="w-full pl-10 pr-4 py-3 text-sm border border-neutral-300 dark:border-neutral-600 rounded-lg bg-neutral-50 dark:bg-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 dark:text-neutral-500"></i>
+                    </div>
+                </div>
+
+                <!-- Theme Categories (Light/Dark) -->
+                <div class="space-y-6">
+                    <!-- Light Themes -->
+                    <div>
+                        <h3 class="flex items-center space-x-2 text-sm font-semibold text-neutral-600 dark:text-neutral-400 mb-3">
+                            <i class="fas fa-sun text-yellow-500"></i>
+                            <span>Light Themes</span>
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <template x-for="themeId in themeCategories.light" :key="themeId">
+                                <div x-show="matchesSearch(themeId, searchQuery)"
+                                     @click="selectTheme(themeId)"
+                                     class="group relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105"
+                                     :class="{
+                                         'border-primary-500 bg-primary-50 dark:bg-primary-900/20': selectedTheme === themeId,
+                                         'border-neutral-200 dark:border-neutral-600 hover:border-primary-300 dark:hover:border-primary-600': selectedTheme !== themeId
+                                     }">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="font-medium text-neutral-900 dark:text-white" x-text="themeData[themeId]?.name || formatThemeName(themeId)"></span>
+                                        <div class="flex space-x-1">
+                                            <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: themeData[themeId]?.colors?.primary || '#3b82f6' }"></div>
+                                            <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: themeData[themeId]?.colors?.background || '#ffffff' }"></div>
+                                            <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: themeData[themeId]?.colors?.surface || '#f8fafc' }"></div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-3" x-text="themeData[themeId]?.description || 'Modern theme'"></p>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-neutral-400 dark:text-neutral-500" x-text="formatThemeName(themeId)"></span>
+                                        <i class="fas fa-check text-primary-600 dark:text-primary-400" x-show="selectedTheme === themeId"></i>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Dark Themes -->
+                    <div>
+                        <h3 class="flex items-center space-x-2 text-sm font-semibold text-neutral-600 dark:text-neutral-400 mb-3">
+                            <i class="fas fa-moon text-indigo-500"></i>
+                            <span>Dark Themes</span>
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <template x-for="themeId in themeCategories.dark" :key="themeId">
+                                <div x-show="matchesSearch(themeId, searchQuery)"
+                                     @click="selectTheme(themeId)"
+                                     class="group relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105"
+                                     :class="{
+                                         'border-primary-500 bg-primary-50 dark:bg-primary-900/20': selectedTheme === themeId,
+                                         'border-neutral-200 dark:border-neutral-600 hover:border-primary-300 dark:hover:border-primary-600': selectedTheme !== themeId
+                                     }">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="font-medium text-neutral-900 dark:text-white" x-text="themeData[themeId]?.name || formatThemeName(themeId)"></span>
+                                        <div class="flex space-x-1">
+                                            <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: themeData[themeId]?.colors?.primary || '#3b82f6' }"></div>
+                                            <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: themeData[themeId]?.colors?.background || '#1f2937' }"></div>
+                                            <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: themeData[themeId]?.colors?.surface || '#374151' }"></div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-neutral-500 dark:text-neutral-400 mb-3" x-text="themeData[themeId]?.description || 'Modern theme'"></p>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-neutral-400 dark:text-neutral-500" x-text="formatThemeName(themeId)"></span>
+                                        <i class="fas fa-check text-primary-600 dark:text-primary-400" x-show="selectedTheme === themeId"></i>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Theme Toggle -->
+                <div class="mt-6 p-4 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-neutral-200 dark:bg-neutral-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-desktop text-neutral-600 dark:text-neutral-300"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-neutral-900 dark:text-white">Auto System Theme</p>
+                                <p class="text-xs text-neutral-500 dark:text-neutral-400">Automatically switch based on your system preference</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox"
+                                   x-model="systemThemeEnabled"
+                                   @change="toggleSystemTheme"
+                                   class="sr-only peer">
+                            <div class="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-neutral-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-neutral-600 peer-checked:bg-primary-600"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Languages Tab Content -->
+            <div x-show="activeTab === 'languages'" x-transition:enter="transition-all duration-300 ease-in-out" x-transition:leave="transition-all duration-300 ease-in-out">
+                <!-- Search Box -->
+                <div class="mb-6">
+                    <div class="relative">
+                        <input type="text"
+                               x-model="languageSearchQuery"
+                               placeholder="Search languages..."
+                               class="w-full pl-10 pr-4 py-3 text-sm border border-neutral-300 dark:border-neutral-600 rounded-lg bg-neutral-50 dark:bg-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-500 dark:placeholder-neutral-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 dark:text-neutral-500"></i>
+                    </div>
+                </div>
+
+                <!-- Languages Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto">
+                    <template x-for="(language, code) in languages" :key="code">
+                        <div x-show="matchesLanguageSearch(language, languageSearchQuery)"
+                             @click="selectLanguage(code)"
+                             class="group relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105"
+                             :class="{
+                                 'border-primary-500 bg-primary-50 dark:bg-primary-900/20': selectedLanguage === code,
+                                 'border-neutral-200 dark:border-neutral-600 hover:border-primary-300 dark:hover:border-primary-600': selectedLanguage !== code
+                             }">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0">
+                                    <span :class="`fi fi-${language.flagCode} fis`" class="text-2xl"></span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="font-medium text-neutral-900 dark:text-white truncate" x-text="language.name"></div>
+                                    <div class="text-xs text-neutral-500 dark:text-neutral-400 truncate" x-text="language.nativeName"></div>
+                                    <div class="text-xs text-neutral-400 dark:text-neutral-500 truncate" x-text="language.country"></div>
+                                </div>
+                                <i class="fas fa-check text-primary-600 dark:text-primary-400" x-show="selectedLanguage === code"></i>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Language Info -->
+                <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <i class="fas fa-info-circle text-blue-600 dark:text-blue-400"></i>
+                        <span class="text-sm font-medium text-blue-900 dark:text-blue-100">Language Support</span>
+                    </div>
+                    <p class="text-xs text-blue-700 dark:text-blue-300">
+                        Language selection affects interface text. Some features may have limited support in certain languages.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Theme Categories -->
+            <div class="space-y-6">
+                <!-- Light Themes -->
+                <div>
+                    <h3 class="flex items-center space-x-2 text-sm font-semibold text-neutral-600 dark:text-neutral-400 mb-3">
+                        <i class="fas fa-sun text-yellow-500"></i>
+                        <span>Light Themes</span>
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <template x-for="themeId in themeCategories.light" :key="themeId">
+                            <div x-show="matchesSearch(themeId, searchQuery)"
+                                 @click="selectTheme(themeId)"
+                                 class="group relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105"
+                                 :class="{
+                                     'border-primary-500 bg-primary-50 dark:bg-primary-900/20': selectedTheme === themeId,
+                                     'border-neutral-200 dark:border-neutral-600 hover:border-primary-300 dark:hover:border-primary-600': selectedTheme !== themeId
+                                 }">
+
+                                <!-- Theme Preview -->
+                                <div class="flex items-center space-x-3 mb-3">
+                                    <div class="w-12 h-8 rounded-md shadow-sm overflow-hidden flex">
+                                        <div class="flex-1 bg-white border-r border-neutral-200"></div>
+                                        <div class="flex-1 bg-neutral-100"></div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium text-neutral-900 dark:text-white capitalize">
+                                            <span x-text="themeData[themeId].name"></span>
+                                        </h4>
+                                        <p class="text-xs text-neutral-500 dark:text-neutral-400">Light theme</p>
+                                    </div>
+                                </div>
+
+                                <!-- Color Palette -->
+                                <div class="flex space-x-1 mb-2">
+                                    <div class="w-4 h-4 rounded-full bg-blue-500"></div>
+                                    <div class="w-4 h-4 rounded-full bg-green-500"></div>
+                                    <div class="w-4 h-4 rounded-full bg-yellow-500"></div>
+                                    <div class="w-4 h-4 rounded-full bg-red-500"></div>
+                                    <div class="w-4 h-4 rounded-full bg-purple-500"></div>
+                                </div>
+
+                                <!-- Selection Indicator -->
+                                <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                    <div x-show="selectedTheme === themeId"
+                                         class="w-5 h-5 bg-primary-500 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-check text-white text-xs"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Dark Themes -->
+                <div>
+                    <h3 class="flex items-center space-x-2 text-sm font-semibold text-neutral-600 dark:text-neutral-400 mb-3">
+                        <i class="fas fa-moon text-indigo-500"></i>
+                        <span>Dark Themes</span>
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <template x-for="themeId in themeCategories.dark" :key="themeId">
+                            <div x-show="matchesSearch(themeId, searchQuery)"
+                                 @click="selectTheme(themeId)"
+                                 class="group relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105"
+                                 :class="{
+                                     'border-primary-500 bg-primary-50 dark:bg-primary-900/20': selectedTheme === themeId,
+                                     'border-neutral-200 dark:border-neutral-600 hover:border-primary-300 dark:hover:border-primary-600': selectedTheme !== themeId
+                                 }">
+
+                                <!-- Theme Preview -->
+                                <div class="flex items-center space-x-3 mb-3">
+                                    <div class="w-12 h-8 rounded-md shadow-sm overflow-hidden flex">
+                                        <div class="flex-1 bg-neutral-800 border-r border-neutral-700"></div>
+                                        <div class="flex-1 bg-neutral-900"></div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium text-neutral-900 dark:text-white capitalize">
+                                            <span x-text="themeData[themeId].name"></span>
+                                        </h4>
+                                        <p class="text-xs text-neutral-500 dark:text-neutral-400">Dark theme</p>
+                                    </div>
+                                </div>
+
+                                <!-- Color Palette -->
+                                <div class="flex space-x-1 mb-2">
+                                    <div class="w-4 h-4 rounded-full bg-blue-400"></div>
+                                    <div class="w-4 h-4 rounded-full bg-green-400"></div>
+                                    <div class="w-4 h-4 rounded-full bg-yellow-400"></div>
+                                    <div class="w-4 h-4 rounded-full bg-red-400"></div>
+                                    <div class="w-4 h-4 rounded-full bg-purple-400"></div>
+                                </div>
+
+                                <!-- Selection Indicator -->
+                                <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                    <div x-show="selectedTheme === themeId"
+                                         class="w-5 h-5 bg-primary-500 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-check text-white text-xs"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Theme Toggle -->
+            <div class="mt-6 p-4 bg-neutral-50 dark:bg-neutral-700/50 rounded-xl">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-neutral-200 dark:bg-neutral-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-desktop text-neutral-600 dark:text-neutral-300"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-neutral-900 dark:text-white">Auto System Theme</p>
+                            <p class="text-xs text-neutral-500 dark:text-neutral-400">Automatically switch based on your system preference</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox"
+                               x-model="systemThemeEnabled"
+                               @change="toggleSystemTheme"
+                               class="sr-only peer">
+                        <div class="w-11 h-6 bg-neutral-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-neutral-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-neutral-600 peer-checked:bg-primary-600"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="flex items-center justify-between p-6 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50">
+            <div class="text-sm text-neutral-500 dark:text-neutral-400">
+                <span>Current theme: </span>
+                <span class="font-medium text-neutral-900 dark:text-white capitalize" x-text="formatThemeName(selectedTheme)"></span>
+            </div>
+            <div class="flex space-x-3">
+                <button @click="isOpen = false"
+                        class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg transition-colors duration-200">
+                    Cancel
+                </button>
+                <button @click="applyTheme()"
+                        class="px-6 py-2 text-sm font-medium bg-primary-600 text-white hover:bg-primary-700 rounded-lg transition-colors duration-200 flex items-center space-x-2">
+                    <i class="fas fa-check"></i>
+                    <span>Apply Theme</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Enhanced theme selector functionality
+document.addEventListener('alpine:init', () => {
+    Alpine.data('themeSelector', () => ({
+        systemThemeEnabled: localStorage.getItem('valido-system-theme') !== 'false',
+
+        init() {
+            this.selectedTheme = localStorage.getItem('valido-theme') || 'valido-white';
+        },
+
+        matchesSearch(theme, query) {
+            if (!query) return true;
+            return theme.toLowerCase().includes(query.toLowerCase()) ||
+                   this.formatThemeName(theme).toLowerCase().includes(query.toLowerCase());
+        },
+
+        formatThemeName(theme) {
+            return theme.split('-').map(word =>
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+        },
+
+        selectTheme(theme) {
+            this.selectedTheme = theme;
+        },
+
+        applyTheme() {
+            if (window.switchTheme) {
+                window.switchTheme(this.selectedTheme);
+            }
+            localStorage.setItem('valido-theme', this.selectedTheme);
+            this.isOpen = false;
+
+            // Show success message
+            if (window.showToast) {
+                showToast('success', `Theme switched to ${this.formatThemeName(this.selectedTheme)}`);
+            }
+        },
+
+        toggleSystemTheme() {
+            localStorage.setItem('valido-system-theme', this.systemThemeEnabled);
+        },
+
+        open() {
+            this.isOpen = true;
+        },
+
+        close() {
+            this.isOpen = false;
+        }
+    }));
+});
+
+// Global function to open theme selector
+window.openThemeSelector = () => {
+    const themeSelector = document.querySelector('[x-data*="themeSelector"]');
+    if (themeSelector && themeSelector.__x) {
+        themeSelector.__x.$data.isOpen = true;
+    }
+};
+
+// Keyboard shortcut to open theme selector (Ctrl/Cmd + Shift + T)
+document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'T') {
+        e.preventDefault();
+        window.openThemeSelector();
+    }
+});
+</script>

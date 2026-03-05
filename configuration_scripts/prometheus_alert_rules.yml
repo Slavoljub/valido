@@ -1,0 +1,29 @@
+groups:
+  - name: validoai.rules
+    rules:
+      - alert: HighErrorRate
+        expr: rate(validoai_api_requests_total{result="error"}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate detected (>5% for 2m)"
+          description: "More than 5% of API requests are failing. Investigate immediately."
+
+      - alert: HighCPUUsage
+        expr: validoai_cpu_usage_percent > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU usage > 90%"
+          description: "CPU usage has been over 90% for 5 minutes."
+
+      - alert: DatabaseDown
+        expr: validoai_database_status == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database {{ $labels.db }} down"
+          description: "Database instance {{ $labels.db }} is not responding."

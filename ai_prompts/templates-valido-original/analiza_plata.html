@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ValidoAI - Analiza plata</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <!-- Bootstrap CSS (samo jednom) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+
+  <!-- jQuery (mora pre DataTables ako koristiš DataTables) -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+
+  <!-- DataTables CSS i JS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" />
+  <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Bootstrap JS (mora biti poslednji) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+  <style>
+    /* Navbar stil */
+    .navbar {
+        background-color: #0d6efd;
+        padding: 10px 20px;
+    }
+    .navbar-brand, .nav-link {
+        color: white !important;
+    }
+
+    /* Poboljšan naslov */
+    h1 {
+        margin-bottom: 0; /* Uklanja donju marginu naslova */
+    }
+
+    /* Osiguravanje da row nema dodatne margine */
+    .row {
+        margin-top: 0 !important;
+    }
+    html, body {
+        height: 100%;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    main {
+        flex: 1;
+    }
+
+    footer {
+        background-color: #0c68ef;
+        color: white;
+        padding: 20px 0;
+        text-align: center;
+        font-size: 0.9rem;
+        border-top: 3px solid #0d6efd;
+        margin-top: auto;
+    }
+
+
+    #gpt-analysis-container {
+      max-width: 100%;
+      width: 100%;
+      margin: 10px auto;  /* Centriranje */
+      padding: 10px;
+      box-sizing: border-box; /* Sprečava da padding poveća dimenziju */
+  }
+  #gpt-analysis-container {
+      max-width: 100%;
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      box-sizing: border-box;
+      clear: both; /* Sprečava da float elementi guraju div */
+      position: relative; /* Osigurava da ostane na mestu */
+  }
+  #gpt-analiza {
+    max-height: 250px; /* Fiksna visina da ne raste unedogled */
+    overflow-y: auto;  /* Omogućava vertikalni skrol unutar ovog elementa */
+    padding: 15px;
+    border: 1px solid #ddd;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    font-size: 16px;
+    line-height: 1.5;
+}
+.card-body {
+    margin-bottom: 10px; /* Povećava razmak između grafikona i footera */
+}
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 800px; /* Postavi max širinu po potrebi */
+    margin: auto;
+}
+
+.chat-input-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.chat-input-group input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.chat-input-group button {
+    margin-left: 10px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.chat-input-group button:hover {
+    background-color: #0056b3;
+}
+
+.chat-response {
+    margin-top: 15px;
+    font-size: 16px;
+}
+
+
+.chat-messages {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.chat-input-group {
+    display: flex;
+    margin-top: 5px; /* Smanjen razmak između input polja i dugmeta */
+}
+
+h1.modal-title {
+    margin-bottom: 10px; /* Smanjen razmak ispod naslova */
+}
+.chat-input-group input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.chat-input-group button {
+    margin-left: 10px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.chat-input-group button:hover {
+    background-color: #0056b3;
+}
+
+.modal-fullscreen {
+    max-width: 100%;
+    height: 100%;
+}
+
+/* Centriran i lep naslov */
+.modal-header h1 {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+}
+
+/* Chat sekcija */
+#chat-container {
+    height: 350px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #fff;
+}
+
+.chat-box {
+    height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+
+/* Finansijski podaci i grafikon */
+#salaryChartModal {
+    width: 100%;
+    height: 300px;
+}
+
+/* Dugmad za dalje analize */
+.d-grid button {
+    font-size: 16px;
+    padding: 10px;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.btn-outline-primary {
+    border: 1px solid #007bff;
+    color: #007bff;
+}
+
+.btn-outline-primary:hover {
+    background-color: #007bff;
+    color: white;
+}
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Dodaje malo prostora između inputa i dugmeta */
+}
+
+#chat-input {
+    flex: 1;
+    height: 45px; /* Podešava visinu input polja */
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 16px;
+}
+
+#chat-send {
+    height: 45px; /* Ista visina kao input polje */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    white-space: nowrap; /* Sprečava prelamanje teksta */
+}
+
+.small-button {
+    padding: 6px 10px;  /* Smanjuje unutrašnji razmak */
+    font-size: 14px;    /* Manji font */
+    min-width: 120px;   /* Ograničava širinu */
+}
+.alert-success {
+    background-color: white !important;
+    color: #1e1e1e;
+    border: 1px solid #ddd;
+}
+
+.chart-wrapper {
+  width: 100%;
+  min-height: 400px;
+}
+
+#salaryChart {
+  width: 100% !important;
+  height: 400px !important;
+  display: block;
+}
+
+</style>
+</head>
+<body>
+   <!-- Navbar -->
+   <nav class="navbar navbar-expand-lg bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="{{ url_for('static', filename='img/valido.svg') }}" alt="ValidoAI Logo" height="30">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link text-white" href="/">Početna</a></li>
+                    <li class="nav-item"><a class="nav-link active text-white" href="/funkcionalnosti">Funkcionalnosti</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="#" data-bs-toggle="modal" data-bs-target="#prijavaModal">
+                            Prijavi me
+                        </a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link text-white" href="/kontakt">Kontakt</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+<main>
+    <!-- Opis -->
+    <div class="container mt-5">
+      <div class="container mt-5">
+          <div class="text-center bg-light p-4 rounded shadow-sm">
+            <h1 class="text-primary fw-bold d-flex align-items-center justify-content-center gap-2">
+              <i class="bi bi-cash-stack"></i>
+              Analiza Plata i Beneficija
+          </h1>
+          <br>
+          <button type="button" class="btn btn-outline-primary btn-md fw-bold px-4" data-bs-toggle="tooltip" title="Generiši uvid na osnovu analiza plata i radnih sati">
+            <i class="bi bi-robot me-2"></i> Kreiraj AI Izveštaj
+        </button>
+        <hr class="my-3">
+        <p class="text-muted fs-6">
+            ValidoAI pruža detaljan uvid u obračun zarada i beneficija koristeći naprednu analitiku i generativnu veštačku inteligenciju. 
+            Brzo i precizno analizirajte neto i bruto zarade, poreze, doprinose i druge troškove, 
+            uz jednostavno identifikovanje anomalija, trendova i potencijalnih ušteda za vaše poslovanje.
+        </p>
+    </div>
+
+
+
+    <!-- Grid layout -->
+    <div class="row mt-4">
+        <!-- Filter i AI Chat (Leva strana) -->
+        <div class="col-md-6">
+          <div class="chat-box card shadow-sm">
+            <div class="card-header bg-primary text-white text-center">
+                <h4 class="fw-bold text-white d-flex align-items-center justify-content-center gap-2">
+                  <i class="bi bi-calendar-month"></i> Izaberite Mesec za Analizu
+              </h4>
+          </div>
+          <div class="card-body chat-container">
+
+              <!-- Drop-down za izbor tipa korisnika bez menjanja postojećih klasa -->
+              <div class="mb-3">
+                <select id="tip-korisnika" class="form-select">
+                  <option value="#">Izaberite ulogu</option>
+                  <option value="vlasnik">Vlasnik firme</option>
+                  <option value="hr">HR menadžer</option>
+              </select>
+          </div>
+          <br>
+          <br>
+
+          <div class="chat-container">
+            <!-- Input polje izdvojeno u svoj red -->
+            <div class="mb-3">
+                <input type="text" id="mesec-input" class="form-control w-100" placeholder="Unesite mesec za analizu...">
+            </div>
+
+            <!-- Dugmići sada zauzimaju ceo red i iste su širine kao input -->
+            <div class="d-flex gap-2">
+                <button id="analyze-button" class="btn btn-primary flex-fill small-button">Pokreni Analizu</button>
+                <button id="time-series-button" class="btn btn-info flex-fill small-button">Vremenska Serija</button>
+                <button id="work-hours-button" class="btn btn-success flex-fill small-button">Pregled Radnih Sati</button>
+            </div>
+        </div>
+        <div id="chat-response" class="chat-response mt-4">
+            <span id="typing-effect"></span>
+        </div>
+    </div>
+</div>
+</div>
+<!-- Grafikon (Desna strana) -->
+<div class="col-md-6">
+  <div class="chart-container card shadow-sm">
+    <div class="card-header bg-primary text-white text-center">
+       <h4 class="fw-bold text-white d-flex align-items-center justify-content-center gap-2">
+          <i class="bi bi-bar-chart-line-fill"></i> Vizuelna Analiza Plata
+      </h4>
+  </div>
+  <div class="card-body">
+      <!-- ✅ Dodajemo wrapper oko canvasa za kontrolu dimenzija -->
+      <div class="chart-wrapper" style="width: 100%; min-height: 400px;">
+        <canvas id="salaryChart"></canvas>
+    </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- ✅ FOOTER -->
+<footer class="text-center text-white p-4 border-top border-primary" style="background-color: #0c68ef;">
+  <div class="mb-3 d-flex justify-content-center flex-wrap gap-4 small">
+    <div class="d-flex flex-column align-items-center">
+      <i class="bi bi-graph-up text-white fs-5"></i>
+      <span class="mt-1">Simulacija</span>
+  </div>
+  <div class="d-flex flex-column align-items-center">
+      <i class="bi bi-file-earmark-text text-white fs-5"></i>
+      <span class="mt-1">Dokumenti</span>
+  </div>
+  <div class="d-flex flex-column align-items-center">
+      <i class="bi bi-chat-dots text-white fs-5"></i>
+      <span class="mt-1">AI komentari</span>
+  </div>
+  <div class="d-flex flex-column align-items-center">
+      <i class="bi bi-sliders text-white fs-5"></i>
+      <span class="mt-1">Propisi</span>
+  </div>
+</div>
+<p class="mb-0">&copy; 2025 ValidoAI. Sva prava zadržana.</p>
+</footer>
+
+<div class="position-fixed bottom-0 end-0 m-3 px-3 py-2 bg-primary text-white rounded shadow-sm small" 
+style="opacity: 0.9; z-index: 1030;" 
+data-bs-toggle="tooltip" 
+title="Ova sekcija koristi veštačku inteligenciju za uvod, savete i preporuke.">
+<i class="bi bi-cpu me-2"></i> AI MODE: aktivan
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>
+<!-- Full-screen modal -->
+<!-- Modal sa AI analizom -->
+<div class="modal fade" id="analizaModal" tabindex="-1" aria-labelledby="analizaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header text-center w-100">
+                <h1 class="modal-title text-primary w-100">Analiza Zarada na Osnovu Zaključnog Lista</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+   document.addEventListener("DOMContentLoaded", function () {
+    const ctx = document.getElementById("salaryChart").getContext("2d");
+    let activeChart = null;
+
+    function initializeEmptyChart() {
+        if (activeChart) activeChart.destroy();
+
+        activeChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: ["Troškovi Plata"],
+                datasets: [
+                    { label: "Neto Zarada", data: [0], backgroundColor: "#4CAF50" },
+                    { label: "Teret Zaposlenog", data: [0], backgroundColor: "#FFC107" },
+                    { label: "Teret Poslodavca", data: [0], backgroundColor: "#2196F3" },
+                    { label: "Bruto 2", data: [0], backgroundColor: "#F44336" }
+                    ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            color: "#333",
+                            font: {
+                                size: 14,
+                                weight: '500',
+                                family: "'Segoe UI', sans-serif"
+                            },
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: "#fff",
+                        titleColor: "#000",
+                        bodyColor: "#000",
+                        borderColor: "#ccc",
+                        borderWidth: 1,
+                        padding: 10,
+                        mode: "index",
+                        intersect: false
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        title: {
+                            display: true,
+                            text: "Trošak",
+                            font: { size: 14, weight: 'bold' },
+                            color: "#555"
+                        },
+                        ticks: { color: "#555" }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Iznos (RSD)",
+                            font: { size: 14, weight: 'bold' },
+                            color: "#555"
+                        },
+                        ticks: { color: "#555" }
+                    }
+                }
+            }
+        });
+    }
+
+    initializeEmptyChart();
+
+    document.getElementById("analyze-button").addEventListener("click", function () {
+        const mesec = document.getElementById("mesec-input").value.trim();
+        const uloga = document.getElementById("tip-korisnika").value;
+
+        if (!mesec) {
+            alert("⚠️ Unesite mesec!");
+            return;
+        }
+
+        const typingEffect = document.getElementById("typing-effect");
+        typingEffect.innerHTML = `<div class="alert alert-info">Molim vas, sačekajte... Pokrećem analizu... ⏳</div>`;
+
+        fetch(`/api/salary_analysis/${encodeURIComponent(mesec.toLowerCase())}/gpt?uloga=${uloga}`)
+        .then(res => res.json())
+        .then(data => {
+            typingEffect.innerHTML = "";
+            typeTextSlowly(data["GPT Analiza"], typingEffect);
+            updateChart(data, "barChart", uloga);
+        })
+        .catch(error => {
+            console.error("❌ Greška pri preuzimanju analize:", error);
+            typingEffect.innerHTML = "⚠️ Došlo je do greške pri analizi.";
+        });
+    });
+
+    document.getElementById("time-series-button").addEventListener("click", function () {
+        const typingEffect = document.getElementById("typing-effect");
+        typingEffect.innerHTML = `<div class="alert alert-info">Molim vas, sačekajte... Generišem analizu i grafikon... ⏳</div>`;
+
+        fetch('/api/salary_analysis/trend')
+        .then(response => response.json())
+        .then(data => {
+            console.log("📊 API PODACI:", data);
+            typingEffect.innerHTML = `<p>${data.gpt_analysis.replaceAll('\n', '<br>')}</p>`;
+            updateChart(data, "timeSeries");
+        })
+        .catch(error => {
+            console.error("❌ Greška pri preuzimanju podataka:", error);
+            typingEffect.innerHTML = "⚠️ Došlo je do greške pri generisanju analize.";
+        });
+    });
+
+    function updateChart(data, type, userRole = "hr") {
+        if (!data || typeof data !== "object") {
+            console.error("❌ Nevalidan objekat podataka za grafikon:", data);
+            return;
+        }
+
+        if (activeChart) activeChart.destroy();
+
+        const isVlasnik = userRole.toLowerCase() === "vlasnik";
+
+        let chartConfig = {};
+
+        if (type === "barChart") {
+            const neto = parseFloat((data["Neto Zarada"] || "0").toString().replace(/\./g, '').replace(',', '.'));
+            const teretZaposlenog = parseFloat((data["Na Teret Zaposlenog"] || "0").toString().replace(/\./g, '').replace(',', '.'));
+            const teretPoslodavca = parseFloat((data["Na Teret Poslodavca"] || "0").toString().replace(/\./g, '').replace(',', '.'));
+            const bruto2 = parseFloat((data["Bruto 2"] || "0").toString().replace(/\./g, '').replace(',', '.'));
+
+            const datasets = isVlasnik
+            ? [
+                { label: "Neto Zarada", data: [neto], backgroundColor: "#4CAF50", stack: "stack1" },
+                { label: "Teret Zaposlenog", data: [teretZaposlenog], backgroundColor: "#FFC107", stack: "stack1" },
+                { label: "Teret Poslodavca", data: [teretPoslodavca], backgroundColor: "#2196F3", stack: "stack1" },
+                { label: "Bruto 2", data: [bruto2], backgroundColor: "#F44336", stack: "stack1" }
+                ]
+            : [
+                { label: "Neto Zarada", data: [neto], backgroundColor: "#4CAF50" },
+                { label: "Teret Zaposlenog", data: [teretZaposlenog], backgroundColor: "#FFC107" },
+                { label: "Teret Poslodavca", data: [teretPoslodavca], backgroundColor: "#2196F3" },
+                { label: "Bruto 2", data: [bruto2], backgroundColor: "#F44336" }
+                ];
+
+            chartConfig = {
+                type: "bar",
+                data: {
+                    labels: ["Troškovi Plata"],
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: "#333",
+                                font: {
+                                    size: 14,
+                                    weight: '500',
+                                    family: "'Segoe UI', sans-serif"
+                                },
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: "#fff",
+                            titleColor: "#000",
+                            bodyColor: "#000",
+                            borderColor: "#ccc",
+                            borderWidth: 1,
+                            padding: 10,
+                            mode: "index",
+                            intersect: false,
+                            callbacks: {
+                                footer: (items) => {
+                                    const total = items.reduce((sum, i) => sum + (i.raw || 0), 0);
+                                    return `Ukupno: ${total.toLocaleString("sr-RS")} RSD`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: isVlasnik,
+                            title: {
+                                display: true,
+                                text: "Trošak",
+                                font: { size: 14, weight: 'bold' },
+                                color: "#555"
+                            },
+                            ticks: { color: "#555" }
+                        },
+                        y: {
+                            stacked: isVlasnik,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: "Iznos (RSD)",
+                                font: { size: 14, weight: 'bold' },
+                                color: "#555"
+                            },
+                            ticks: { color: "#555" }
+                        }
+                    }
+                }
+            };
+        }
+
+        else if (type === "timeSeries") {
+            const chartData = data.chart_data;
+            if (!chartData || !chartData.labels) {
+                console.error("❌ Nedostaju podaci za vremensku seriju!", chartData);
+                return;
+            }
+
+            chartConfig = {
+                type: "line",
+                data: {
+                    labels: chartData.labels,
+                    datasets: [
+                    {
+                        label: "Bruto 1",
+                        data: chartData.bruto1,
+                        borderColor: "#4CAF50",
+                        backgroundColor: "rgba(76, 175, 80, 0.2)",
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: "Bruto 2",
+                        data: chartData.bruto2,
+                        borderColor: "#F44336",
+                        backgroundColor: "rgba(244, 67, 54, 0.2)",
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: "Na Teret Poslodavca",
+                        data: chartData.na_teret_poslodavca,
+                        borderColor: "#2196F3",
+                        backgroundColor: "rgba(33, 150, 243, 0.2)",
+                        fill: true,
+                        tension: 0.4
+                    }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: "#333",
+                                font: {
+                                    size: 14,
+                                    weight: '500',
+                                    family: "'Segoe UI', sans-serif"
+                                },
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: "#fff",
+                            titleColor: "#000",
+                            bodyColor: "#000",
+                            borderColor: "#ccc",
+                            borderWidth: 1,
+                            padding: 10,
+                            mode: "index",
+                            intersect: false,
+                            callbacks: {
+                                label: (ctx) => `${ctx.dataset.label}: ${ctx.formattedValue} RSD`
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: "nearest",
+                        axis: "x",
+                        intersect: false
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: "Mesec",
+                                font: { size: 14, weight: 'bold' },
+                                color: "#555"
+                            },
+                            ticks: { color: "#555" }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: "Iznos (RSD)",
+                                font: { size: 14, weight: 'bold' },
+                                color: "#555"
+                            },
+                            ticks: { color: "#555" }
+                        }
+                    }
+                }
+            };
+        }
+
+        activeChart = new Chart(ctx, chartConfig);
+        setTimeout(() => activeChart.resize(), 100);
+    }
+
+    window.updateChart = updateChart;
+});
+
+// 🔹 DUGME ZA VREMENSKU SERIJU - Lepša verzija iz template-a
+document.getElementById("time-series-button").addEventListener("click", function() {
+    const typingEffect = document.getElementById("typing-effect");
+    
+    // Lepši loading UI sa spinnerom
+    typingEffect.innerHTML = `
+        <div class="d-flex align-items-center gap-2 alert alert-info">
+            <div class="spinner-border spinner-border-sm" role="status"></div>
+            <strong>Generišem analizu i grafikon...</strong>
+        </div>
+    `;
+
+    fetch('/api/salary_analysis/trend')
+    .then(response => response.json())
+    .then(data => {
+        console.log("📊 API PODACI:", data);
+        
+        // Lepši prikaz rezultata analize sa Card komponentom
+        typingEffect.innerHTML = `
+            <div class="card shadow-sm mt-3">
+                <div class="card-body">
+                    <p class="card-text">${data.gpt_analysis.replaceAll('\n', '<br>')}</p>
+                </div>
+            </div>
+        `;
+        
+        updateChart(data, "timeSeries");
+    })
+    .catch(error => {
+        console.error("❌ Greška pri preuzimanju podataka:", error);
+        typingEffect.innerHTML = `
+            <div class="alert alert-danger">⚠️ Došlo je do greške pri generisanju analize.</div>
+        `;
+    });
+}); // ✅ Kraj lepše verzije
+
+
+
+// --------------------------- ODAVDE POČINJE NOVA FUNKCIJA RADNIH SATI ---------------------------
+document.getElementById("work-hours-button").addEventListener("click", function() {
+    try {
+        console.log("✅ Kliknuto dugme za pregled radnih sati.");
+        
+        const pitanje = document.getElementById("mesec-input").value.trim();
+        console.log("📌 Pitanje uneto:", pitanje);
+        
+        const regex = /Koliko je ([A-ZĆČĐŠŽa-zćčđšž]+ [A-ZĆČĐŠŽa-zćčđšž]+) imao radnih sati u (\w+)/i;
+        const match = pitanje.match(regex);
+
+        if (!match) {
+            alert("⚠️ Unesite pitanje u formatu: 'Koliko je [IME PREZIME ili PREZIME IME] imao radnih sati u [MESEC]?'");
+            console.error("❌ Pitanje nije u ispravnom formatu.");
+            return;
+        }
+
+        let radnik = match[1].trim().split(" ");
+        const meseci_map = {
+            "Januaru": "Januar", 
+            "Februaru": "Februar", 
+            "Martu": "Mart", 
+            "Aprilu": "April",
+            "Maju": "Maj", 
+            "Junu": "Jun", 
+            "Julu": "Jul", 
+            "Avgustu": "Avgust",
+            "Septembru": "Septembar", 
+            "Oktobru": "Oktobar", 
+            "Novembru": "Novembar", 
+            "Decembru": "Decembar"
+        };
+
+        const mesec_pun = match[2].charAt(0).toUpperCase() + match[2].slice(1).toLowerCase();
+        const mesec = meseci_map[mesec_pun] || mesec_pun;
+
+        const poznataPrezmena = ["Vasovic", "Matkovic", "Trbojevic", "Markovic", "Nikolic", "Ilic", "Sreckovic"];
+
+        if (poznataPrezmena.includes(radnik[0].charAt(0).toUpperCase() + radnik[0].slice(1).toLowerCase())) {
+            radnik = [radnik[1], radnik[0]];
+        }
+
+        radnik = radnik.map(ime => ime.charAt(0).toUpperCase() + ime.slice(1).toLowerCase()).join(" ");
+
+        const typingEffect = document.getElementById("typing-effect");
+        typingEffect.innerHTML = `<div class="alert alert-info">Molim vas, sačekajte... Preuzimam podatke... ⏳</div>`;
+
+        const apiUrl = "http://127.0.0.1:5000/api/obracun_zarade";
+        const requestBody = {
+            zaposleni: radnik,
+            mesec: mesec
+        };
+
+        console.log("📤 Šaljemo API zahtev na:", apiUrl);
+        console.log("📄 Podaci:", requestBody);
+
+        fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestBody)
+        })
+        .then(res => {
+            console.log("📥 API odgovor primljen:", res);
+            if (!res.ok) {
+                console.error("❌ API greška:", res.status, res.statusText);
+                throw new Error(`Greška ${res.status}: ${res.statusText}`);
+            }
+            return res.json();
+        })
+        .then(data => {
+            console.log("📊 API podaci:", data);
+            typingEffect.innerHTML = "";
+
+            if (data.error) {
+                console.error("❌ API vratio grešku:", data.error);
+                typingEffect.innerHTML = `<div class="alert alert-danger">⚠️ ${data.error}</div>`;
+            } else {
+                typingEffect.innerHTML = `<div class="alert alert-success">
+                <strong>${radnik}</strong> je imao <strong>${data["Radni sati"]}</strong> radnih sati u ${mesec}. <br>
+                <strong></strong> <span id="gpt-text-target"></span>
+                </div>`;
+
+                const target = document.getElementById("gpt-text-target");
+                typeTextSlowly(data["GPT Analiza"], target);
+            }
+        })
+        .catch(error => {
+            console.error("❌ Greška pri preuzimanju podataka:", error);
+            typingEffect.innerHTML = "⚠️ Došlo je do greške pri obradi podataka.";
+        });
+
+    } catch (error) {
+        console.error("❌ Neočekivana greška u funkciji:", error);
+    }
+});
+        // ---------------------------------------------------------------
+        // 🔹 FUNKCIJA ZA SPORO ISCRTAVANJE TEKSTA AI ANALIZE
+        // ---------------------------------------------------------------
+function typeTextSlowly(text, element, delay = 30) {
+    element.textContent = "";
+    let i = 0;
+    const interval = setInterval(() => {
+        element.textContent += text[i++];
+        if (i >= text.length) clearInterval(interval);
+    }, delay);
+}
+</script>

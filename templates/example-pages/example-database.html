@@ -1,0 +1,1529 @@
+<!-- Database Example Page -->
+{% extends "layouts/base.html"" %}
+
+{% block title %}Database Connections - ValidoAI{% endblock %}
+
+{% block page_title %}Database Connection Testing{% endblock %}
+{% block page_description %}Test and manage all database connections with CRUD operations{% endblock %}
+
+{% block head %}
+<style>
+.database-card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6 transition-all duration-200 hover:shadow-md;
+}
+
+.database-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+}
+
+.status-indicator {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.status-success {
+    @apply bg-green-100 text-green-800;
+}
+
+.status-failed {
+    @apply bg-red-100 text-red-800;
+}
+
+.status-warning {
+    @apply bg-yellow-100 text-yellow-800;
+}
+
+.connection-button {
+    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md transition-all duration-200;
+}
+
+.connect-btn {
+    @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+}
+
+.disconnect-btn {
+    @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+}
+
+.configure-btn {
+    @apply bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500;
+}
+
+.table-card {
+    @apply bg-gray-50 p-4 rounded-lg border border-gray-200;
+}
+
+.table-list {
+    @apply space-y-2 max-h-64 overflow-y-auto;
+}
+
+.table-item {
+    @apply flex items-center justify-between p-3 bg-white rounded border border-gray-200 hover:bg-gray-50 transition-colors;
+}
+
+.crud-buttons {
+    @apply flex items-center space-x-2;
+}
+
+.crud-btn {
+    @apply inline-flex items-center px-2 py-1 text-xs font-medium rounded transition-colors;
+}
+
+.crud-create {
+    @apply bg-green-100 text-green-800 hover:bg-green-200;
+}
+
+.crud-read {
+    @apply bg-blue-100 text-blue-800 hover:bg-blue-200;
+}
+
+.crud-update {
+    @apply bg-yellow-100 text-yellow-800 hover:bg-yellow-200;
+}
+
+.crud-delete {
+    @apply bg-red-100 text-red-800 hover:bg-red-200;
+}
+
+.modal-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4;
+}
+
+.modal-content {
+    @apply bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto;
+}
+
+.cache-stats {
+    @apply grid grid-cols-2 md:grid-cols-4 gap-4;
+}
+
+.stat-card {
+    @apply bg-blue-50 p-4 rounded-lg text-center;
+}
+
+.stat-value {
+    @apply text-2xl font-bold text-blue-600;
+}
+
+.stat-label {
+    @apply text-sm text-blue-600;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Database Connection Testing</h1>
+                <p class="text-gray-600 mt-1">Test, configure, and manage all database connections with full CRUD operations</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button
+                    @click="refreshAllConnections()"
+                    :disabled="refreshing"
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                >
+                    <i class="fas fa-sync mr-2" :class="{ 'fa-spin': refreshing }"></i>
+                    Refresh All
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cache Statistics -->
+    <div class="database-card">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Cache Statistics</h3>
+        <div class="cache-stats">
+            <div class="stat-card">
+                <div class="stat-value">{{ cache_stats.total_cached_keys or 0 }}</div>
+                <div class="stat-label">Total Keys</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ cache_stats.keys_by_category.chat_history or 0 }}</div>
+                <div class="stat-label">Chat Sessions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ cache_stats.keys_by_category.embeddings or 0 }}</div>
+                <div class="stat-label">Embeddings</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ cache_stats.used_memory or 'N/A' }}</div>
+                <div class="stat-label">Memory Used</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supported Databases Section -->
+    <div class="database-card">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-lg font-medium text-gray-900">Supported Database Types</h3>
+                <p class="text-sm text-gray-600 mt-1">All database types that can be configured and tested</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button
+                    @click="showAllSupported = !showAllSupported"
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                >
+                    <i class="fas fa-eye mr-2" :class="{ 'fa-eye-slash': showAllSupported }"></i>
+                    <span x-text="showAllSupported ? 'Hide Details' : 'Show Details'"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <template x-for="db in supportedDatabases" :key="db.type">
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-gray-300 transition-colors">
+                    <div class="flex items-center mb-3">
+                        <div :class="['w-10 h-10 rounded-lg flex items-center justify-center text-white mr-3', db.color]">
+                            <i :class="db.icon"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-900" x-text="db.name"></h4>
+                            <div class="text-xs text-gray-500" x-text="db.type"></div>
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-gray-600 mb-3" x-text="db.description"></p>
+
+                    <div x-show="showAllSupported" class="space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-gray-500">Default Port:</span>
+                            <span class="font-medium" x-text="db.defaultPort || 'N/A'"></span>
+                        </div>
+
+                        <div class="text-xs">
+                            <span class="text-gray-500 block mb-1">Features:</span>
+                            <div class="flex flex-wrap gap-1">
+                                <template x-for="feature in db.features" :key="feature">
+                                    <span class="inline-block bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs" x-text="feature"></span>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-2 pt-2">
+                            <button
+                                @click="configureDatabaseType(db.type)"
+                                class="flex-1 inline-flex items-center justify-center px-3 py-1 border border-blue-300 text-xs font-medium rounded text-blue-700 bg-blue-50 hover:bg-blue-100"
+                            >
+                                <i class="fas fa-cog mr-1"></i>
+                                Configure
+                            </button>
+                            <button
+                                @click="testDatabaseType(db.type)"
+                                class="flex-1 inline-flex items-center justify-center px-3 py-1 border border-green-300 text-xs font-medium rounded text-green-700 bg-green-50 hover:bg-green-100"
+                            >
+                                <i class="fas fa-plug mr-1"></i>
+                                Test
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Database Connection Cards -->
+    <div class="database-grid">
+        <template x-for="(health, dbName) in databaseHealth" :key="dbName">
+            <div class="database-card">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900" x-text="dbName.toUpperCase()"></h3>
+                        <div class="text-sm text-gray-500" x-text="getDatabaseType(dbName)"></div>
+                    </div>
+                    <div class="status-indicator"
+                         :class="getStatusClass(health.status)">
+                        <i :class="getStatusIcon(health.status)" class="mr-1"></i>
+                        <span x-text="health.status"></span>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                        <div>Status: <span x-text="health.status"></span></div>
+                        <div>Response: <span x-text="health.response_time || 'N/A'"></span>ms</div>
+                        <div>Connections: <span x-text="health.active_connections || 0"></span></div>
+                        <div>Size: <span x-text="formatFileSize(health.database_size) || 'N/A'"></span></div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button
+                            @click="testConnection(dbName)"
+                            :disabled="testingConnections.includes(dbName)"
+                            class="connection-button connect-btn"
+                        >
+                            <i class="fas fa-plug mr-2"></i>
+                            <span x-show="!testingConnections.includes(dbName)">Test</span>
+                            <span x-show="testingConnections.includes(dbName)">Testing...</span>
+                        </button>
+
+                        <button
+                            @click="configureConnection(dbName)"
+                            class="connection-button configure-btn"
+                        >
+                            <i class="fas fa-cog mr-2"></i>
+                            Configure
+                        </button>
+
+                        <button
+                            @click="showDatabaseInfo(dbName)"
+                            class="connection-button"
+                            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;"
+                        >
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Info
+                        </button>
+
+                        <button
+                            @click="disconnectConnection(dbName)"
+                            class="connection-button disconnect-btn"
+                        >
+                            <i class="fas fa-power-off mr-2"></i>
+                            Disconnect
+                        </button>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="border-t pt-3">
+                        <div class="text-xs font-medium text-gray-500 mb-2">QUICK ACTIONS</div>
+                        <div class="flex flex-wrap gap-1">
+                            <button @click="showTables(dbName)" class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs hover:bg-blue-200">
+                                <i class="fas fa-table mr-1"></i>Tables
+                            </button>
+                            <button @click="showUsers(dbName)" class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs hover:bg-green-200">
+                                <i class="fas fa-users mr-1"></i>Users
+                            </button>
+                            <button @click="showBackupOptions(dbName)" class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs hover:bg-yellow-200">
+                                <i class="fas fa-save mr-1"></i>Backup
+                            </button>
+                            <button @click="showQueryConsole(dbName)" class="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs hover:bg-purple-200">
+                                <i class="fas fa-terminal mr-1"></i>Query
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Selected Database Tables -->
+    <div x-show="selectedDatabase" class="database-card">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-medium text-gray-900">
+                Tables in <span x-text="selectedDatabase.toUpperCase()"></span>
+            </h3>
+            <button
+                @click="closeTables()"
+                class="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+                <i class="fas fa-times mr-1"></i>
+                Close
+            </button>
+        </div>
+
+        <div class="table-list">
+            <template x-for="table in databaseTables" :key="table.name || table.tablename || table[0]">
+                <div class="table-item">
+                    <div class="font-medium" x-text="getTableName(table)"></div>
+                    <div class="crud-buttons">
+                        <button
+                            @click="showTableData(table)"
+                            class="crud-btn crud-read"
+                            title="View Data"
+                        >
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button
+                            @click="showCreateForm(table)"
+                            class="crud-btn crud-create"
+                            title="Create Record"
+                        >
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button
+                            @click="showTableStructure(table)"
+                            class="crud-btn crud-update"
+                            title="Table Structure"
+                        >
+                            <i class="fas fa-table"></i>
+                        </button>
+                        <button
+                            @click="showDeleteConfirmation(table)"
+                            class="crud-btn crud-delete"
+                            title="Drop Table"
+                        >
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Table Data Modal -->
+    <div x-show="showTableDataModal" class="modal-overlay" @click="closeTableDataModal()">
+        <div class="modal-content" @click.stop>
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">
+                        Data in <span x-text="selectedTableName"></span>
+                    </h3>
+                    <button @click="closeTableDataModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-600">
+                            Rows: <span x-text="tableData.row_count || 0"></span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button @click="refreshTableData()" class="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                <i class="fas fa-sync mr-1"></i>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <template x-for="column in tableData.columns" :key="getColumnKey(column)">
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" x-text="getColumnName(column)"></th>
+                                    </template>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <template x-for="row in tableData.data" :key="getRowKey(row)">
+                                    <tr class="hover:bg-gray-50">
+                                        <template x-for="column in tableData.columns" :key="getColumnKey(column)">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" x-text="getCellValue(row, column)"></td>
+                                        </template>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Database Configuration Modal -->
+    <div x-show="showConfigModal" class="modal-overlay" @click="closeConfigModal()">
+        <div class="modal-content" @click.stop>
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">
+                        Configure <span x-text="configDatabaseName"></span>
+                    </h3>
+                    <button @click="closeConfigModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <form @submit.prevent="saveConfiguration()" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Host</label>
+                            <input
+                                type="text"
+                                x-model="dbConfig.host"
+                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="localhost"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Port</label>
+                            <input
+                                type="number"
+                                x-model="dbConfig.port"
+                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="5432"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Database Name</label>
+                            <input
+                                type="text"
+                                x-model="dbConfig.database"
+                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="ai_valido_online"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Username</label>
+                            <input
+                                type="text"
+                                x-model="dbConfig.username"
+                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="postgres"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Password</label>
+                            <input
+                                type="password"
+                                x-model="dbConfig.password"
+                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="password"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">SSL Mode</label>
+                            <select
+                                x-model="dbConfig.ssl_mode"
+                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            >
+                                <option value="disable">Disable</option>
+                                <option value="require">Require</option>
+                                <option value="prefer">Prefer</option>
+                                <option value="allow">Allow</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Connection Timeout</label>
+                            <input
+                                type="number"
+                                x-model="dbConfig.timeout"
+                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="30"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Max Connections</label>
+                            <input
+                                type="number"
+                                x-model="dbConfig.max_connections"
+                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="10"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end space-x-3 pt-4 border-t">
+                        <button
+                            type="button"
+                            @click="testConfiguration()"
+                            :disabled="testingConfig"
+                            class="inline-flex items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100"
+                        >
+                            <i class="fas fa-plug mr-2"></i>
+                            <span x-show="!testingConfig">Test Connection</span>
+                            <span x-show="testingConfig">Testing...</span>
+                        </button>
+                        <button
+                            type="button"
+                            @click="closeConfigModal()"
+                            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                        >
+                            <i class="fas fa-save mr-2"></i>
+                            Save Configuration
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Database Information Modal -->
+    <div x-show="showInfoModal" class="modal-overlay" @click="closeInfoModal()">
+        <div class="modal-content" @click.stop>
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">
+                        Database Information: <span x-text="infoDatabaseName"></span>
+                    </h3>
+                    <button @click="closeInfoModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Basic Information -->
+                    <div>
+                        <h4 class="text-md font-medium text-gray-900 mb-3">Basic Information</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-gray-50 p-3 rounded">
+                                <div class="text-sm font-medium text-gray-500">Database Type</div>
+                                <div class="text-sm text-gray-900" x-text="databaseInfo.type || 'N/A'"></div>
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded">
+                                <div class="text-sm font-medium text-gray-500">Version</div>
+                                <div class="text-sm text-gray-900" x-text="databaseInfo.version || 'N/A'"></div>
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded">
+                                <div class="text-sm font-medium text-gray-500">Size</div>
+                                <div class="text-sm text-gray-900" x-text="formatFileSize(databaseInfo.size) || 'N/A'"></div>
+                            </div>
+                            <div class="bg-gray-50 p-3 rounded">
+                                <div class="text-sm font-medium text-gray-500">Uptime</div>
+                                <div class="text-sm text-gray-900" x-text="formatUptime(databaseInfo.uptime) || 'N/A'"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Metrics -->
+                    <div>
+                        <h4 class="text-md font-medium text-gray-900 mb-3">Performance Metrics</h4>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="bg-blue-50 p-3 rounded">
+                                <div class="text-sm font-medium text-blue-600">Active Connections</div>
+                                <div class="text-lg font-bold text-blue-900" x-text="databaseInfo.active_connections || 0"></div>
+                            </div>
+                            <div class="bg-green-50 p-3 rounded">
+                                <div class="text-sm font-medium text-green-600">Queries per Second</div>
+                                <div class="text-lg font-bold text-green-900" x-text="databaseInfo.qps || 0"></div>
+                            </div>
+                            <div class="bg-yellow-50 p-3 rounded">
+                                <div class="text-sm font-medium text-yellow-600">Cache Hit Rate</div>
+                                <div class="text-lg font-bold text-yellow-900" x-text="formatPercentage(databaseInfo.cache_hit_rate) || 'N/A'"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tables Summary -->
+                    <div>
+                        <h4 class="text-md font-medium text-gray-900 mb-3">Tables Summary</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Table Name</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rows</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Modified</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <template x-for="table in databaseInfo.tables" :key="table.name">
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="table.name"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="table.row_count || 0"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="formatFileSize(table.size) || 'N/A'"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="table.last_modified || 'N/A'"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Query Console Modal -->
+    <div x-show="showQueryModal" class="modal-overlay" @click="closeQueryModal()">
+        <div class="modal-content" @click.stop style="max-width: 90vw; max-height: 90vh;">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">
+                        Query Console: <span x-text="queryDatabaseName"></span>
+                    </h3>
+                    <button @click="closeQueryModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Query Input -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">SQL Query</label>
+                        <textarea
+                            x-model="queryText"
+                            rows="8"
+                            class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+                            placeholder="SELECT * FROM users LIMIT 100;"
+                        ></textarea>
+                    </div>
+
+                    <!-- Query Actions -->
+                    <div class="flex items-center space-x-2">
+                        <button
+                            @click="executeQuery()"
+                            :disabled="executingQuery"
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                        >
+                            <i class="fas fa-play mr-2"></i>
+                            <span x-show="!executingQuery">Execute Query</span>
+                            <span x-show="executingQuery">Executing...</span>
+                        </button>
+                        <button @click="clearQuery()" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            <i class="fas fa-trash mr-2"></i>
+                            Clear
+                        </button>
+                        <button @click="loadQueryTemplate()" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            <i class="fas fa-file-import mr-2"></i>
+                            Templates
+                        </button>
+                    </div>
+
+                    <!-- Query Results -->
+                    <div x-show="queryResults">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-md font-medium text-gray-900">Query Results</h4>
+                            <div class="text-sm text-gray-500">
+                                Rows: <span x-text="queryResults.row_count || 0"></span> |
+                                Execution Time: <span x-text="queryResults.execution_time || 'N/A'"></span>ms
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto max-h-96">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <template x-for="column in queryResults.columns" :key="column">
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" x-text="column"></th>
+                                        </template>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <template x-for="row in queryResults.data" :key="getRowKey(row)">
+                                        <tr class="hover:bg-gray-50">
+                                            <template x-for="column in queryResults.columns" :key="column">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" x-text="row[column] || ''"></td>
+                                            </template>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Error Display -->
+                    <div x-show="queryError" class="bg-red-50 border border-red-200 rounded p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                            <div class="text-sm text-red-800" x-text="queryError"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CRUD Operations Modal -->
+    <div x-show="showCrudModal" class="modal-overlay" @click="closeCrudModal()">
+        <div class="modal-content" @click.stop>
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">
+                        CRUD Operations: <span x-text="crudTableName"></span>
+                    </h3>
+                    <button @click="closeCrudModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Create Form -->
+                    <div>
+                        <h4 class="text-md font-medium text-gray-900 mb-3">Create New Record</h4>
+                        <form @submit.prevent="createRecord()" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <template x-for="column in tableStructure" :key="column.name">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700" x-text="column.name"></label>
+                                        <input
+                                            type="text"
+                                            :name="'create_' + column.name"
+                                            x-model="createForm[column.name]"
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                            :placeholder="'Enter ' + column.name"
+                                        >
+                                    </div>
+                                </template>
+                            </div>
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+                                <i class="fas fa-plus mr-2"></i>
+                                Create Record
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Update Form -->
+                    <div x-show="selectedRecord">
+                        <h4 class="text-md font-medium text-gray-900 mb-3">Update Selected Record</h4>
+                        <form @submit.prevent="updateRecord()" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <template x-for="column in tableStructure" :key="column.name">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700" x-text="column.name"></label>
+                                        <input
+                                            type="text"
+                                            :name="'update_' + column.name"
+                                            x-model="updateForm[column.name]"
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                            :placeholder="'Enter ' + column.name"
+                                        >
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700">
+                                    <i class="fas fa-edit mr-2"></i>
+                                    Update Record
+                                </button>
+                                <button type="button" @click="clearUpdateForm()" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                    Clear
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Delete Confirmation -->
+                    <div x-show="showDeleteConfirm" class="bg-red-50 border border-red-200 rounded p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="text-md font-medium text-red-800">Delete Record</h4>
+                                <p class="text-sm text-red-600">Are you sure you want to delete this record? This action cannot be undone.</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button @click="confirmDelete()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700">
+                                    <i class="fas fa-trash mr-2"></i>
+                                    Delete
+                                </button>
+                                <button @click="cancelDelete()" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('databaseExample', () => ({
+        // Data
+        databaseHealth: {{ database_health | tojson | safe }},
+        redisHealth: {{ redis_health | tojson | safe }},
+        cacheStats: {{ cache_stats | tojson | safe }},
+        availableDatabases: {{ available_databases | tojson | safe }},
+
+        // Supported Database Types
+        supportedDatabases: [
+            {
+                name: 'SQLite',
+                type: 'sqlite',
+                description: 'Local file-based database',
+                icon: 'fas fa-database',
+                color: 'bg-green-500',
+                defaultPort: null,
+                features: ['Local Storage', 'No Server Required', 'Simple Setup']
+            },
+            {
+                name: 'PostgreSQL',
+                type: 'postgresql',
+                description: 'Advanced open-source relational database',
+                icon: 'fas fa-server',
+                color: 'bg-blue-500',
+                defaultPort: 5432,
+                features: ['ACID Compliant', 'Advanced Features', 'Extensions Support']
+            },
+            {
+                name: 'MySQL',
+                type: 'mysql',
+                description: 'Popular open-source relational database',
+                icon: 'fas fa-database',
+                color: 'bg-orange-500',
+                defaultPort: 3306,
+                features: ['High Performance', 'Wide Adoption', 'Easy Integration']
+            },
+            {
+                name: 'MongoDB',
+                type: 'mongodb',
+                description: 'NoSQL document database',
+                icon: 'fas fa-leaf',
+                color: 'bg-green-600',
+                defaultPort: 27017,
+                features: ['Document Storage', 'Flexible Schema', 'High Scalability']
+            },
+            {
+                name: 'Redis',
+                type: 'redis',
+                description: 'In-memory data structure store',
+                icon: 'fas fa-bolt',
+                color: 'bg-red-500',
+                defaultPort: 6379,
+                features: ['Caching', 'Pub/Sub', 'Fast Operations']
+            },
+            {
+                name: 'Elasticsearch',
+                type: 'elasticsearch',
+                description: 'Distributed search and analytics engine',
+                icon: 'fas fa-search',
+                color: 'bg-yellow-500',
+                defaultPort: 9200,
+                features: ['Full-text Search', 'Analytics', 'Real-time Indexing']
+            }
+        ],
+
+        // State
+        testingConnections: [],
+        selectedDatabase: null,
+        databaseTables: [],
+        selectedTableName: '',
+        tableData: {},
+        showTableDataModal: false,
+        refreshing: false,
+
+        // Configuration Modal
+        showConfigModal: false,
+        configDatabaseName: '',
+        dbConfig: {
+            host: 'localhost',
+            port: 5432,
+            database: '',
+            username: '',
+            password: '',
+            ssl_mode: 'prefer',
+            timeout: 30,
+            max_connections: 10
+        },
+        testingConfig: false,
+
+        // Info Modal
+        showInfoModal: false,
+        infoDatabaseName: '',
+        databaseInfo: {},
+
+        // Query Console Modal
+        showQueryModal: false,
+        queryDatabaseName: '',
+        queryText: '',
+        queryResults: null,
+        queryError: null,
+        executingQuery: false,
+
+        // CRUD Modal
+        showCrudModal: false,
+        crudTableName: '',
+        tableStructure: [],
+        createForm: {},
+        updateForm: {},
+        selectedRecord: null,
+        showDeleteConfirm: false,
+
+        // Supported Databases Display
+        showAllSupported: false,
+
+
+
+        // Methods
+        async testConnection(dbName) {
+            if (this.testingConnections.includes(dbName)) return;
+
+            this.testingConnections.push(dbName);
+
+            try {
+                const response = await fetch('/api/database/test-connection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ database_name: dbName })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    this.databaseHealth[dbName] = {
+                        status: 'healthy',
+                        response_time: result.response_time || 0
+                    };
+                    this.showNotification(`Connection to ${dbName} successful`, 'success');
+
+                    // Automatically load tables for successful connection
+                    await this.loadTables(dbName);
+                } else {
+                    this.databaseHealth[dbName] = {
+                        status: 'unhealthy',
+                        error: result.error
+                    };
+                    this.showNotification(`Connection to ${dbName} failed: ${result.error}`, 'error');
+                }
+
+            } catch (error) {
+                this.databaseHealth[dbName] = {
+                    status: 'unhealthy',
+                    error: error.message
+                };
+                this.showNotification(`Connection test failed: ${error.message}`, 'error');
+            } finally {
+                this.testingConnections = this.testingConnections.filter(d => d !== dbName);
+            }
+        },
+
+        configureConnection(dbName) {
+            // Redirect to database settings page with specific database
+            window.location.href = `/settings/database?database=${dbName}`;
+        },
+
+        disconnectConnection(dbName) {
+            // For now, just update the status
+            this.databaseHealth[dbName] = {
+                status: 'disconnected'
+            };
+            this.showNotification(`Disconnected from ${dbName}`, 'info');
+        },
+
+        async loadTables(dbName) {
+            try {
+                const response = await fetch('/api/database/get-tables', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ database_name: dbName })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    this.selectedDatabase = dbName;
+                    this.databaseTables = result.tables;
+                } else {
+                    this.showNotification(`Failed to load tables: ${result.error}`, 'error');
+                }
+
+            } catch (error) {
+                this.showNotification(`Failed to load tables: ${error.message}`, 'error');
+            }
+        },
+
+        async showTableData(table) {
+            const tableName = this.getTableName(table);
+            this.selectedTableName = tableName;
+
+            try {
+                const response = await fetch('/api/database/get-table-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        database_name: this.selectedDatabase,
+                        table_name: tableName,
+                        limit: 100
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    this.tableData = result;
+                    this.showTableDataModal = true;
+                } else {
+                    this.showNotification(`Failed to load table data: ${result.error}`, 'error');
+                }
+
+            } catch (error) {
+                this.showNotification(`Failed to load table data: ${error.message}`, 'error');
+            }
+        },
+
+        showCreateForm(table) {
+            const tableName = this.getTableName(table);
+            this.showNotification(`Create form for ${tableName} - Coming soon!`, 'info');
+        },
+
+        showTableStructure(table) {
+            const tableName = this.getTableName(table);
+            this.showNotification(`Table structure for ${tableName} - Coming soon!`, 'info');
+        },
+
+        showDeleteConfirmation(table) {
+            const tableName = this.getTableName(table);
+            this.showNotification(`Delete table ${tableName} - Coming soon!`, 'warning');
+        },
+
+        async refreshTableData() {
+            if (this.selectedTableName) {
+                await this.showTableData({ name: this.selectedTableName });
+            }
+        },
+
+        closeTableDataModal() {
+            this.showTableDataModal = false;
+            this.tableData = {};
+            this.selectedTableName = '';
+        },
+
+        closeTables() {
+            this.selectedDatabase = null;
+            this.databaseTables = [];
+        },
+
+        async refreshAllConnections() {
+            this.refreshing = true;
+
+            try {
+                for (const dbName of this.availableDatabases) {
+                    await this.testConnection(dbName);
+                }
+
+                this.showNotification('All connections refreshed', 'success');
+            } catch (error) {
+                this.showNotification(`Refresh failed: ${error.message}`, 'error');
+            } finally {
+                this.refreshing = false;
+            }
+        },
+
+        // Helper methods
+        getStatusClass(status) {
+            switch (status) {
+                case 'healthy':
+                case 'success':
+                    return 'status-success';
+                case 'unhealthy':
+                case 'failed':
+                    return 'status-failed';
+                case 'disconnected':
+                    return 'status-warning';
+                default:
+                    return 'status-warning';
+            }
+        },
+
+        getStatusIcon(status) {
+            switch (status) {
+                case 'healthy':
+                case 'success':
+                    return 'fas fa-check-circle';
+                case 'unhealthy':
+                case 'failed':
+                    return 'fas fa-times-circle';
+                case 'disconnected':
+                    return 'fas fa-pause-circle';
+                default:
+                    return 'fas fa-question-circle';
+            }
+        },
+
+        getTableName(table) {
+            if (typeof table === 'object') {
+                return table.name || table.tablename || (Array.isArray(table) ? table[0] : table);
+            }
+            return table;
+        },
+
+        getColumnKey(column) {
+            if (typeof column === 'object') {
+                return column.name || column.column_name || column[0] || JSON.stringify(column);
+            }
+            return column;
+        },
+
+        getColumnName(column) {
+            if (typeof column === 'object') {
+                return column.name || column.column_name || column[0] || 'Unknown';
+            }
+            return column;
+        },
+
+        getRowKey(row) {
+            return JSON.stringify(row);
+        },
+
+        getCellValue(row, column) {
+            if (typeof row === 'object' && typeof column === 'object') {
+                const columnName = this.getColumnName(column);
+                return row[columnName] || '';
+            }
+            return '';
+        },
+
+        showNotification(message, type = 'info') {
+            // Simple notification system
+            console.log(`[${type.toUpperCase()}] ${message}`);
+
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 px-4 py-2 rounded-md text-white z-50 ${
+                type === 'success' ? 'bg-green-500' :
+                type === 'error' ? 'bg-red-500' :
+                type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+            }`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        },
+
+        // Configuration Modal Methods
+        configureDatabaseType(dbType) {
+            this.configDatabaseName = dbType;
+            this.dbConfig = {
+                host: 'localhost',
+                port: this.getDefaultPort(dbType),
+                database: '',
+                username: '',
+                password: '',
+                ssl_mode: 'prefer',
+                timeout: 30,
+                max_connections: 10
+            };
+            this.showConfigModal = true;
+        },
+
+        getDefaultPort(dbType) {
+            const ports = {
+                'postgresql': 5432,
+                'mysql': 3306,
+                'mongodb': 27017,
+                'redis': 6379,
+                'elasticsearch': 9200
+            };
+            return ports[dbType] || 5432;
+        },
+
+        closeConfigModal() {
+            this.showConfigModal = false;
+            this.configDatabaseName = '';
+            this.dbConfig = {};
+            this.testingConfig = false;
+        },
+
+        async testConfiguration() {
+            this.testingConfig = true;
+            try {
+                const response = await fetch('/api/database/test-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        db_type: this.configDatabaseName,
+                        config: this.dbConfig
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    this.showNotification('Configuration test successful!', 'success');
+                } else {
+                    this.showNotification(`Configuration test failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                this.showNotification(`Test failed: ${error.message}`, 'error');
+            } finally {
+                this.testingConfig = false;
+            }
+        },
+
+        async saveConfiguration() {
+            try {
+                const response = await fetch('/api/database/save-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        db_type: this.configDatabaseName,
+                        config: this.dbConfig
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    this.showNotification('Configuration saved successfully!', 'success');
+                    this.closeConfigModal();
+                } else {
+                    this.showNotification(`Failed to save configuration: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                this.showNotification(`Save failed: ${error.message}`, 'error');
+            }
+        },
+
+        // Database Info Modal Methods
+        async showDatabaseInfo(dbName) {
+            this.infoDatabaseName = dbName;
+            try {
+                const response = await fetch('/api/database/get-info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ database_name: dbName })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    this.databaseInfo = result.info;
+                    this.showInfoModal = true;
+                } else {
+                    this.showNotification(`Failed to get database info: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                this.showNotification(`Failed to get database info: ${error.message}`, 'error');
+            }
+        },
+
+        closeInfoModal() {
+            this.showInfoModal = false;
+            this.infoDatabaseName = '';
+            this.databaseInfo = {};
+        },
+
+        // Query Console Modal Methods
+        showQueryConsole(dbName) {
+            this.queryDatabaseName = dbName;
+            this.queryText = '';
+            this.queryResults = null;
+            this.queryError = null;
+            this.showQueryModal = true;
+        },
+
+        closeQueryModal() {
+            this.showQueryModal = false;
+            this.queryDatabaseName = '';
+            this.queryText = '';
+            this.queryResults = null;
+            this.queryError = null;
+        },
+
+        async executeQuery() {
+            if (!this.queryText.trim()) {
+                this.showNotification('Please enter a query', 'warning');
+                return;
+            }
+
+            this.executingQuery = true;
+            this.queryError = null;
+
+            try {
+                const response = await fetch('/api/database/execute-query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        database_name: this.queryDatabaseName,
+                        query: this.queryText
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    this.queryResults = result;
+                } else {
+                    this.queryError = result.error;
+                }
+            } catch (error) {
+                this.queryError = error.message;
+            } finally {
+                this.executingQuery = false;
+            }
+        },
+
+        clearQuery() {
+            this.queryText = '';
+            this.queryResults = null;
+            this.queryError = null;
+        },
+
+        loadQueryTemplate() {
+            const templates = {
+                'SELECT': 'SELECT * FROM table_name LIMIT 100;',
+                'INSERT': 'INSERT INTO table_name (column1, column2) VALUES (value1, value2);',
+                'UPDATE': 'UPDATE table_name SET column1 = value1 WHERE condition;',
+                'DELETE': 'DELETE FROM table_name WHERE condition;'
+            };
+            this.queryText = templates['SELECT'];
+            this.showNotification('Query template loaded', 'info');
+        },
+
+        // CRUD Modal Methods
+        showCrudModal(tableName) {
+            this.crudTableName = tableName;
+            this.tableStructure = [];
+            this.createForm = {};
+            this.updateForm = {};
+            this.selectedRecord = null;
+            this.showDeleteConfirm = false;
+            this.showCrudModal = true;
+            this.loadTableStructure(tableName);
+        },
+
+        closeCrudModal() {
+            this.showCrudModal = false;
+            this.crudTableName = '';
+            this.tableStructure = [];
+            this.createForm = {};
+            this.updateForm = {};
+            this.selectedRecord = null;
+            this.showDeleteConfirm = false;
+        },
+
+        async loadTableStructure(tableName) {
+            try {
+                const response = await fetch('/api/database/get-table-structure', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        database_name: this.selectedDatabase,
+                        table_name: tableName
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    this.tableStructure = result.columns;
+                } else {
+                    this.showNotification(`Failed to load table structure: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                this.showNotification(`Failed to load table structure: ${error.message}`, 'error');
+            }
+        },
+
+        async createRecord() {
+            try {
+                const response = await fetch('/api/database/create-record', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        database_name: this.selectedDatabase,
+                        table_name: this.crudTableName,
+                        data: this.createForm
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    this.showNotification('Record created successfully!', 'success');
+                    this.createForm = {};
+                    this.refreshTableData();
+                } else {
+                    this.showNotification(`Failed to create record: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                this.showNotification(`Failed to create record: ${error.message}`, 'error');
+            }
+        },
+
+        selectRecordForUpdate(record) {
+            this.selectedRecord = record;
+            this.updateForm = { ...record };
+        },
+
+        async updateRecord() {
+            if (!this.selectedRecord) return;
+
+            try {
+                const response = await fetch('/api/database/update-record', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        database_name: this.selectedDatabase,
+                        table_name: this.crudTableName,
+                        record_id: this.selectedRecord.id,
+                        data: this.updateForm
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    this.showNotification('Record updated successfully!', 'success');
+                    this.selectedRecord = null;
+                    this.updateForm = {};
+                    this.refreshTableData();
+                } else {
+                    this.showNotification(`Failed to update record: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                this.showNotification(`Failed to update record: ${error.message}`, 'error');
+            }
+        },
+
+        clearUpdateForm() {
+            this.selectedRecord = null;
+            this.updateForm = {};
+        },
+
+        confirmDelete() {
+            if (!this.selectedRecord) return;
+
+            try {
+                const response = await fetch('/api/database/delete-record', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        database_name: this.selectedDatabase,
+                        table_name: this.crudTableName,
+                        record_id: this.selectedRecord.id
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    this.showNotification('Record deleted successfully!', 'success');
+                    this.selectedRecord = null;
+                    this.showDeleteConfirm = false;
+                    this.refreshTableData();
+                } else {
+                    this.showNotification(`Failed to delete record: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                this.showNotification(`Failed to delete record: ${error.message}`, 'error');
+            }
+        },
+
+        cancelDelete() {
+            this.showDeleteConfirm = false;
+        },
+
+        // Quick Actions
+        showTables(dbName) {
+            this.loadTables(dbName);
+        },
+
+        showUsers(dbName) {
+            this.showNotification(`User management for ${dbName} - Coming soon!`, 'info');
+        },
+
+        showBackupOptions(dbName) {
+            this.showNotification(`Backup options for ${dbName} - Coming soon!`, 'info');
+        },
+
+        // Utility Methods
+        formatFileSize(bytes) {
+            if (!bytes || bytes === 'N/A') return 'N/A';
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            if (bytes === 0) return '0 Bytes';
+            const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        },
+
+        formatUptime(seconds) {
+            if (!seconds || seconds === 'N/A') return 'N/A';
+            const days = Math.floor(seconds / 86400);
+            const hours = Math.floor((seconds % 86400) / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            return `${days}d ${hours}h ${minutes}m`;
+        },
+
+        formatPercentage(value) {
+            if (!value || value === 'N/A') return 'N/A';
+            return `${Math.round(value * 100)}%`;
+        },
+
+        getDatabaseType(dbName) {
+            const dbTypes = {
+                'sqlite': 'SQLite',
+                'postgresql': 'PostgreSQL',
+                'mysql': 'MySQL',
+                'mongodb': 'MongoDB',
+                'redis': 'Redis'
+            };
+            return dbTypes[dbName] || 'Unknown';
+        },
+
+
+    }));
+});
+</script>
+{% endblock %}

@@ -1,0 +1,233 @@
+{% extends "layouts/base.html"" %}
+
+{% block title %}Example Page - Conditional Loading Demo{% endblock %}
+
+{% block container_class %}w-full px-4 sm:px-6 lg:px-8{% endblock %}
+
+{% block conditional_css %}
+<!-- Page-specific CSS that only loads on this page -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/example-pages.css') }}">
+<style>
+    .example-card {
+        @apply bg-white rounded-lg shadow-md p-6 border border-neutral-200;
+    }
+    
+    .code-block {
+        @apply bg-neutral-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-x-auto;
+    }
+    
+    .theme-demo {
+        @apply p-4 rounded-lg border-2 border-dashed;
+    }
+    
+    .theme-demo[data-theme="valido-white"] {
+        @apply bg-white text-neutral-900 border-neutral-300;
+    }
+    
+    .theme-demo[data-theme="valido-dark"] {
+        @apply bg-neutral-900 text-white border-neutral-600;
+    }
+    
+    .theme-demo[data-theme="dracula"] {
+        @apply bg-purple-900 text-purple-100 border-purple-600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Page Header -->
+    <div class="text-center">
+        <h1 class="text-4xl font-bold text-neutral-900 mb-4">Example Page</h1>
+        <p class="text-lg text-neutral-600 max-w-3xl mx-auto">
+            This page demonstrates conditional CSS/JS loading, theme switching, and responsive design patterns.
+            Notice how only the necessary resources are loaded for this specific page.
+        </p>
+    </div>
+
+    <!-- Theme Demo Section -->
+    <div class="example-card">
+        <h2 class="text-2xl font-bold mb-4">Theme System Demo</h2>
+        <p class="text-neutral-600 mb-4">
+            The theme system automatically switches logos and colors based on the selected theme.
+            Try switching themes using the palette icon in the header.
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <div class="theme-demo" data-theme="valido-white">
+                <h3 class="font-bold mb-2">Valido White</h3>
+                <p class="text-sm">Clean, professional light theme</p>
+            </div>
+            <div class="theme-demo" data-theme="valido-dark">
+                <h3 class="font-bold mb-2">Valido Dark</h3>
+                <p class="text-sm">Modern dark theme for reduced eye strain</p>
+            </div>
+            <div class="theme-demo" data-theme="dracula">
+                <h3 class="font-bold mb-2">Dracula</h3>
+                <p class="text-sm">Vibrant purple theme for creativity</p>
+            </div>
+        </div>
+        
+        <div class="bg-neutral-100 p-4 rounded-lg">
+            <h4 class="font-bold mb-2">Current Theme: <span id="current-theme">valido-white</span></h4>
+            <p class="text-sm text-neutral-600">
+                The logo automatically switches between dark and light versions based on the theme.
+            </p>
+        </div>
+    </div>
+
+    <!-- Conditional Loading Demo -->
+    <div class="example-card">
+        <h2 class="text-2xl font-bold mb-4">Conditional Resource Loading</h2>
+        <p class="text-neutral-600 mb-4">
+            This page demonstrates how to load CSS and JavaScript only when needed, improving performance.
+        </p>
+        
+        <div class="space-y-4">
+            <div>
+                <h3 class="font-bold mb-2">CSS Loading Strategy</h3>
+                <div class="code-block">
+&lt;!-- Base CSS (always loaded) --&gt;
+&lt;link rel="stylesheet" href="base.css"&gt;
+
+&lt;!-- Conditional CSS (page-specific) --&gt;
+{% block conditional_css %}
+&lt;link rel="stylesheet" href="page-specific.css"&gt;
+{% endblock %}
+                </div>
+            </div>
+            
+            <div>
+                <h3 class="font-bold mb-2">JavaScript Loading Strategy</h3>
+                <div class="code-block">
+&lt;!-- Base JS (always loaded) --&gt;
+&lt;script src="base.js"&gt;&lt;/script&gt;
+
+&lt;!-- Conditional JS (page-specific) --&gt;
+{% block conditional_js %}
+&lt;script src="page-specific.js"&gt;&lt;/script&gt;
+{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Width Layout Demo -->
+    <div class="example-card">
+        <h2 class="text-2xl font-bold mb-4">Full Width Layout</h2>
+        <p class="text-neutral-600 mb-4">
+            This page uses a full-width layout by overriding the container class.
+        </p>
+        
+        <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6 rounded-lg">
+            <h3 class="text-xl font-bold mb-2">Full Width Container</h3>
+            <p>This content spans the full width of the viewport, perfect for dashboards and data visualization.</p>
+        </div>
+    </div>
+
+    <!-- Interactive Components -->
+    <div class="example-card">
+        <h2 class="text-2xl font-bold mb-4">Interactive Components</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Theme Switcher Demo -->
+            <div>
+                <h3 class="font-bold mb-3">Theme Switcher</h3>
+                <div class="space-y-2">
+                    <button onclick="switchTheme('valido-white')" class="w-full bg-white border border-neutral-300 text-neutral-700 px-4 py-2 rounded hover:bg-neutral-50">
+                        Switch to Valido White
+                    </button>
+                    <button onclick="switchTheme('valido-dark')" class="w-full bg-neutral-800 text-white px-4 py-2 rounded hover:bg-neutral-700">
+                        Switch to Valido Dark
+                    </button>
+                    <button onclick="switchTheme('dracula')" class="w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                        Switch to Dracula
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Dynamic Content Demo -->
+            <div>
+                <h3 class="font-bold mb-3">Dynamic Content</h3>
+                <div id="dynamic-content" class="bg-neutral-100 p-4 rounded">
+                    <p>Click the button to load dynamic content</p>
+                </div>
+                <button onclick="loadDynamicContent()" class="mt-2 bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-700">
+                    Load Content
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="example-card">
+        <h2 class="text-2xl font-bold mb-4">Performance Benefits</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="text-center p-4 bg-green-50 rounded-lg">
+                <div class="text-2xl font-bold text-green-600">30%</div>
+                <div class="text-sm text-green-700">Faster Loading</div>
+            </div>
+            <div class="text-center p-4 bg-blue-50 rounded-lg">
+                <div class="text-2xl font-bold text-blue-600">50%</div>
+                <div class="text-sm text-blue-700">Less CSS</div>
+            </div>
+            <div class="text-center p-4 bg-purple-50 rounded-lg">
+                <div class="text-2xl font-bold text-purple-600">40%</div>
+                <div class="text-sm text-purple-700">Less JS</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block conditional_js %}
+<!-- Page-specific JavaScript that only loads on this page -->
+<script>
+    // Update current theme display
+    function updateThemeDisplay() {
+        const currentTheme = localStorage.getItem('theme') || 'valido-white';
+        document.getElementById('current-theme').textContent = currentTheme;
+        
+        // Update theme demo boxes
+        document.querySelectorAll('.theme-demo').forEach(box => {
+            box.setAttribute('data-theme', currentTheme);
+        });
+    }
+    
+    // Load dynamic content
+    function loadDynamicContent() {
+        const container = document.getElementById('dynamic-content');
+        container.innerHTML = `
+            <div class="animate-fade-in">
+                <h4 class="font-bold mb-2">Dynamic Content Loaded!</h4>
+                <p class="text-sm">This content was loaded dynamically without a page refresh.</p>
+                <p class="text-xs text-neutral-500 mt-2">Timestamp: ${new Date().toLocaleTimeString()}</p>
+            </div>
+        `;
+    }
+    
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        updateThemeDisplay();
+        
+        // Watch for theme changes
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'theme') {
+                updateThemeDisplay();
+            }
+        });
+    });
+    
+    // Listen for theme changes from Alpine.js
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('examplePage', () => ({
+            init() {
+                this.$watch('currentTheme', () => {
+                    updateThemeDisplay();
+                });
+            }
+        }));
+    });
+</script>
+{% endblock %}

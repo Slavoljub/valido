@@ -1,0 +1,41 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Error {{ error_code }} - {{ error_title }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+        <div class="bg-red-600 text-white px-6 py-4">
+            <h1 class="text-2xl font-bold">Error {{ error_code }}: {{ error_title }}</h1>
+        </div>
+        <div class="p-6">
+            <p class="text-lg text-gray-700 dark:text-gray-300 mb-4">{{ error_message }}</p>
+
+            <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-md text-sm text-gray-600 dark:text-gray-400">
+                <p><strong>Timestamp:</strong> {{ timestamp }}</p>
+                <p><strong>Error ID:</strong> {{ error_uuid }}</p>
+                <p><strong>Request ID:</strong> {{ request_id }}</p>
+                {% if url %}
+                    <p><strong>URL:</strong> {{ url }}</p>
+                    <p><strong>Method:</strong> {{ method }}</p>
+                {% endif %}
+            </div>
+
+            {% if error_stack_trace %}
+            <div class="mt-6">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Developer Details (Debug Mode)</h2>
+                <div class="bg-gray-900 text-white p-4 rounded-md overflow-x-auto">
+                    <pre><code class="language-python">{{ error_stack_trace }}</code></pre>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="mt-6">
+                <a href="{{ url_for('main.home_index') }}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                    Go to Homepage
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

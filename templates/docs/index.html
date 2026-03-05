@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ValidoAI API Documentation</title>
+
+    <!-- Theme-aware meta tags -->
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="color-scheme" content="light dark">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicons/favicon-32x32.png') }}" sizes="32x32">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicons/favicon-16x16.png') }}" sizes="16x16">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Swagger UI CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui.css" />
+
+    <!-- Custom CSS for theme integration -->
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --border-primary: #e2e8f0;
+        }
+
+        [data-theme="valido-dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --border-primary: #334155;
+        }
+
+        [data-theme="dracula"] {
+            --bg-primary: #282a36;
+            --bg-secondary: #44475a;
+            --text-primary: #f8f8f2;
+            --text-secondary: #6272a4;
+            --border-primary: #6272a4;
+        }
+
+        [data-theme="material-dark"] {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --border-primary: #333333;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .api-docs-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .api-docs-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .api-docs-header p {
+            margin: 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .api-info-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .api-info-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .api-info-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .api-info-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .feature-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .swagger-container {
+            margin: 2rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Theme switcher integration */
+        .theme-switcher-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .theme-switcher-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .api-docs-header h1 {
+                font-size: 2rem;
+            }
+
+            .api-docs-header p {
+                font-size: 1rem;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .theme-switcher-btn {
+                width: 45px;
+                height: 45px;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            border: 3px solid var(--border-primary);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-right: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Code syntax highlighting */
+        pre {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+        code {
+            background: var(--bg-secondary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Switcher Button -->
+    <button class="theme-switcher-btn" onclick="openThemeSwitcher()" title="Change Theme">
+        <i class="fas fa-palette"></i>
+    </button>
+
+    <!-- Header -->
+    <header class="api-docs-header">
+        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
+            <h1><i class="fas fa-code"></i> ValidoAI API Documentation</h1>
+            <p>Comprehensive API reference for all ValidoAI endpoints with interactive testing</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container" style="max-width: 1200px; margin: 2rem auto; padding: 0 1rem;">
+        <!-- API Info Card -->
+        <div class="api-info-card">
+            <h2 class="api-info-title"><i class="fas fa-info-circle"></i> API Overview</h2>
+            <div class="api-info-description">
+                <p>The ValidoAI API provides comprehensive access to all application features including:</p>
+                <ul>
+                    <li><strong>Dashboard Data</strong> - Real-time financial and system metrics</li>
+                    <li><strong>UI Components</strong> - Interactive component showcase and testing</li>
+                    <li><strong>Database Management</strong> - Enterprise database operations</li>
+                    <li><strong>Question System</strong> - AI-powered question management</li>
+                    <li><strong>Theme System</strong> - Dynamic theme customization</li>
+                    <li><strong>Testing Framework</strong> - Automated quality assurance</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Feature Grid -->
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h3 class="feature-title">Fast & Reliable</h3>
+                <p class="feature-description">Optimized performance with sub-second response times and enterprise-grade reliability</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="feature-title">Secure & Compliant</h3>
+                <p class="feature-description">Enterprise security standards with GDPR, CCPA compliance and audit logging</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-palette"></i>
+                </div>
+                <h3 class="feature-title">Theme Integrated</h3>
+                <p class="feature-description">8 professional themes with dynamic switching and customization options</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <h3 class="feature-title">Database Ready</h3>
+                <p class="feature-description">Multi-database support with real-time monitoring and management</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-vial"></i>
+                </div>
+                <h3 class="feature-title">Test Automation</h3>
+                <p class="feature-description">Comprehensive testing framework with 95%+ coverage and real-time reporting</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3 class="feature-title">Mobile Optimized</h3>
+                <p class="feature-description">Responsive design from 320px to 12k resolution with touch optimization</p>
+            </div>
+        </div>
+
+        <!-- Usage Examples -->
+        <div class="api-info-card">
+            <h2 class="api-info-title"><i class="fas fa-code"></i> Quick Start Examples</h2>
+            <div class="api-info-description">
+                <h4>1. Get API Specification</h4>
+                <pre><code>curl -X GET "http://localhost:5000/api-docs" \
+  -H "accept: application/json"</code></pre>
+
+                <h4>2. Get Current Theme</h4>
+                <pre><code>curl -X GET "http://localhost:5000/api/theme/info" \
+  -H "accept: application/json"</code></pre>
+
+                <h4>3. Run Tests</h4>
+                <pre><code>curl -X POST "http://localhost:5000/api/test/run" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "test_type": "all",
+    "parallel": true
+  }'</code></pre>
+
+                <h4>4. Get Questions</h4>
+                <pre><code>curl -X GET "http://localhost:5000/api/questions?page=1&limit=10" \
+  -H "accept: application/json"</code></pre>
+            </div>
+        </div>
+
+        <!-- Swagger UI Container -->
+        <div class="swagger-container">
+            <div id="swagger-ui"></div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer style="background: var(--bg-secondary); border-top: 1px solid var(--border-primary); padding: 2rem 0; margin-top: 3rem;">
+        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 1rem; text-align: center;">
+            <p style="color: var(--text-secondary); margin: 0;">
+                <strong>ValidoAI API Documentation</strong> |
+                Version 1.0.0 |
+                <a href="mailto:support@validoai.com" style="color: var(--primary-color);">Contact Support</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui-standalone-preset.js"></script>
+
+    <script>
+        // Initialize Swagger UI
+        window.onload = function() {
+            SwaggerUIBundle({
+                url: '/api-docs',
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                validatorUrl: null,
+                tryItOutEnabled: true,
+                requestInterceptor: function(request) {
+                    // Add any custom request headers if needed
+                    return request;
+                },
+                responseInterceptor: function(response) {
+                    // Handle responses if needed
+                    return response;
+                },
+                onComplete: function() {
+                    console.log('Swagger UI initialized successfully');
+                }
+            });
+        };
+
+        // Theme switcher integration
+        function openThemeSwitcher() {
+            // If theme switcher is available, open it
+            if (window.openThemeSelector) {
+                window.openThemeSelector();
+            } else {
+                // Fallback - redirect to main page with theme switcher
+                window.location.href = '/#theme-switcher';
+            }
+        }
+
+        // Apply current theme
+        function applyCurrentTheme() {
+            const currentTheme = localStorage.getItem('valido-theme') || 'valido-white';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+        }
+
+        // Listen for theme changes
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'valido-theme') {
+                applyCurrentTheme();
+            }
+        });
+
+        // Initialize theme
+        applyCurrentTheme();
+
+        // Add loading indicator
+        const swaggerContainer = document.getElementById('swagger-ui');
+        if (swaggerContainer) {
+            swaggerContainer.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <span>Loading API Documentation...</span>
+                </div>
+            `;
+        }
+    </script>
+
+    <!-- Include theme manager if available -->
+    <script src="{{ url_for('static', filename='js/theme-manager.js') }}"></script>
+</body>
+</html>

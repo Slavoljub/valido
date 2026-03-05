@@ -1,0 +1,362 @@
+{% extends "layouts/base.html"" %}
+
+{% block title %}{{ ticket.ticket_number }} - {{ ticket.subject }} - ValidoAI{% endblock %}
+
+{% block description %}Ticket details and conversation{% endblock %}
+
+{% block content %}
+<!-- Ticket Header -->
+<div class="ticket-header mb-6">
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-between align-center">
+                <div class="d-flex align-center gap-4">
+                    <!-- Navigation Arrows -->
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-secondary" onclick="previousTicket()">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="nextTicket()">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Ticket Info -->
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">{{ ticket.ticket_number }}</h1>
+                        <p class="text-gray-600">{{ ticket.subject }}</p>
+                        <p class="text-sm text-gray-500">Via email</p>
+                    </div>
+                </div>
+                
+                <!-- Status Badge -->
+                <div class="d-flex align-center gap-3">
+                    <span class="status-badge status-{{ ticket.status }}">
+                        {% if ticket.status == 'pending' %}
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        {% elif ticket.status == 'solved' or ticket.status == 'closed' %}
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        {% endif %}
+                        {{ ticket.status|title }}
+                    </span>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-secondary" onclick="showFilters()">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
+                            </svg>
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="printTicket()">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                            </svg>
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="showMoreOptions()">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="ticket-content">
+    <div class="d-grid" style="grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+        <!-- Messages Section -->
+        <div class="messages-section">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Messages Thread -->
+                    <div class="messages-thread" id="messages-thread">
+                        {% for message in messages %}
+                        <div class="message-item {% if message.sender_id == 1 %}message-outgoing{% else %}message-incoming{% endif %}">
+                            <div class="message-header">
+                                <div class="d-flex align-center gap-2">
+                                    <img src="{{ message.sender_avatar or '/static/images/avatars/default.jpg' }}" 
+                                         alt="{{ message.sender_name }}" 
+                                         class="w-8 h-8 rounded-full">
+                                    <div>
+                                        <span class="font-medium">{{ message.sender_name }}</span>
+                                        <span class="text-sm text-gray-500">to {{ ticket.requester_name }}, me ▼</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-center gap-2">
+                                    <span class="text-sm text-gray-500">{{ message.created_at|format_time }}</span>
+                                    <button class="btn btn-sm btn-secondary" onclick="starMessage({{ message.id }})">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="replyToMessage({{ message.id }})">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="message-content">
+                                {{ message.message|nl2br }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Reply Section -->
+                    <div class="reply-section mt-6">
+                        <div class="reply-header">
+                            <div class="d-flex align-center gap-2">
+                                <button class="btn btn-sm btn-secondary" onclick="showReplyOptions()">
+                                    Reply
+                                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <span class="text-sm text-gray-600">{{ ticket.requester_name }} ({{ ticket.requester_email }})</span>
+                            </div>
+                        </div>
+                        
+                        <div class="reply-composer">
+                            <textarea id="reply-message" class="form-textarea w-full" rows="6" placeholder="Write your thoughts here..."></textarea>
+                            
+                            <!-- Formatting Toolbar -->
+                            <div class="formatting-toolbar">
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-secondary" onclick="formatText('undo')">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="formatText('redo')">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"></path>
+                                        </svg>
+                                    </button>
+                                    <select class="form-select form-select-sm" onchange="formatText('font', this.value)">
+                                        <option value="Arial">Arial (Sans-serif)</option>
+                                        <option value="Times">Times (Serif)</option>
+                                        <option value="Courier">Courier (Monospace)</option>
+                                    </select>
+                                    <select class="form-select form-select-sm" onchange="formatText('size', this.value)">
+                                        <option value="12">12</option>
+                                        <option value="14">14</option>
+                                        <option value="16">16</option>
+                                        <option value="18">18</option>
+                                    </select>
+                                    <button class="btn btn-sm btn-secondary" onclick="formatText('bold')">
+                                        <strong>B</strong>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="formatText('italic')">
+                                        <em>I</em>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="formatText('underline')">
+                                        <u>U</u>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="formatText('strikethrough')">
+                                        <s>S</s>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="formatText('color')">
+                                        <span style="color: #000;">T</span>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="formatText('background')">
+                                        <span style="background: #fff;">A</span>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="formatText('quote')">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="formatText('align-left')">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="formatText('align-center')">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="formatText('align-right')">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="formatText('list-ul')">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="formatText('list-ol')">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="reply-actions">
+                                <div class="d-flex justify-between align-center">
+                                    <button class="btn btn-primary" onclick="submitReply()">
+                                        Submit as Open
+                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </button>
+                                    
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-secondary" onclick="attachFile()">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                                            </svg>
+                                        </button>
+                                        <button class="btn btn-sm btn-secondary" onclick="addLocation()">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            </svg>
+                                        </button>
+                                        <button class="btn btn-sm btn-secondary" onclick="addEmoji()">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </button>
+                                        <button class="btn btn-sm btn-secondary" onclick="addImage()">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                        </button>
+                                        <button class="btn btn-sm btn-secondary" onclick="drawAnnotation()">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="ticket-sidebar">
+            <!-- Ticket Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title">Ticket Details</h3>
+                </div>
+                <div class="card-body">
+                    <div class="ticket-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <span class="status-badge status-{{ ticket.status }}">{{ ticket.status|title }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Priority:</span>
+                            <span class="priority-badge priority-{{ ticket.priority }}">{{ ticket.priority|title }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Type:</span>
+                            <span>{{ ticket.type|title }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Created:</span>
+                            <span>{{ ticket.created_at|format_datetime }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Updated:</span>
+                            <span>{{ ticket.updated_at|format_datetime }}</span>
+                        </div>
+                        {% if ticket.closed_at %}
+                        <div class="detail-item">
+                            <span class="detail-label">Closed:</span>
+                            <span>{{ ticket.closed_at|format_datetime }}</span>
+                        </div>
+                        {% endif %}
+                        {% if ticket.tags %}
+                        <div class="detail-item">
+                            <span class="detail-label">Tags:</span>
+                            <div class="tags-container">
+                                {% for tag in ticket.tags.split(',') %}
+                                <span class="tag">{{ tag.strip() }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Participants -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title">Participants</h3>
+                </div>
+                <div class="card-body">
+                    <div class="participants-list">
+                        <div class="participant-item">
+                            <img src="{{ ticket.requester_avatar or '/static/images/avatars/default.jpg' }}" 
+                                 alt="{{ ticket.requester_name }}" 
+                                 class="w-8 h-8 rounded-full">
+                            <div>
+                                <span class="font-medium">{{ ticket.requester_name }}</span>
+                                <span class="text-sm text-gray-500">Requester</span>
+                            </div>
+                        </div>
+                        {% if ticket.agent_name %}
+                        <div class="participant-item">
+                            <img src="{{ ticket.agent_avatar or '/static/images/avatars/default.jpg' }}" 
+                                 alt="{{ ticket.agent_name }}" 
+                                 class="w-8 h-8 rounded-full">
+                            <div>
+                                <span class="font-medium">{{ ticket.agent_name }}</span>
+                                <span class="text-sm text-gray-500">Agent</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Activity Log -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Activity</h3>
+                </div>
+                <div class="card-body">
+                    <div class="activity-log">
+                        {% for activity in activity %}
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="activity-content">
+                                <span class="font-medium">{{ activity.user_name }}</span>
+                                <span class="text-sm text-gray-600">{{ activity.action }}</span>
+                                <span class="text-xs text-gray-500">{{ activity.created_at|format_time }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

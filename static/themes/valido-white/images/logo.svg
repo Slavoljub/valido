@@ -1,0 +1,14 @@
+<svg width="120" height="40" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="20" cy="20" r="18" fill="#3B82F6" stroke="#2563EB" stroke-width="2"/>
+  
+  <!-- V letter -->
+  <path d="M12 8L20 28L28 8" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- AI text -->
+  <text x="45" y="25" font-family="Inter, sans-serif" font-size="16" font-weight="600" fill="#1F2937">ValidoAI</text>
+  
+  <!-- Decorative elements -->
+  <circle cx="15" cy="15" r="2" fill="white" opacity="0.8"/>
+  <circle cx="25" cy="15" r="1.5" fill="white" opacity="0.6"/>
+</svg>

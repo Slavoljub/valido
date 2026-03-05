@@ -1,0 +1,1343 @@
+{
+  "total_tests": 82,
+  "passed": 0,
+  "failed": 81,
+  "skipped": 1,
+  "errors": 0,
+  "duration": 292.0467531681061,
+  "categories": {
+    "unit": {
+      "total": 11,
+      "passed": 0,
+      "failed": 11,
+      "skipped": 0,
+      "errors": 0
+    },
+    "routes": {
+      "total": 1,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 1,
+      "errors": 0
+    },
+    "imports": {
+      "total": 70,
+      "passed": 0,
+      "failed": 70,
+      "skipped": 0,
+      "errors": 0
+    }
+  },
+  "results": [
+    {
+      "name": "test_api_documentation.py",
+      "category": "unit",
+      "status": "TestStatus.FAILED",
+      "duration": 4.812935829162598,
+      "message": "Some tests failed in test_api_documentation.py",
+      "details": {
+        "file": "tests/unit\\test_api_documentation.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:13:20.155127",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_app.py",
+      "category": "unit",
+      "status": "TestStatus.FAILED",
+      "duration": 4.9781272411346436,
+      "message": "Some tests failed in test_app.py",
+      "details": {
+        "file": "tests/unit\\test_app.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:13:25.133491",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_application.py",
+      "category": "unit",
+      "status": "TestStatus.FAILED",
+      "duration": 3.94345760345459,
+      "message": "Some tests failed in test_application.py",
+      "details": {
+        "file": "tests/unit\\test_application.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:13:29.077146",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_app_start.py",
+      "category": "unit",
+      "status": "TestStatus.FAILED",
+      "duration": 3.561431407928467,
+      "message": "Some tests failed in test_app_start.py",
+      "details": {
+        "file": "tests/unit\\test_app_start.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:13:32.638770",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_error_handling.py",
+      "category": "unit",
+      "status": "TestStatus.FAILED",
+      "duration": 3.5575802326202393,
+      "message": "Some tests failed in test_error_handling.py",
+      "details": {
+        "file": "tests/unit\\test_error_handling.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:13:36.196603",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_error_handling_simple.py",
+      "category": "unit",
+      "status": "TestStatus.FAILED",
+      "duration": 3.37367844581604,
+      "message": "Some tests failed in test_error_handling_simple.py",
+      "details": {
+        "file": "tests/unit\\test_error_handling_simple.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:13:39.570502",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_error_handling_system.py",
+      "category": "unit",
+      "status": "TestStatus.FAILED",
+      "duration": 3.4748165607452393,
+      "message": "Some tests failed in test_error_handling_system.py",
+      "details": {
+        "file": "tests/unit\\test_error_handling_system.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:13:43.045524",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_models.py",
+      "category": "unit",
+      "status": "TestStatus.FAILED",
+      "duration": 3.5106759071350098,
+      "message": "Some tests failed in test_models.py",
+      "details": {
+        "file": "tests/unit\\test_models.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:13:46.556389",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_patterns.py",
+      "category": "unit",
+      "status": "TestStatus.FAILED",
+      "duration": 3.563669443130493,
+      "message": "Some tests failed in test_patterns.py",
+      "details": {
+        "file": "tests/unit\\test_patterns.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:13:50.120218",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_schema_validation.py",
+      "category": "unit",
+      "status": "TestStatus.FAILED",
+      "duration": 3.4167003631591797,
+      "message": "Some tests failed in test_schema_validation.py",
+      "details": {
+        "file": "tests/unit\\test_schema_validation.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:13:53.537058",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_viewmodel_factory.py",
+      "category": "unit",
+      "status": "TestStatus.FAILED",
+      "duration": 3.6282615661621094,
+      "message": "Some tests failed in test_viewmodel_factory.py",
+      "details": {
+        "file": "tests/unit\\test_viewmodel_factory.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:13:57.165462",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "routes_tests",
+      "category": "routes",
+      "status": "TestStatus.SKIPPED",
+      "duration": 0.0,
+      "message": "Test directory not found: tests/routes",
+      "details": {},
+      "timestamp": "2025-08-30 06:13:57.165842",
+      "output": "",
+      "error": ""
+    },
+    {
+      "name": "test_application_startup.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.7114579677581787,
+      "message": "Some tests failed in test_application_startup.py",
+      "details": {
+        "file": "tests\\test_application_startup.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:14:00.881563",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_companies_route.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.4505386352539062,
+      "message": "Some tests failed in test_companies_route.py",
+      "details": {
+        "file": "tests\\test_companies_route.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:14:04.332269",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_database_crud.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.5274460315704346,
+      "message": "Some tests failed in test_database_crud.py",
+      "details": {
+        "file": "tests\\test_database_crud.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:14:07.859852",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_fp32_precision_manager.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.38765025138855,
+      "message": "Some tests failed in test_fp32_precision_manager.py",
+      "details": {
+        "file": "tests\\test_fp32_precision_manager.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:14:11.247693",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_hypercorn.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.5712122917175293,
+      "message": "Some tests failed in test_hypercorn.py",
+      "details": {
+        "file": "tests\\test_hypercorn.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:14:14.819147",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_imports_and_dependencies.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 5.003365755081177,
+      "message": "Some tests failed in test_imports_and_dependencies.py",
+      "details": {
+        "file": "tests\\test_imports_and_dependencies.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:14:19.822753",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_jupyter_client_integration.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.9012808799743652,
+      "message": "Some tests failed in test_jupyter_client_integration.py",
+      "details": {
+        "file": "tests\\test_jupyter_client_integration.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:14:23.724230",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_jupyter_client_simple.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.4078269004821777,
+      "message": "Some tests failed in test_jupyter_client_simple.py",
+      "details": {
+        "file": "tests\\test_jupyter_client_simple.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:14:27.132398",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_routes_verification.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.220789670944214,
+      "message": "Some tests failed in test_routes_verification.py",
+      "details": {
+        "file": "tests\\test_routes_verification.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:14:30.353343",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_sqlite_manager.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.3137905597686768,
+      "message": "Some tests failed in test_sqlite_manager.py",
+      "details": {
+        "file": "tests\\test_sqlite_manager.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:14:33.667324",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_validate_imports.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.8335065841674805,
+      "message": "Some tests failed in test_validate_imports.py",
+      "details": {
+        "file": "tests\\test_validate_imports.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:14:37.501079",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_ai_integration.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.6094884872436523,
+      "message": "Some tests failed in test_ai_integration.py",
+      "details": {
+        "file": "tests\\ai\\test_ai_integration.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:14:41.110740",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_sentiment_analysis.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.4069244861602783,
+      "message": "Some tests failed in test_sentiment_analysis.py",
+      "details": {
+        "file": "tests\\ai\\test_sentiment_analysis.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:14:44.517951",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_database.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.613631010055542,
+      "message": "Some tests failed in test_database.py",
+      "details": {
+        "file": "tests\\database\\test_database.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:14:48.131861",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_database_comprehensive.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.50209641456604,
+      "message": "Some tests failed in test_database_comprehensive.py",
+      "details": {
+        "file": "tests\\database\\test_database_comprehensive.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:14:51.634089",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_database_connections.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.482496738433838,
+      "message": "Some tests failed in test_database_connections.py",
+      "details": {
+        "file": "tests\\database\\test_database_connections.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:14:55.116751",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_database_connector_manager.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 4.069002628326416,
+      "message": "Some tests failed in test_database_connector_manager.py",
+      "details": {
+        "file": "tests\\database\\test_database_connector_manager.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:14:59.186088",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_database_setup.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.89876651763916,
+      "message": "Some tests failed in test_database_setup.py",
+      "details": {
+        "file": "tests\\database\\test_database_setup.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:15:03.085054",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_postgres_cli.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.4968929290771484,
+      "message": "Some tests failed in test_postgres_cli.py",
+      "details": {
+        "file": "tests\\database\\test_postgres_cli.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:15:06.582198",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_postgres_crud.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.6473350524902344,
+      "message": "Some tests failed in test_postgres_crud.py",
+      "details": {
+        "file": "tests\\database\\test_postgres_crud.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:15:10.229732",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_complete_system_e2e.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.6577839851379395,
+      "message": "Some tests failed in test_complete_system_e2e.py",
+      "details": {
+        "file": "tests\\e2e\\test_complete_system_e2e.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:15:13.887831",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_webhooks_e2e.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 4.278799533843994,
+      "message": "Some tests failed in test_webhooks_e2e.py",
+      "details": {
+        "file": "tests\\e2e\\test_webhooks_e2e.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:15:18.167701",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_webhook_comprehensive_e2e.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 4.17603874206543,
+      "message": "Some tests failed in test_webhook_comprehensive_e2e.py",
+      "details": {
+        "file": "tests\\e2e\\test_webhook_comprehensive_e2e.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:15:22.343886",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_companies_tabs.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.699467658996582,
+      "message": "Some tests failed in test_companies_tabs.py",
+      "details": {
+        "file": "tests\\functional\\test_companies_tabs.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:15:26.043508",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_content_management.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.2648227214813232,
+      "message": "Some tests failed in test_content_management.py",
+      "details": {
+        "file": "tests\\functional\\test_content_management.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:15:29.308495",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_dashboard_analytics.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.3057966232299805,
+      "message": "Some tests failed in test_dashboard_analytics.py",
+      "details": {
+        "file": "tests\\functional\\test_dashboard_analytics.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:15:32.614457",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_ai_chat_system.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.3438754081726074,
+      "message": "Some tests failed in test_ai_chat_system.py",
+      "details": {
+        "file": "tests\\integration\\test_ai_chat_system.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:15:35.958560",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_chat_storage.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.382383108139038,
+      "message": "Some tests failed in test_chat_storage.py",
+      "details": {
+        "file": "tests\\integration\\test_chat_storage.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:15:39.341180",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_chat_webhook_integration.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.351583957672119,
+      "message": "Some tests failed in test_chat_webhook_integration.py",
+      "details": {
+        "file": "tests\\integration\\test_chat_webhook_integration.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:15:42.693008",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_comprehensive_integration.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.7284317016601562,
+      "message": "Some tests failed in test_comprehensive_integration.py",
+      "details": {
+        "file": "tests\\integration\\test_comprehensive_integration.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:15:46.421689",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_core_integration.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.3197555541992188,
+      "message": "Some tests failed in test_core_integration.py",
+      "details": {
+        "file": "tests\\integration\\test_core_integration.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:15:49.741661",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_crud_operations.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.2462124824523926,
+      "message": "Some tests failed in test_crud_operations.py",
+      "details": {
+        "file": "tests\\integration\\test_crud_operations.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:15:52.988147",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_crud_routes.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.706968307495117,
+      "message": "Some tests failed in test_crud_routes.py",
+      "details": {
+        "file": "tests\\integration\\test_crud_routes.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:15:56.695395",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_data_integrator.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.666168689727783,
+      "message": "Some tests failed in test_data_integrator.py",
+      "details": {
+        "file": "tests\\integration\\test_data_integrator.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:16:00.361919",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_health_endpoint.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.5310568809509277,
+      "message": "Some tests failed in test_health_endpoint.py",
+      "details": {
+        "file": "tests\\integration\\test_health_endpoint.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:16:03.893118",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_metrics_endpoint.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.708456516265869,
+      "message": "Some tests failed in test_metrics_endpoint.py",
+      "details": {
+        "file": "tests\\integration\\test_metrics_endpoint.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:16:07.601766",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_n8n_integration.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.565880060195923,
+      "message": "Some tests failed in test_n8n_integration.py",
+      "details": {
+        "file": "tests\\integration\\test_n8n_integration.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:16:11.167893",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_n8n_simple.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.5846683979034424,
+      "message": "Some tests failed in test_n8n_simple.py",
+      "details": {
+        "file": "tests\\integration\\test_n8n_simple.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:16:14.752901",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_redis_cache_manager.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.6004936695098877,
+      "message": "Some tests failed in test_redis_cache_manager.py",
+      "details": {
+        "file": "tests\\integration\\test_redis_cache_manager.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:16:18.353549",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_routes.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.8703346252441406,
+      "message": "Some tests failed in test_routes.py",
+      "details": {
+        "file": "tests\\integration\\test_routes.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:16:22.224111",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_routes_comprehensive.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.785996913909912,
+      "message": "Some tests failed in test_routes_comprehensive.py",
+      "details": {
+        "file": "tests\\integration\\test_routes_comprehensive.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:16:26.010266",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_unified_chat.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.8243496417999268,
+      "message": "Some tests failed in test_unified_chat.py",
+      "details": {
+        "file": "tests\\integration\\test_unified_chat.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:16:29.834821",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_unified_crud.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.6122066974639893,
+      "message": "Some tests failed in test_unified_crud.py",
+      "details": {
+        "file": "tests\\integration\\test_unified_crud.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:16:33.447205",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_webhook_integration.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.601595640182495,
+      "message": "Some tests failed in test_webhook_integration.py",
+      "details": {
+        "file": "tests\\integration\\test_webhook_integration.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:16:37.048938",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_database_performance.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.5455942153930664,
+      "message": "Some tests failed in test_database_performance.py",
+      "details": {
+        "file": "tests\\performance\\test_database_performance.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:16:40.594713",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_webhook_performance.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.6950714588165283,
+      "message": "Some tests failed in test_webhook_performance.py",
+      "details": {
+        "file": "tests\\performance\\test_webhook_performance.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:16:44.290272",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_authentication.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.932236909866333,
+      "message": "Some tests failed in test_authentication.py",
+      "details": {
+        "file": "tests\\security\\test_authentication.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:16:48.222710",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_security_manager.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.7211575508117676,
+      "message": "Some tests failed in test_security_manager.py",
+      "details": {
+        "file": "tests\\security\\test_security_manager.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:16:51.944183",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_webhook_security.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.2532413005828857,
+      "message": "Some tests failed in test_webhook_security.py",
+      "details": {
+        "file": "tests\\security\\test_webhook_security.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:16:55.197589",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_ckeditor_component.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.319371461868286,
+      "message": "Some tests failed in test_ckeditor_component.py",
+      "details": {
+        "file": "tests\\ui\\test_ckeditor_component.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:16:58.517166",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_ui_comprehensive.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.3308632373809814,
+      "message": "Some tests failed in test_ui_comprehensive.py",
+      "details": {
+        "file": "tests\\ui\\test_ui_comprehensive.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:17:01.848215",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_ui_examples.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.5176076889038086,
+      "message": "Some tests failed in test_ui_examples.py",
+      "details": {
+        "file": "tests\\ui\\test_ui_examples.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:17:05.365973",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_api_documentation.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.0657694339752197,
+      "message": "Some tests failed in test_api_documentation.py",
+      "details": {
+        "file": "tests\\unit\\test_api_documentation.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:17:08.431879",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_app.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 2.9928784370422363,
+      "message": "Some tests failed in test_app.py",
+      "details": {
+        "file": "tests\\unit\\test_app.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:17:11.424891",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_application.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.3462369441986084,
+      "message": "Some tests failed in test_application.py",
+      "details": {
+        "file": "tests\\unit\\test_application.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:17:14.771379",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_app_start.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.7507262229919434,
+      "message": "Some tests failed in test_app_start.py",
+      "details": {
+        "file": "tests\\unit\\test_app_start.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:17:18.522530",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_error_handling.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 4.5617125034332275,
+      "message": "Some tests failed in test_error_handling.py",
+      "details": {
+        "file": "tests\\unit\\test_error_handling.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:17:23.084483",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_error_handling_simple.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.4055848121643066,
+      "message": "Some tests failed in test_error_handling_simple.py",
+      "details": {
+        "file": "tests\\unit\\test_error_handling_simple.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:17:26.490320",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_error_handling_system.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.478273868560791,
+      "message": "Some tests failed in test_error_handling_system.py",
+      "details": {
+        "file": "tests\\unit\\test_error_handling_system.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:17:29.968784",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_models.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.202650547027588,
+      "message": "Some tests failed in test_models.py",
+      "details": {
+        "file": "tests\\unit\\test_models.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:17:33.171576",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_patterns.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.0850815773010254,
+      "message": "Some tests failed in test_patterns.py",
+      "details": {
+        "file": "tests\\unit\\test_patterns.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:17:36.256809",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_schema_validation.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.468672275543213,
+      "message": "Some tests failed in test_schema_validation.py",
+      "details": {
+        "file": "tests\\unit\\test_schema_validation.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:17:39.725614",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_viewmodel_factory.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.8948006629943848,
+      "message": "Some tests failed in test_viewmodel_factory.py",
+      "details": {
+        "file": "tests\\unit\\test_viewmodel_factory.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:17:43.620675",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_automation_demo.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.277155876159668,
+      "message": "Some tests failed in test_automation_demo.py",
+      "details": {
+        "file": "tests\\utilities\\test_automation_demo.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:17:46.898078",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_comprehensive_suite.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.244708776473999,
+      "message": "Some tests failed in test_comprehensive_suite.py",
+      "details": {
+        "file": "tests\\utilities\\test_comprehensive_suite.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:17:50.142939",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_comprehensive_system.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.435192108154297,
+      "message": "Some tests failed in test_comprehensive_system.py",
+      "details": {
+        "file": "tests\\utilities\\test_comprehensive_system.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:17:53.578393",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_imports.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.53580904006958,
+      "message": "Some tests failed in test_imports.py",
+      "details": {
+        "file": "tests\\utilities\\test_imports.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:17:57.114394",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_memory_optimization.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.51045560836792,
+      "message": "Some tests failed in test_memory_optimization.py",
+      "details": {
+        "file": "tests\\utilities\\test_memory_optimization.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:18:00.625046",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_suite_runner.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.3739593029022217,
+      "message": "Some tests failed in test_suite_runner.py",
+      "details": {
+        "file": "tests\\utilities\\test_suite_runner.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:18:03.999164",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    },
+    {
+      "name": "test_validoai_implementation.py",
+      "category": "imports",
+      "status": "TestStatus.FAILED",
+      "duration": 3.3888721466064453,
+      "message": "Some tests failed in test_validoai_implementation.py",
+      "details": {
+        "file": "tests\\utilities\\test_validoai_implementation.py",
+        "return_code": 4,
+        "stdout_lines": 3,
+        "stderr_lines": 8
+      },
+      "timestamp": "2025-08-30 06:18:07.388227",
+      "output": "\u2705 ValidoAI test configuration loaded successfully\n\ud83d\udcca Test fixtures ready for execution\n\ud83c\udfaf Following Cursor Rules for comprehensive coverage\n",
+      "error": "Could not find platform independent libraries <prefix>\nC:\\Program Files\\Python313\\Lib\\ssl.py:524: UserWarning: Bad certificate in Windows certificate store: not enough data: cadata does not contain a certificate (_ssl.c:4219)\n  warnings.warn(f\"Bad certificate in Windows certificate store: {exc!s}\")\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=none --timeout 30\n  inifile: C:\\MAMP\\htdocs\\ai.valido.online\\tests\\pytest.ini\n  rootdir: C:\\MAMP\\htdocs\\ai.valido.online\\tests\n\n"
+    }
+  ],
+  "summary": "\u26a0\ufe0f 0 passed, 81 failed, 0 errors out of 82 tests",
+  "timestamp": "2025-08-30 06:18:07.388557",
+  "report_file": ""
+}

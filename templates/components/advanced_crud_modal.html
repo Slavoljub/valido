@@ -1,0 +1,1224 @@
+{% extends "components/base_component.html" %}
+
+{% block component_content %}
+<div
+    x-show="{{ config.get('show_var', 'showAdvancedModal') }}"
+    x-cloak
+    class="modal-overlay advanced-modal-overlay"
+>
+    <div class="modal-content advanced-modal {{ config.get('size', 'xl') }}">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                {{ config.get('title', 'Advanced CRUD') }}
+            </h3>
+            <div class="modal-controls">
+                <button
+                    type="button"
+                    class="btn btn-secondary btn-sm"
+                    @click="{{ config.get('show_var', 'showAdvancedModal') }} = false"
+                >
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Close
+                </button>
+            </div>
+        </div>
+
+        <div class="modal-body">
+            <!-- Search and Filter Controls -->
+            <div class="modal-controls-section">
+                <div class="search-group">
+                    <div class="relative">
+                        <input
+                            type="text"
+                            class="form-control pl-10"
+                            placeholder="{{ config.get('search_placeholder', 'Search records...') }}"
+                            x-model="{{ config.get('search_var', 'searchQuery') }}"
+                            @input.debounce.300ms="{{ config.get('search_handler', 'searchData') }}"
+                        >
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                {% if config.get('filter_options') %}
+                <div class="filter-group">
+                    <select
+                        class="form-control"
+                        x-model="{{ config.get('filter_var', 'selectedFilter') }}"
+                        @change="{{ config.get('filter_handler', 'applyFilter') }}"
+                    >
+                        <option value="">All {{ config.get('table_name', 'Records') }}</option>
+                        {% for filter_option in config.get('filter_options', []) %}
+                        <option value="{{ filter_option.value }}">{{ filter_option.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <div class="column-selector">
+                    <button
+                        type="button"
+                        class="btn btn-outline btn-sm"
+                        @click="{{ config.get('columns_var', 'showColumnSelector') }} = true"
+                    >
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        Columns
+                    </button>
+                </div>
+
+                <div class="view-controls">
+                    <div class="flex items-center space-x-2">
+                        <button
+                            type="button"
+                            class="btn btn-outline btn-sm"
+                            :class="{ 'bg-blue-100': viewMode === 'table' }"
+                            @click="viewMode = 'table'"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0a2 2 0 002 2h10a2 2 0 002-2V8a2 2 0 00-2-2H8a2 2 0 00-2 2v8z"></path>
+                            </svg>
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-outline btn-sm"
+                            :class="{ 'bg-blue-100': viewMode === 'grid' }"
+                            @click="viewMode = 'grid'"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM12 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM12 13a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column Selector Modal -->
+            <div
+                x-show="{{ config.get('columns_var', 'showColumnSelector') }}"
+                x-cloak
+                class="column-selector-overlay"
+                @click="{{ config.get('columns_var', 'showColumnSelector') }} = false"
+            >
+                <div class="column-selector-content" @click.stop>
+                    <div class="column-selector-header">
+                        <h4>Show Columns</h4>
+                        <div class="column-selector-actions">
+                            <button
+                                type="button"
+                                class="btn btn-outline btn-xs"
+                                @click="selectAllColumns()"
+                            >
+                                Select All
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-outline btn-xs"
+                                @click="clearColumnSelection()"
+                            >
+                                Clear All
+                            </button>
+                        </div>
+                    </div>
+                    <div class="column-checkboxes">
+                        <template x-for="column in {{ config.get('columns_list', 'availableColumns') }}" :key="column.key">
+                            <label class="checkbox-item">
+                                <input
+                                    type="checkbox"
+                                    :value="column.key"
+                                    x-model="{{ config.get('visible_columns', 'visibleColumns') }}"
+                                >
+                                <span class="checkbox-label">
+                                    <span x-text="column.label"></span>
+                                    <span x-show="column.description" class="checkbox-description" x-text="column.description"></span>
+                                </span>
+                            </label>
+                        </template>
+                    </div>
+                    <div class="column-actions">
+                        <button
+                            type="button"
+                            class="btn btn-secondary btn-sm"
+                            @click="{{ config.get('columns_var', 'showColumnSelector') }} = false"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm"
+                            @click="{{ config.get('columns_var', 'showColumnSelector') }} = false"
+                        >
+                            Apply
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Display -->
+            <div class="data-display-container">
+                <!-- Table View -->
+                <div x-show="viewMode === 'table'" class="data-table-container">
+                    <div class="table-responsive">
+                        <table class="data-table advanced-table">
+                            <thead>
+                                <tr>
+                                    <th class="checkbox-column">
+                                        <input
+                                            type="checkbox"
+                                            x-model="{{ config.get('select_all_var', 'selectAll') }}"
+                                            @change="{{ config.get('select_all_handler', 'toggleSelectAll') }}"
+                                        >
+                                    </th>
+                                    <template x-for="column in {{ config.get('visible_columns', 'visibleColumns') }}" :key="column">
+                                        <th
+                                            class="sortable-column"
+                                            @click="{{ config.get('sort_handler', 'sortBy') }}($event, column)"
+                                        >
+                                            <div class="column-header">
+                                                <span x-text="getColumnLabel(column)"></span>
+                                                <div class="sort-indicators">
+                                                    <svg x-show="getSortDirection(column) === 'asc'" class="sort-icon active" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                                    </svg>
+                                                    <svg x-show="getSortDirection(column) === 'desc'" class="sort-icon active" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7-7-7"></path>
+                                                    </svg>
+                                                    <svg x-show="!getSortDirection(column)" class="sort-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </th>
+                                    </template>
+                                    <th class="actions-column">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="(item, index) in {{ config.get('data_var', 'tableData') }}" :key="getItemKey(item)">
+                                    <tr class="data-row" :class="{ 'selected': isSelected(item) }">
+                                        <td class="checkbox-cell">
+                                            <input
+                                                type="checkbox"
+                                                :value="getItemKey(item)"
+                                                x-model="{{ config.get('selected_items', 'selectedItems') }}"
+                                            >
+                                        </td>
+                                        <template x-for="column in {{ config.get('visible_columns', 'visibleColumns') }}" :key="column">
+                                            <td>
+                                                <div class="cell-content">
+                                                    <span x-text="getCellValue(item, column)"></span>
+                                                    <div x-show="column.tooltip" class="cell-tooltip" x-text="column.tooltip"></div>
+                                                </div>
+                                            </td>
+                                        </template>
+                                        <td class="actions-cell">
+                                            <div class="action-buttons">
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-primary action-btn"
+                                                    @click="{{ config.get('edit_handler', 'editItem') }}(item)"
+                                                    title="Edit"
+                                                >
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-info action-btn"
+                                                    @click="{{ config.get('view_handler', 'viewItem') }}(item)"
+                                                    title="View Details"
+                                                >
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-warning action-btn"
+                                                    @click="{{ config.get('duplicate_handler', 'duplicateItem') }}(item)"
+                                                    title="Duplicate"
+                                                >
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-danger action-btn"
+                                                    @click="{{ config.get('delete_handler', 'deleteItem') }}(item)"
+                                                    title="Delete"
+                                                >
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Grid View -->
+                <div x-show="viewMode === 'grid'" class="data-grid-container">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        <template x-for="(item, index) in {{ config.get('data_var', 'tableData') }}" :key="getItemKey(item)">
+                            <div class="card grid-card" :class="{ 'selected': isSelected(item) }">
+                                <div class="card-header">
+                                    <div class="card-checkbox">
+                                        <input
+                                            type="checkbox"
+                                            :value="getItemKey(item)"
+                                            x-model="{{ config.get('selected_items', 'selectedItems') }}"
+                                        >
+                                    </div>
+                                    <div class="card-actions">
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-primary"
+                                            @click="{{ config.get('edit_handler', 'editItem') }}(item)"
+                                        >
+                                            Edit
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <template x-for="column in {{ config.get('visible_columns', 'visibleColumns') }}">
+                                        <div class="grid-field">
+                                            <label x-text="getColumnLabel(column)" class="field-label"></label>
+                                            <div x-text="getCellValue(item, column)" class="field-value"></div>
+                                        </div>
+                                    </template>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="grid-actions">
+                                        <button
+                                            type="button"
+                                            class="btn btn-xs btn-info"
+                                            @click="{{ config.get('view_handler', 'viewItem') }}(item)"
+                                        >
+                                            View
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="btn btn-xs btn-danger"
+                                            @click="{{ config.get('delete_handler', 'deleteItem') }}(item)"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div x-show="{{ config.get('data_var', 'tableData') }}.length === 0" class="empty-state">
+                    <div class="empty-state-content">
+                        <svg class="empty-state-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                        </svg>
+                        <h3 class="empty-state-title">No records found</h3>
+                        <p class="empty-state-message">Try adjusting your search or filter criteria.</p>
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            @click="{{ config.get('refresh_handler', 'refreshData') }}"
+                        >
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-container" x-show="{{ config.get('data_var', 'tableData') }}.length > 0">
+                <div class="pagination-info">
+                    <span x-text="getPaginationInfo()"></span>
+                    <div class="pagination-size-selector">
+                        <label>Show:</label>
+                        <select x-model="pageSize" @change="changePageSize()" class="form-control form-control-sm">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="pagination-controls">
+                    <button
+                        type="button"
+                        class="btn btn-outline btn-sm"
+                        :disabled="!{{ config.get('has_prev_var', 'hasPrevPage') }}"
+                        @click="{{ config.get('prev_handler', 'goToPrevPage') }}"
+                    >
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        Previous
+                    </button>
+
+                    <div class="pagination-pages">
+                        <template x-for="page in getVisiblePages()" :key="page">
+                            <button
+                                type="button"
+                                class="pagination-page"
+                                :class="{ 'active': page === {{ config.get('current_page', 'currentPage') }} }"
+                                x-text="page"
+                                @click="{{ config.get('page_handler', 'goToPage') }}(page)"
+                            ></button>
+                        </template>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn btn-outline btn-sm"
+                        :disabled="!{{ config.get('has_next_var', 'hasNextPage') }}"
+                        @click="{{ config.get('next_handler', 'goToNextPage') }}"
+                    >
+                        Next
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="bulk-actions-container" x-show="{{ config.get('selected_items', 'selectedItems') }}.length > 0">
+                <div class="bulk-actions-bar">
+                    <div class="bulk-actions-info">
+                        <span class="bulk-count" x-text="{{ config.get('selected_items', 'selectedItems') }}.length"></span>
+                        <span>items selected</span>
+                    </div>
+                    <div class="bulk-actions-controls">
+                        <div class="bulk-action-buttons">
+                            <button
+                                type="button"
+                                class="btn btn-success btn-sm"
+                                @click="{{ config.get('bulk_edit_handler', 'bulkEdit') }}"
+                            >
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                Bulk Edit
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-info btn-sm"
+                                @click="{{ config.get('bulk_export_handler', 'bulkExport') }}"
+                            >
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Export Selected
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-warning btn-sm"
+                                @click="{{ config.get('bulk_duplicate_handler', 'bulkDuplicate') }}"
+                            >
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                Duplicate Selected
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-danger btn-sm"
+                                @click="{{ config.get('bulk_delete_handler', 'bulkDelete') }}"
+                            >
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                Delete Selected
+                            </button>
+                        </div>
+                        <div class="bulk-actions-close">
+                            <button
+                                type="button"
+                                class="btn btn-outline btn-sm"
+                                @click="clearSelection()"
+                            >
+                                Clear Selection
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <div class="footer-actions">
+                <div class="footer-info">
+                    <span class="footer-text">
+                        Total: <span x-text="{{ config.get('total_count', 'totalCount') }}"></span> records
+                    </span>
+                </div>
+                <div class="footer-buttons">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        @click="{{ config.get('show_var', 'showAdvancedModal') }} = false"
+                    >
+                        Close
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        @click="{{ config.get('save_handler', 'saveChanges') }}"
+                    >
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block component_styles %}
+<style>
+.advanced-modal {
+    max-width: 95vw;
+    max-height: 95vh;
+    overflow: hidden;
+}
+
+.advanced-modal-overlay {
+    backdrop-filter: blur(4px);
+}
+
+.modal-controls-section {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto auto;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.search-group input {
+    width: 100%;
+}
+
+.column-selector-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.column-selector-content {
+    background: var(--bg-primary);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    max-width: 400px;
+    width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+}
+
+.column-selector-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.column-selector-header h4 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.column-selector-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.column-checkboxes {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.checkbox-item:hover {
+    background: var(--bg-secondary);
+}
+
+.checkbox-item input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+.checkbox-label {
+    display: flex;
+    flex-direction: column;
+}
+
+.checkbox-description {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.125rem;
+}
+
+.column-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.data-display-container {
+    min-height: 400px;
+}
+
+.data-table-container {
+    height: 400px;
+    overflow: auto;
+}
+
+.advanced-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.advanced-table th,
+.advanced-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.advanced-table th {
+    background: var(--bg-secondary);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.sortable-column {
+    cursor: pointer;
+    user-select: none;
+}
+
+.sortable-column:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sort-indicators {
+    display: flex;
+    flex-direction: column;
+    margin-left: 0.5rem;
+}
+
+.sort-icon {
+    width: 0.75rem;
+    height: 0.75rem;
+    opacity: 0.3;
+    transition: opacity 0.2s;
+}
+
+.sort-icon.active {
+    opacity: 1;
+}
+
+.checkbox-column {
+    width: 3rem;
+}
+
+.actions-column {
+    width: 8rem;
+}
+
+.data-row {
+    transition: background-color 0.2s;
+}
+
+.data-row:hover {
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.data-row.selected {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.action-btn {
+    padding: 0.25rem;
+    min-width: auto;
+}
+
+.cell-content {
+    position: relative;
+}
+
+.cell-tooltip {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 50;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.cell-content:hover .cell-tooltip {
+    display: block;
+}
+
+.grid-card {
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.grid-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.grid-card.selected {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+.card-footer {
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+}
+
+.grid-field {
+    margin-bottom: 0.75rem;
+}
+
+.grid-field:last-child {
+    margin-bottom: 0;
+}
+
+.field-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.field-value {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.grid-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 400px;
+}
+
+.empty-state-content {
+    text-align: center;
+}
+
+.empty-state-icon {
+    width: 3rem;
+    height: 3rem;
+    margin: 0 auto 1rem;
+    color: var(--text-secondary);
+}
+
+.empty-state-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-message {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.pagination-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.pagination-size-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.pagination-size-selector label {
+    color: var(--text-secondary);
+}
+
+.pagination-size-selector select {
+    width: 4rem;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pagination-pages {
+    display: flex;
+    gap: 0.25rem;
+    margin: 0 1rem;
+}
+
+.pagination-page {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 2.5rem;
+    text-align: center;
+}
+
+.pagination-page:hover {
+    background: var(--bg-secondary);
+}
+
+.pagination-page.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+.bulk-actions-container {
+    margin-top: 1rem;
+}
+
+.bulk-actions-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #3b82f6;
+    color: white;
+    border-radius: 0.5rem;
+}
+
+.bulk-actions-info {
+    font-weight: 600;
+}
+
+.bulk-count {
+    font-size: 1.125rem;
+}
+
+.bulk-actions-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.bulk-action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.footer-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.footer-info {
+    color: var(--text-secondary);
+}
+
+.footer-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .modal-controls-section {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .column-selector-content {
+        width: 95vw;
+        max-height: 90vh;
+    }
+
+    .pagination-container {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .pagination-pages {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .bulk-actions-bar {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .footer-actions {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+}
+</style>
+{% endblock %}
+
+{% block component_scripts %}
+<script>
+function advancedCrudModal() {
+    return {
+        viewMode: 'table',
+        pageSize: 25,
+        sortColumn: null,
+        sortDirection: null,
+
+        init() {
+            // Initialize component
+            console.log('Advanced CRUD Modal initialized');
+        },
+
+        // Search functionality
+        searchData() {
+            // Debounced search implementation
+            if (this.searchQuery && this.searchQuery.length >= 2) {
+                this.filterData();
+            } else if (!this.searchQuery) {
+                this.clearSearch();
+            }
+        },
+
+        // Filter functionality
+        applyFilter() {
+            this.filterData();
+        },
+
+        // Sort functionality
+        sortBy(event, column) {
+            if (this.sortColumn === column.key) {
+                // Toggle sort direction
+                this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortColumn = column.key;
+                this.sortDirection = 'asc';
+            }
+            this.sortData();
+        },
+
+        getSortDirection(column) {
+            return this.sortColumn === column.key ? this.sortDirection : null;
+        },
+
+        // Column management
+        selectAllColumns() {
+            this.visibleColumns = this.availableColumns.map(col => col.key);
+        },
+
+        clearColumnSelection() {
+            this.visibleColumns = [];
+        },
+
+        // Selection management
+        toggleSelectAll() {
+            if (this.selectAll) {
+                this.selectedItems = this.tableData.map(item => this.getItemKey(item));
+            } else {
+                this.selectedItems = [];
+            }
+        },
+
+        isSelected(item) {
+            return this.selectedItems.includes(this.getItemKey(item));
+        },
+
+        clearSelection() {
+            this.selectedItems = [];
+            this.selectAll = false;
+        },
+
+        // Data helpers
+        getColumnLabel(column) {
+            return column.label || column.key;
+        },
+
+        getCellValue(item, column) {
+            if (column.formatter) {
+                return column.formatter(item[column.key], item);
+            }
+            return item[column.key] || '';
+        },
+
+        getItemKey(item) {
+            return item.id || item._id || item.pk || item.uuid;
+        },
+
+        // Pagination helpers
+        getPaginationInfo() {
+            const start = ((this.currentPage - 1) * this.pageSize) + 1;
+            const end = Math.min(this.currentPage * this.pageSize, this.totalCount);
+            return `Showing ${start} to ${end} of ${this.totalCount} entries`;
+        },
+
+        getVisiblePages() {
+            const totalPages = this.totalPages;
+            const currentPage = this.currentPage;
+            const delta = 2;
+            const range = [];
+            const rangeWithDots = [];
+
+            for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+                range.push(i);
+            }
+
+            if (currentPage - delta > 2) {
+                rangeWithDots.push(1, '...');
+            } else {
+                rangeWithDots.push(1);
+            }
+
+            rangeWithDots.push(...range);
+
+            if (currentPage + delta < totalPages - 1) {
+                rangeWithDots.push('...', totalPages);
+            } else if (totalPages > 1) {
+                rangeWithDots.push(totalPages);
+            }
+
+            return rangeWithDots;
+        },
+
+        // Action handlers
+        editItem(item) {
+            if (typeof this.editHandler === 'function') {
+                this.editHandler(item);
+            } else {
+                console.log('Edit item:', item);
+                // Default edit implementation
+            }
+        },
+
+        viewItem(item) {
+            if (typeof this.viewHandler === 'function') {
+                this.viewHandler(item);
+            } else {
+                console.log('View item:', item);
+                // Default view implementation
+            }
+        },
+
+        deleteItem(item) {
+            if (typeof this.deleteHandler === 'function') {
+                this.deleteHandler(item);
+            } else {
+                console.log('Delete item:', item);
+                // Default delete implementation
+            }
+        },
+
+        duplicateItem(item) {
+            if (typeof this.duplicateHandler === 'function') {
+                this.duplicateHandler(item);
+            } else {
+                console.log('Duplicate item:', item);
+                // Default duplicate implementation
+            }
+        },
+
+        // Bulk operations
+        bulkEdit() {
+            if (this.selectedItems.length === 0) return;
+            if (typeof this.bulkEditHandler === 'function') {
+                this.bulkEditHandler(this.selectedItems);
+            } else {
+                console.log('Bulk edit items:', this.selectedItems);
+            }
+        },
+
+        bulkExport() {
+            if (this.selectedItems.length === 0) return;
+            if (typeof this.bulkExportHandler === 'function') {
+                this.bulkExportHandler(this.selectedItems);
+            } else {
+                console.log('Bulk export items:', this.selectedItems);
+            }
+        },
+
+        bulkDelete() {
+            if (this.selectedItems.length === 0) return;
+            if (typeof this.bulkDeleteHandler === 'function') {
+                this.bulkDeleteHandler(this.selectedItems);
+            } else {
+                console.log('Bulk delete items:', this.selectedItems);
+            }
+        },
+
+        bulkDuplicate() {
+            if (this.selectedItems.length === 0) return;
+            if (typeof this.bulkDuplicateHandler === 'function') {
+                this.bulkDuplicateHandler(this.selectedItems);
+            } else {
+                console.log('Bulk duplicate items:', this.selectedItems);
+            }
+        },
+
+        // Pagination
+        goToPrevPage() {
+            if (this.hasPrevPage) {
+                this.currentPage--;
+                this.loadData();
+            }
+        },
+
+        goToNextPage() {
+            if (this.hasNextPage) {
+                this.currentPage++;
+                this.loadData();
+            }
+        },
+
+        goToPage(page) {
+            if (page !== '...' && page >= 1 && page <= this.totalPages) {
+                this.currentPage = page;
+                this.loadData();
+            }
+        },
+
+        changePageSize() {
+            this.currentPage = 1;
+            this.loadData();
+        },
+
+        // Data operations
+        loadData() {
+            if (typeof this.loadDataHandler === 'function') {
+                this.loadDataHandler({
+                    page: this.currentPage,
+                    pageSize: this.pageSize,
+                    search: this.searchQuery,
+                    filter: this.selectedFilter,
+                    sort: this.sortColumn,
+                    sortDirection: this.sortDirection
+                });
+            }
+        },
+
+        filterData() {
+            this.currentPage = 1;
+            this.loadData();
+        },
+
+        sortData() {
+            this.loadData();
+        },
+
+        clearSearch() {
+            this.searchQuery = '';
+            this.currentPage = 1;
+            this.loadData();
+        },
+
+        refreshData() {
+            this.loadData();
+        },
+
+        saveChanges() {
+            if (typeof this.saveChangesHandler === 'function') {
+                this.saveChangesHandler();
+            } else {
+                console.log('Save changes');
+            }
+        }
+    }
+}
+</script>
+{% endblock %}

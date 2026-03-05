@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns:meta="http://example.com/metadata">
+    <meta:info>
+        <meta:title>Sample XML Document</meta:title>
+        <meta:author>Document Processor</meta:author>
+        <meta:created>2024-01-01</meta:created>
+    </meta:info>
+    <content>
+        <section id="introduction">
+            <title>Introduction</title>
+            <paragraph>This is a sample XML document for testing.</paragraph>
+            <list>
+                <item>XML parsing</item>
+                <item>Structure analysis</item>
+                <item>Namespace extraction</item>
+            </list>
+        </section>
+        <section id="features">
+            <title>Features</title>
+            <paragraph>The processor can extract various XML elements.</paragraph>
+        </section>
+    </content>
+</document>

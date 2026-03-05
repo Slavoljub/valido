@@ -1,0 +1,414 @@
+<!-- Business Forms Tab Content -->
+<div class="space-y-6">
+    <!-- Search and Filters -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="form-label">Search</label>
+                <input type="text" id="formsSearchInput" placeholder="Search business forms..." class="form-input"
+                       onkeyup="filterBusinessForms()">
+            </div>
+            <div>
+                <label class="form-label">Status</label>
+                <select id="formsStatusFilter" class="form-input" onchange="filterBusinessForms()">
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Business Forms Table -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <h3 class="text-lg font-medium text-gray-900">Business Forms</h3>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button onclick="openCreateFormModal()" class="btn-primary">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Business Form
+                    </button>
+                    <button onclick="refreshBusinessForms()" class="btn-secondary">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Form Name
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Description
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Companies Using
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="businessFormsTableBody" class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center">
+                            <i class="fas fa-spinner fa-spin text-3xl text-gray-400 mb-4"></i>
+                            <p class="text-gray-500">Loading business forms...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div id="formsStatsContainer" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <!-- Stats will be loaded here -->
+    </div>
+</div>
+
+<!-- Create/Edit Business Form Modal -->
+<div id="formModal" class="modal-overlay hidden">
+    <div class="modal-container max-w-md">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-medium text-gray-900" id="formModalTitle">Add New Business Form</h3>
+            <button onclick="closeFormModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form id="formForm" onsubmit="saveBusinessForm(event)">
+            <input type="hidden" id="formId" name="business_forms_id">
+
+            <div class="space-y-4">
+                <div>
+                    <label class="form-label required">Form Name</label>
+                    <input type="text" id="formName" name="form_name" required class="form-input"
+                           placeholder="e.g., Limited Liability Company">
+                </div>
+
+                <div>
+                    <label class="form-label">Description</label>
+                    <textarea id="formDescription" name="description" rows="3" class="form-input"
+                              placeholder="Brief description of the business form..."></textarea>
+                </div>
+
+                <div>
+                    <label class="form-label">Legal Requirements</label>
+                    <textarea id="formLegalReq" name="legal_requirements" rows="3" class="form-input"
+                              placeholder="Key legal requirements for this form..."></textarea>
+                </div>
+
+                <div>
+                    <label class="form-label">Tax Implications</label>
+                    <textarea id="formTaxImpl" name="tax_implications" rows="2" class="form-input"
+                              placeholder="Tax-related information..."></textarea>
+                </div>
+
+                <div class="flex items-center">
+                    <input type="checkbox" id="formActive" name="is_active" class="form-control w-auto mr-2">
+                    <label class="text-sm text-gray-700">
+                        Active (available for new companies)
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 mt-6">
+                <button type="button" onclick="closeFormModal()" class="btn-secondary">
+                    Cancel
+                </button>
+                <button type="submit" class="btn-primary">
+                    Save Business Form
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tab-specific JavaScript -->
+<script>
+function filterBusinessForms() {
+    const searchTerm = document.getElementById('formsSearchInput').value.toLowerCase();
+    const statusFilter = document.getElementById('formsStatusFilter').value;
+
+    const rows = document.querySelectorAll('#businessFormsTableBody tr[data-form-id]');
+    rows.forEach(row => {
+        const formName = row.dataset.formName?.toLowerCase() || '';
+        const status = row.dataset.status || '';
+
+        const matchesSearch = formName.includes(searchTerm);
+        const matchesStatus = !statusFilter || status === statusFilter;
+
+        row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+    });
+}
+
+function refreshBusinessForms() {
+    loadBusinessForms();
+}
+
+async function loadBusinessForms() {
+    try {
+        const response = await fetch('/api/business-forms');
+        const data = await response.json();
+
+        if (data.success) {
+            renderBusinessForms(data.forms);
+            renderFormsStats(data.stats);
+        } else {
+            showToast('Error', 'Failed to load business forms', 'error');
+        }
+    } catch (error) {
+        console.error('Error loading business forms:', error);
+        showToast('Error', 'Failed to load business forms', 'error');
+    }
+}
+
+function renderBusinessForms(forms) {
+    const tbody = document.getElementById('businessFormsTableBody');
+
+    if (!forms || forms.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="px-6 py-12 text-center">
+                    <i class="fas fa-file-contract text-3xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500 mb-4">No business forms found</p>
+                    <button onclick="openCreateFormModal()" class="btn-primary">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add First Business Form
+                    </button>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = forms.map(form => `
+        <tr data-form-id="${form.business_forms_id}"
+            data-form-name="${form.form_name}"
+            data-status="${form.is_active ? 'active' : 'inactive'}">
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div>
+                    <div class="text-sm font-medium text-gray-900">${form.form_name}</div>
+                    <div class="text-sm text-gray-500">${form.description || 'No description'}</div>
+                </div>
+            </td>
+            <td class="px-6 py-4">
+                <div class="text-sm text-gray-900 max-w-xs truncate">
+                    ${form.legal_requirements || 'No legal requirements specified'}
+                </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full ${form.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                    ${form.is_active ? 'Active' : 'Inactive'}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${form.companies_count || 0} companies
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <div class="flex space-x-2">
+                    <button onclick="viewBusinessForm('${form.business_forms_id}')"
+                            class="text-blue-600 hover:text-blue-900" title="View">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button onclick="editBusinessForm('${form.business_forms_id}')"
+                            class="text-green-600 hover:text-green-900" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="deleteBusinessForm('${form.business_forms_id}')"
+                            class="text-red-600 hover:text-red-900" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderFormsStats(stats) {
+    const container = document.getElementById('formsStatsContainer');
+    if (!stats) return;
+
+    container.innerHTML = `
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                        <i class="fas fa-file-contract text-white text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <div class="text-2xl font-bold text-gray-900">${stats.total || 0}</div>
+                    <div class="text-sm text-gray-500">Total Forms</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                        <i class="fas fa-check-circle text-white text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <div class="text-2xl font-bold text-gray-900">${stats.active || 0}</div>
+                    <div class="text-sm text-gray-500">Active Forms</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
+                        <i class="fas fa-building text-white text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <div class="text-2xl font-bold text-gray-900">${stats.totalCompanies || 0}</div>
+                    <div class="text-sm text-gray-500">Total Companies</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
+                        <i class="fas fa-percentage text-white text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <div class="text-2xl font-bold text-gray-900">${stats.avgUsage || 0}%</div>
+                    <div class="text-sm text-gray-500">Avg. Usage</div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function openCreateFormModal() {
+    document.getElementById('formModalTitle').textContent = 'Add New Business Form';
+    document.getElementById('formForm').reset();
+    document.getElementById('formId').value = '';
+    document.getElementById('formActive').checked = true;
+    document.getElementById('formModal').classList.remove('hidden');
+}
+
+function closeFormModal() {
+    document.getElementById('formModal').classList.add('hidden');
+}
+
+async function saveBusinessForm(event) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const formDataObj = Object.fromEntries(formData.entries());
+
+    // Convert checkbox to boolean
+    formDataObj.is_active = formDataObj.is_active === 'on';
+
+    const formId = formDataObj.business_forms_id;
+    const isEdit = !!formId;
+
+    try {
+        const response = await fetch(`/api/business-forms${isEdit ? `/${formId}` : ''}`, {
+            method: isEdit ? 'PUT' : 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formDataObj)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showToast('Success', `Business form ${isEdit ? 'updated' : 'created'} successfully`, 'success');
+            closeFormModal();
+            loadBusinessForms();
+        } else {
+            showToast('Error', result.message || 'Failed to save business form', 'error');
+        }
+    } catch (error) {
+        console.error('Error saving business form:', error);
+        showToast('Error', 'Failed to save business form', 'error');
+    }
+}
+
+function viewBusinessForm(id) {
+    // Load and display business form details
+    fetch(`/api/business-forms/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const form = data.form;
+                // Create a simple view modal or redirect to detailed view
+                showToast('Info', `Viewing: ${form.form_name}`, 'info');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading business form:', error);
+            showToast('Error', 'Failed to load business form details', 'error');
+        });
+}
+
+function editBusinessForm(id) {
+    // Load business form data and open edit modal
+    fetch(`/api/business-forms/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const form = data.form;
+                document.getElementById('formModalTitle').textContent = 'Edit Business Form';
+                document.getElementById('formId').value = form.business_forms_id;
+                document.getElementById('formName').value = form.form_name;
+                document.getElementById('formDescription').value = form.description || '';
+                document.getElementById('formLegalReq').value = form.legal_requirements || '';
+                document.getElementById('formTaxImpl').value = form.tax_implications || '';
+                document.getElementById('formActive').checked = form.is_active;
+                document.getElementById('formModal').classList.remove('hidden');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading business form:', error);
+            showToast('Error', 'Failed to load business form data', 'error');
+        });
+}
+
+function deleteBusinessForm(id) {
+    if (confirm('Are you sure you want to delete this business form? This action cannot be undone.')) {
+        fetch(`/api/business-forms/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Success', 'Business form deleted successfully', 'success');
+                loadBusinessForms();
+            } else {
+                showToast('Error', data.message || 'Failed to delete business form', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting business form:', error);
+            showToast('Error', 'Failed to delete business form', 'error');
+        });
+    }
+}
+
+// Initialize when tab is activated
+document.addEventListener('business_formsTabActivated', function() {
+    loadBusinessForms();
+});
+</script>

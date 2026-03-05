@@ -1,0 +1,812 @@
+{% extends "layouts/base.html"" %}
+
+{% block title %}Test Suite - Comprehensive Testing System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div class="mb-3 mb-lg-0">
+                    <h1 class="h3 mb-0">🧪 ValidoAI Comprehensive Test Suite v2.0</h1>
+                    <p class="text-muted">Enterprise-grade testing system with UI/UX, E2E, Security, Integration, and Performance testing</p>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-primary" onclick="runComprehensiveTests()">
+                        <i class="fas fa-play me-2"></i>Run All Tests
+                    </button>
+                    <button class="btn btn-success" onclick="generateReport()">
+                        <i class="fas fa-chart-bar me-2"></i>Generate Report
+                    </button>
+                    <button class="btn btn-info" onclick="refreshStatus()">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh Status
+                    </button>
+                    <button class="btn btn-warning" onclick="stopAllTests()">
+                        <i class="fas fa-stop me-2"></i>Stop Tests
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Configuration Panel -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cogs me-2"></i>Test Configuration
+                        <button class="btn btn-sm btn-outline-secondary float-end" onclick="toggleConfigPanel()">
+                            <i class="fas fa-chevron-up"></i>
+                        </button>
+                    </h5>
+                </div>
+                <div class="card-body" id="configPanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Test Categories</label>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="ui_ux" checked>
+                                        <label class="form-check-label" for="ui_ux">🎨 UI/UX Tests</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="e2e" checked>
+                                        <label class="form-check-label" for="e2e">🔄 E2E Tests</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="security" checked>
+                                        <label class="form-check-label" for="security">🔒 Security Tests</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="integration" checked>
+                                        <label class="form-check-label" for="integration">🔗 Integration Tests</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="routes" checked>
+                                        <label class="form-check-label" for="routes">📍 Route Tests</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="llm_ml">
+                                        <label class="form-check-label" for="llm_ml">🤖 LLM/ML Tests</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="webhook_api">
+                                        <label class="form-check-label" for="webhook_api">🔗 Webhook/API Tests</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="performance" checked>
+                                        <label class="form-check-label" for="performance">⚡ Performance Tests</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Report Format</label>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="reportFormat" id="html" value="html" checked>
+                                        <label class="form-check-label" for="html">📄 HTML Report</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="reportFormat" id="pdf" value="pdf">
+                                        <label class="form-check-label" for="pdf">📕 PDF Report</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="reportFormat" id="json" value="json">
+                                        <label class="form-check-label" for="json">📊 JSON Report</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Execution Mode</label>
+                                <div class="d-flex gap-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="executionMode" id="parallel" value="parallel" checked>
+                                        <label class="form-check-label" for="parallel">⚡ Parallel Execution</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="executionMode" id="sequential" value="sequential">
+                                        <label class="form-check-label" for="sequential">🔄 Sequential Execution</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Status Cards -->
+    <div class="row mb-4" id="systemStatus">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">🖥️ System Status</h5>
+                    <h2 class="mb-0" id="systemStatusText">Loading...</h2>
+                    <small class="opacity-75" id="systemStatusDetail">Initializing...</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">📊 CPU Usage</h5>
+                    <h2 class="mb-0" id="cpuUsage">Loading...</h2>
+                    <small class="opacity-75">System Performance</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">🧠 Memory Usage</h5>
+                    <h2 class="mb-0" id="memoryUsage">Loading...</h2>
+                    <small class="opacity-75">RAM Utilization</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h5 class="card-title">📈 Disk Usage</h5>
+                    <h2 class="mb-0" id="diskUsage">Loading...</h2>
+                    <small class="opacity-75">Storage Status</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Progress Bar -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card" id="testProgressCard" style="display: none;">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tasks me-2"></i>Test Execution Progress
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold">Overall Progress</span>
+                            <span id="progressText">0%</span>
+                        </div>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                 id="testProgressBar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-md-2">
+                            <div class="border rounded p-2">
+                                <div class="h4 mb-0 text-primary" id="runningTests">0</div>
+                                <small class="text-muted">Running</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="border rounded p-2">
+                                <div class="h4 mb-0 text-success" id="completedTests">0</div>
+                                <small class="text-muted">Completed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="border rounded p-2">
+                                <div class="h4 mb-0 text-danger" id="failedTests">0</div>
+                                <small class="text-muted">Failed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="border rounded p-2">
+                                <div class="h4 mb-0 text-info" id="totalTests">0</div>
+                                <small class="text-muted">Total</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="border rounded p-2">
+                                <div class="h4 mb-0 text-warning" id="elapsedTime">00:00</div>
+                                <small class="text-muted">Elapsed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="border rounded p-2">
+                                <div class="h4 mb-0 text-secondary" id="estimatedTime">--:--</div>
+                                <small class="text-muted">Remaining</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Categories Grid -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-3">🎯 Test Categories</h5>
+            <div class="row" id="testCategories">
+                <div class="col-12 text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading test categories...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Results -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📊 Test Results & Status</h5>
+                </div>
+                <div class="card-body" id="testResults">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading test results...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Global variables
+let testExecutionInterval = null;
+let startTime = null;
+let currentTestRun = null;
+
+// Initialize the page
+document.addEventListener('DOMContentLoaded', function() {
+    loadSystemStatus();
+    loadTestCategories();
+
+    // Auto-refresh every 30 seconds
+    setInterval(refreshStatus, 30000);
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+
+// System status loading
+async function loadSystemStatus() {
+    try {
+        const response = await fetch('/api/v1/test-suite/status');
+        const data = await response.json();
+
+        if (data.success) {
+            const status = data.data;
+            document.getElementById('systemStatusText').textContent = status.status || 'Unknown';
+            document.getElementById('systemStatusDetail').textContent = status.status_detail || 'System operational';
+            document.getElementById('cpuUsage').textContent = `${status.system_info?.cpu_usage || 0}%`;
+            document.getElementById('memoryUsage').textContent = `${status.system_info?.memory_usage || 0}%`;
+            document.getElementById('diskUsage').textContent = `${status.system_info?.disk_usage || 0}%`;
+        }
+    } catch (error) {
+        console.error('Error loading system status:', error);
+        document.getElementById('systemStatusText').textContent = 'Error';
+        document.getElementById('systemStatusDetail').textContent = 'Unable to load status';
+        document.getElementById('cpuUsage').textContent = 'Error';
+        document.getElementById('memoryUsage').textContent = 'Error';
+        document.getElementById('diskUsage').textContent = 'Error';
+    }
+}
+
+// Test categories loading
+async function loadTestCategories() {
+    try {
+        const response = await fetch('/api/v1/test-suite/categories');
+        const data = await response.json();
+
+        if (data.success) {
+            const categoriesContainer = document.getElementById('testCategories');
+            categoriesContainer.innerHTML = '';
+
+            // Enhanced test categories with comprehensive coverage
+            const testCategories = [
+                {
+                    id: 'ui_ux',
+                    name: 'UI/UX Testing',
+                    description: 'Visual regression, accessibility, responsive design, and user interaction testing',
+                    icon: '🎨',
+                    status: 'available',
+                    color: 'primary'
+                },
+                {
+                    id: 'e2e',
+                    name: 'E2E Testing',
+                    description: 'Complete end-to-end user journey testing with Selenium/Playwright',
+                    icon: '🔄',
+                    status: 'available',
+                    color: 'success'
+                },
+                {
+                    id: 'integration',
+                    name: 'Integration Testing',
+                    description: 'Database, API, webhook, and component integration testing',
+                    icon: '🔗',
+                    status: 'available',
+                    color: 'info'
+                },
+                {
+                    id: 'security',
+                    name: 'Security Testing',
+                    description: 'SQL injection, XSS, CSRF, authentication, and vulnerability testing',
+                    icon: '🔒',
+                    status: 'available',
+                    color: 'danger'
+                },
+                {
+                    id: 'routes',
+                    name: 'Route Testing',
+                    description: 'Application routes, endpoints, and API validation testing',
+                    icon: '📍',
+                    status: 'available',
+                    color: 'warning'
+                },
+                {
+                    id: 'llm_ml',
+                    name: 'LLM & ML Testing',
+                    description: 'Local LLM models, ML algorithms, and AI model testing',
+                    icon: '🤖',
+                    status: 'available',
+                    color: 'secondary'
+                },
+                {
+                    id: 'webhook_api',
+                    name: 'Webhook & API Testing',
+                    description: 'Webhook creation, triggering, payload processing, and API integration testing',
+                    icon: '🔗',
+                    status: 'available',
+                    color: 'dark'
+                },
+                {
+                    id: 'performance',
+                    name: 'Performance Testing',
+                    description: 'Load testing, response times, memory usage, and scalability testing',
+                    icon: '⚡',
+                    status: 'available',
+                    color: 'purple'
+                }
+            ];
+
+            testCategories.forEach(category => {
+                const statusBadge = getStatusBadge(category.status);
+                const categoryCard = `
+                    <div class="col-md-3 mb-3">
+                        <div class="card h-100 border-${category.color} shadow-sm">
+                            <div class="card-body text-center">
+                                <h6 class="card-title text-${category.color}">${category.icon} ${category.name}</h6>
+                                <p class="card-text small text-muted">${category.description}</p>
+                                ${statusBadge}
+                                <div class="mt-3">
+                                    <button class="btn btn-${category.color} btn-sm me-2" onclick="runCategory('${category.id}')"
+                                            data-bs-toggle="tooltip" title="Run ${category.name}">
+                                        <i class="fas fa-play"></i> Run
+                                    </button>
+                                    <button class="btn btn-outline-${category.color} btn-sm" onclick="viewCategoryDetails('${category.id}')"
+                                            data-bs-toggle="tooltip" title="View ${category.name} Details">
+                                        <i class="fas fa-info-circle"></i> Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                categoriesContainer.innerHTML += categoryCard;
+            });
+        }
+    } catch (error) {
+        console.error('Error loading test categories:', error);
+        document.getElementById('testCategories').innerHTML = '<div class="col-12 text-center text-danger">Error loading test categories</div>';
+    }
+}
+
+function getCategoryIcon(categoryId) {
+    const icons = {
+        'webhooks': '🔗',
+        'api_integrations': '🔌',
+        'e2e': '🔄',
+        'performance': '⚡',
+        'security': '🔒',
+        'ui_ux': '🎨',
+        'routes': '🛣️',
+        'llm_ml': '🤖',
+        'chat_integration': '💬',
+        'comprehensive': '🏆'
+    };
+    return icons[categoryId] || '🧪';
+}
+
+function getStatusBadge(status) {
+    const badges = {
+        'available': '<span class="badge bg-success">Available</span>',
+        'running': '<span class="badge bg-primary">Running</span>',
+        'completed': '<span class="badge bg-success">Completed</span>',
+        'failed': '<span class="badge bg-danger">Failed</span>',
+        'disabled': '<span class="badge bg-secondary">Disabled</span>'
+    };
+    return badges[status] || '<span class="badge bg-secondary">Unknown</span>';
+}
+
+// Test execution functions
+async function runCategory(categoryId) {
+    try {
+        // Get selected test categories and configuration
+        const selectedCategories = getSelectedCategories();
+        const executionMode = document.querySelector('input[name="executionMode"]:checked').value;
+        const reportFormat = document.querySelector('input[name="reportFormat"]:checked').value;
+
+        if (selectedCategories.length === 0) {
+            showToast('Please select at least one test category', 'warning');
+            return;
+        }
+
+        // Show progress card
+        document.getElementById('testProgressCard').style.display = 'block';
+        startTime = Date.now();
+        updateProgress(0, 0, 0, selectedCategories.length);
+
+        showToast(`Starting ${categoryId} tests...`, 'info');
+
+        const response = await fetch('/api/v1/test-suite/run', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                category: categoryId,
+                options: {
+                    categories: selectedCategories,
+                    execution_mode: executionMode,
+                    report_format: reportFormat
+                }
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showToast(`Test category ${categoryId} started successfully!`, 'success');
+            currentTestRun = data.test_run_id;
+
+            // Start progress monitoring
+            startProgressMonitoring();
+        } else {
+            showToast(`Error starting test category: ${data.error}`, 'error');
+            document.getElementById('testProgressCard').style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error running category:', error);
+        showToast('Error running test category', 'error');
+        document.getElementById('testProgressCard').style.display = 'none';
+    }
+}
+
+async function runComprehensiveTests() {
+    // Get all selected categories
+    const selectedCategories = getSelectedCategories();
+
+    if (selectedCategories.length === 0) {
+        showToast('Please select at least one test category', 'warning');
+        return;
+    }
+
+    try {
+        // Show progress card
+        document.getElementById('testProgressCard').style.display = 'block';
+        startTime = Date.now();
+        updateProgress(0, 0, 0, selectedCategories.length);
+
+        showToast(`Starting comprehensive tests for ${selectedCategories.length} categories...`, 'info');
+
+        const executionMode = document.querySelector('input[name="executionMode"]:checked').value;
+        const reportFormat = document.querySelector('input[name="reportFormat"]:checked').value;
+
+        const response = await fetch('/api/v1/test-suite/run', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                category: 'comprehensive',
+                options: {
+                    categories: selectedCategories,
+                    execution_mode: executionMode,
+                    report_format: reportFormat
+                }
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showToast(`Comprehensive tests started successfully!`, 'success');
+            currentTestRun = data.test_run_id;
+
+            // Start progress monitoring
+            startProgressMonitoring();
+        } else {
+            showToast(`Error starting comprehensive tests: ${data.error}`, 'error');
+            document.getElementById('testProgressCard').style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error running comprehensive tests:', error);
+        showToast('Error running comprehensive tests', 'error');
+        document.getElementById('testProgressCard').style.display = 'none';
+    }
+}
+
+async function generateReport() {
+    try {
+        showToast('Generating comprehensive test report...', 'info');
+
+        const reportFormat = document.querySelector('input[name="reportFormat"]:checked').value;
+
+        const response = await fetch('/api/v1/test-suite/report', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                format: reportFormat,
+                include_charts: true,
+                include_details: true
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showToast(`Report generated successfully!`, 'success');
+
+            // Open report in new tab if HTML
+            if (reportFormat === 'html' && data.report_url) {
+                window.open(data.report_url, '_blank');
+            }
+        } else {
+            showToast(`Error generating report: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        console.error('Error generating report:', error);
+        showToast('Error generating report', 'error');
+    }
+}
+
+async function stopAllTests() {
+    try {
+        if (!currentTestRun) {
+            showToast('No active test run to stop', 'warning');
+            return;
+        }
+
+        showToast('Stopping all tests...', 'info');
+
+        const response = await fetch('/api/v1/test-suite/stop', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                test_run_id: currentTestRun
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showToast('All tests stopped successfully', 'success');
+            if (testExecutionInterval) {
+                clearInterval(testExecutionInterval);
+                testExecutionInterval = null;
+            }
+            document.getElementById('testProgressCard').style.display = 'none';
+        } else {
+            showToast(`Error stopping tests: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        console.error('Error stopping tests:', error);
+        showToast('Error stopping tests', 'error');
+    }
+}
+
+function showToast(message, type = 'info') {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${type} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+
+    // Add to toast container
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        document.body.appendChild(container);
+    }
+    container.appendChild(toast);
+
+    // Initialize and show toast
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+
+    // Remove toast element after it's hidden
+    toast.addEventListener('hidden.bs.toast', () => {
+        toast.remove();
+    });
+}
+
+async function refreshStatus() {
+    await loadSystemStatus();
+    if (currentTestRun) {
+        await loadTestProgress();
+    }
+}
+
+// Helper functions
+function getSelectedCategories() {
+    const selected = [];
+    const checkboxes = document.querySelectorAll('#configPanel input[type="checkbox"]:checked');
+    checkboxes.forEach(checkbox => {
+        selected.push(checkbox.id);
+    });
+    return selected;
+}
+
+function startProgressMonitoring() {
+    testExecutionInterval = setInterval(async () => {
+        if (currentTestRun) {
+            await loadTestProgress();
+        }
+    }, 2000); // Update every 2 seconds
+}
+
+async function loadTestProgress() {
+    try {
+        const response = await fetch(`/api/v1/test-suite/progress/${currentTestRun}`);
+        const data = await response.json();
+
+        if (data.success) {
+            const progress = data.progress;
+            updateProgress(
+                progress.completed_tests || 0,
+                progress.failed_tests || 0,
+                progress.running_tests || 0,
+                progress.total_tests || 0
+            );
+
+            // Check if tests are complete
+            if (progress.completed_tests + progress.failed_tests >= progress.total_tests) {
+                testExecutionComplete();
+            }
+        }
+    } catch (error) {
+        console.error('Error loading test progress:', error);
+    }
+}
+
+function updateProgress(completed, failed, running, total) {
+    const progressPercent = total > 0 ? ((completed + failed) / total) * 100 : 0;
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const estimated = total > 0 ? Math.floor((elapsed / Math.max(completed + failed, 1)) * (total - completed - failed)) : 0;
+
+    document.getElementById('testProgressBar').style.width = `${progressPercent}%`;
+    document.getElementById('progressText').textContent = `${progressPercent.toFixed(1)}%`;
+    document.getElementById('completedTests').textContent = completed;
+    document.getElementById('failedTests').textContent = failed;
+    document.getElementById('runningTests').textContent = running;
+    document.getElementById('totalTests').textContent = total;
+    document.getElementById('elapsedTime').textContent = formatTime(elapsed);
+    document.getElementById('estimatedTime').textContent = estimated > 0 ? formatTime(estimated) : '--:--';
+}
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+function testExecutionComplete() {
+    if (testExecutionInterval) {
+        clearInterval(testExecutionInterval);
+        testExecutionInterval = null;
+    }
+
+    showToast('Test execution completed!', 'success');
+
+    // Auto-generate report
+    setTimeout(() => {
+        generateReport();
+    }, 1000);
+}
+
+function toggleConfigPanel() {
+    const panel = document.getElementById('configPanel');
+    const button = panel.previousElementSibling.querySelector('.toggle-btn');
+    const icon = button.querySelector('i');
+
+    if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        icon.className = 'fas fa-chevron-up';
+    } else {
+        panel.style.display = 'none';
+        icon.className = 'fas fa-chevron-down';
+    }
+}
+
+function viewCategoryDetails(categoryId) {
+    const categoryDetails = {
+        'ui_ux': {
+            title: 'UI/UX Testing',
+            description: 'Comprehensive user interface and experience testing',
+            features: ['Visual regression testing', 'Accessibility testing', 'Responsive design testing', 'Cross-browser compatibility', 'User interaction testing']
+        },
+        'e2e': {
+            title: 'E2E Testing',
+            description: 'Complete end-to-end user journey testing',
+            features: ['User workflow testing', 'Business logic validation', 'Data flow testing', 'Integration testing', 'Performance under load']
+        },
+        'integration': {
+            title: 'Integration Testing',
+            description: 'Testing component interactions and data flow',
+            features: ['API integration', 'Database connectivity', 'External service integration', 'Webhook testing', 'Data consistency']
+        },
+        'security': {
+            title: 'Security Testing',
+            description: 'Comprehensive security vulnerability assessment',
+            features: ['SQL injection testing', 'XSS vulnerability testing', 'CSRF protection testing', 'Authentication testing', 'Authorization testing']
+        },
+        'routes': {
+            title: 'Route Testing',
+            description: 'Application routing and endpoint validation',
+            features: ['Route availability', 'HTTP method validation', 'Response code testing', 'API endpoint testing', 'Route parameter validation']
+        },
+        'llm_ml': {
+            title: 'LLM & ML Testing',
+            description: 'Local LLM and machine learning model testing',
+            features: ['Model accuracy testing', 'Response quality assessment', 'Performance benchmarking', 'Integration testing', 'Error handling']
+        },
+        'webhook_api': {
+            title: 'Webhook & API Testing',
+            description: 'External API and webhook integration testing',
+            features: ['Webhook payload testing', 'API response validation', 'Authentication testing', 'Error handling', 'Rate limiting']
+        },
+        'performance': {
+            title: 'Performance Testing',
+            description: 'Application performance and scalability testing',
+            features: ['Load testing', 'Response time testing', 'Memory usage testing', 'Concurrent user testing', 'Scalability testing']
+        }
+    };
+
+    const details = categoryDetails[categoryId];
+    if (details) {
+        let message = `${details.title}\\n\\n${details.description}\\n\\nFeatures:\\n`;
+        details.features.forEach(feature => {
+            message += `• ${feature}\\n`;
+        });
+
+        alert(message);
+    }
+}
+</script>
+{% endblock %}

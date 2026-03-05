@@ -1,0 +1,396 @@
+<!-- Form Validation Component -->
+<div class="form-validation-wrapper" x-data="formValidationComponent()">
+    <div class="validation-summary" x-show="hasErrors" x-transition>
+        <div class="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-4 mb-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-red-400"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
+                        Please correct the following errors:
+                    </h3>
+                    <ul class="mt-2 text-sm text-red-700 dark:text-red-300 list-disc list-inside">
+                        <template x-for="error in errors" :key="error.field">
+                            <li x-text="error.message"></li>
+                        </template>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="validation-summary" x-show="hasSuccess" x-transition>
+        <div class="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg p-4 mb-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-400"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-green-800 dark:text-green-200">
+                        Form submitted successfully!
+                    </h3>
+                    <p x-show="successMessage" class="mt-1 text-sm text-green-700 dark:text-green-300" x-text="successMessage"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Field-level validation messages -->
+    <div class="field-validation" x-show="fieldErrors.length > 0">
+        <template x-for="fieldError in fieldErrors" :key="fieldError.field">
+            <div class="mt-1 text-sm text-red-600 dark:text-red-400" :id="fieldError.field + '-error'" x-text="fieldError.message"></div>
+        </template>
+    </div>
+
+    <!-- Progress indicator for multi-step forms -->
+    <div class="form-progress" x-show="showProgress" x-transition>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
+                <span>Form Progress</span>
+                <span x-text="`Step ${currentStep} of ${totalSteps}`"></span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                     :style="`width: ${(currentStep / totalSteps) * 100}%`"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real-time validation feedback -->
+    <div class="real-time-feedback" x-show="showRealTimeValidation">
+        <div class="flex items-center space-x-2 text-sm">
+            <div class="flex items-center" :class="{ 'text-green-600': validationStatus === 'valid', 'text-red-600': validationStatus === 'invalid', 'text-yellow-600': validationStatus === 'checking' }">
+                <i class="fas fa-spinner fa-spin" x-show="validationStatus === 'checking'"></i>
+                <i class="fas fa-check-circle" x-show="validationStatus === 'valid'"></i>
+                <i class="fas fa-exclamation-triangle" x-show="validationStatus === 'invalid'"></i>
+            </div>
+            <span x-text="validationMessage" :class="{ 'text-green-600': validationStatus === 'valid', 'text-red-600': validationStatus === 'invalid', 'text-yellow-600': validationStatus === 'checking' }"></span>
+        </div>
+    </div>
+</div>
+
+<script>
+function formValidationComponent() {
+    return {
+        errors: [],
+        fieldErrors: [],
+        hasErrors: false,
+        hasSuccess: false,
+        successMessage: '',
+        currentStep: 1,
+        totalSteps: 1,
+        showProgress: false,
+        showRealTimeValidation: false,
+        validationStatus: 'idle', // idle, checking, valid, invalid
+        validationMessage: '',
+        isValidating: false,
+
+        init() {
+            this.$watch('errors', () => {
+                this.hasErrors = this.errors.length > 0;
+            });
+
+            this.$watch('fieldErrors', () => {
+                this.updateFieldValidation();
+            });
+        },
+
+        // Add form-level error
+        addError(field, message) {
+            const existingError = this.errors.find(e => e.field === field);
+            if (!existingError) {
+                this.errors.push({ field, message });
+            }
+        },
+
+        // Remove form-level error
+        removeError(field) {
+            this.errors = this.errors.filter(e => e.field !== field);
+        },
+
+        // Clear all errors
+        clearErrors() {
+            this.errors = [];
+            this.fieldErrors = [];
+            this.hasErrors = false;
+        },
+
+        // Add field-level error
+        addFieldError(field, message) {
+            const existingError = this.fieldErrors.find(e => e.field === field);
+            if (!existingError) {
+                this.fieldErrors.push({ field, message });
+            }
+        },
+
+        // Remove field-level error
+        removeFieldError(field) {
+            this.fieldErrors = this.fieldErrors.filter(e => e.field !== field);
+        },
+
+        // Show success message
+        showSuccess(message = 'Form submitted successfully!') {
+            this.hasSuccess = true;
+            this.successMessage = message;
+            this.clearErrors();
+
+            setTimeout(() => {
+                this.hasSuccess = false;
+                this.successMessage = '';
+            }, 5000);
+        },
+
+        // Update field validation classes
+        updateFieldValidation() {
+            // Remove previous validation classes
+            document.querySelectorAll('.form-field').forEach(field => {
+                field.classList.remove('field-valid', 'field-invalid');
+            });
+
+            // Add new validation classes
+            this.fieldErrors.forEach(error => {
+                const field = document.querySelector(`[name="${error.field}"], #${error.field}`);
+                if (field) {
+                    field.classList.add('field-invalid');
+                    field.classList.remove('field-valid');
+                }
+            });
+
+            // Mark valid fields
+            const allFields = document.querySelectorAll('.form-field');
+            allFields.forEach(field => {
+                const fieldName = field.name || field.id;
+                const hasError = this.fieldErrors.find(e => e.field === fieldName);
+                if (!hasError && field.value && !field.classList.contains('field-invalid')) {
+                    field.classList.add('field-valid');
+                }
+            });
+        },
+
+        // Validate single field
+        async validateField(fieldName, value, rules = {}) {
+            this.validationStatus = 'checking';
+            this.validationMessage = 'Validating...';
+
+            try {
+                const result = await this.validateFieldRules(fieldName, value, rules);
+
+                if (result.isValid) {
+                    this.validationStatus = 'valid';
+                    this.validationMessage = 'Valid';
+                    this.removeFieldError(fieldName);
+                } else {
+                    this.validationStatus = 'invalid';
+                    this.validationMessage = result.message;
+                    this.addFieldError(fieldName, result.message);
+                }
+
+                return result.isValid;
+            } catch (error) {
+                this.validationStatus = 'invalid';
+                this.validationMessage = 'Validation failed';
+                this.addFieldError(fieldName, 'Validation failed');
+                return false;
+            }
+        },
+
+        // Validate field rules
+        async validateFieldRules(fieldName, value, rules) {
+            // Required validation
+            if (rules.required && (!value || value.trim() === '')) {
+                return { isValid: false, message: `${fieldName} is required` };
+            }
+
+            // Email validation
+            if (rules.email && value) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(value)) {
+                    return { isValid: false, message: 'Please enter a valid email address' };
+                }
+            }
+
+            // Phone validation (Serbian format)
+            if (rules.phone && value) {
+                const phoneRegex = /^\+381\d{8,9}$/;
+                if (!phoneRegex.test(value.replace(/\s/g, ''))) {
+                    return { isValid: false, message: 'Please enter a valid phone number (+381 XX XXXXXXX)' };
+                }
+            }
+
+            // Serbian PIB validation
+            if (rules.pib && value) {
+                if (value.length !== 9 || !/^\d{9}$/.test(value)) {
+                    return { isValid: false, message: 'PIB must be exactly 9 digits' };
+                }
+                // Additional PIB validation logic can be added here
+            }
+
+            // Min length validation
+            if (rules.minLength && value && value.length < rules.minLength) {
+                return { isValid: false, message: `Minimum ${rules.minLength} characters required` };
+            }
+
+            // Max length validation
+            if (rules.maxLength && value && value.length > rules.maxLength) {
+                return { isValid: false, message: `Maximum ${rules.maxLength} characters allowed` };
+            }
+
+            // Pattern validation
+            if (rules.pattern && value) {
+                const regex = new RegExp(rules.pattern);
+                if (!regex.test(value)) {
+                    return { isValid: false, message: rules.patternMessage || 'Invalid format' };
+                }
+            }
+
+            // Custom validation function
+            if (rules.custom && typeof rules.custom === 'function') {
+                const result = await rules.custom(value);
+                if (!result.isValid) {
+                    return { isValid: false, message: result.message };
+                }
+            }
+
+            // Server-side validation
+            if (rules.server && value) {
+                try {
+                    const response = await fetch(rules.server.url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ field: fieldName, value, ...rules.server.params })
+                    });
+                    const result = await response.json();
+                    if (!result.isValid) {
+                        return { isValid: false, message: result.message };
+                    }
+                } catch (error) {
+                    return { isValid: false, message: 'Server validation failed' };
+                }
+            }
+
+            return { isValid: true, message: 'Valid' };
+        },
+
+        // Validate entire form
+        async validateForm(formData, rules = {}) {
+            this.isValidating = true;
+            this.clearErrors();
+            let isValid = true;
+
+            for (const [fieldName, value] of Object.entries(formData)) {
+                const fieldRules = rules[fieldName];
+                if (fieldRules) {
+                    const fieldValid = await this.validateField(fieldName, value, fieldRules);
+                    if (!fieldValid) {
+                        isValid = false;
+                    }
+                }
+            }
+
+            this.isValidating = false;
+            return isValid;
+        },
+
+        // Set form progress
+        setProgress(current, total) {
+            this.currentStep = current;
+            this.totalSteps = total;
+            this.showProgress = true;
+        },
+
+        // Next step in multi-step form
+        nextStep() {
+            if (this.currentStep < this.totalSteps) {
+                this.currentStep++;
+            }
+        },
+
+        // Previous step in multi-step form
+        previousStep() {
+            if (this.currentStep > 1) {
+                this.currentStep--;
+            }
+        },
+
+        // Enable real-time validation
+        enableRealTimeValidation() {
+            this.showRealTimeValidation = true;
+        },
+
+        // Disable real-time validation
+        disableRealTimeValidation() {
+            this.showRealTimeValidation = false;
+        }
+    }
+}
+</script>
+
+<style>
+/* Form Validation Component Styles */
+.form-validation-wrapper {
+    @apply w-full;
+}
+
+/* Field validation states */
+.field-valid {
+    @apply border-green-500 focus:ring-green-500;
+}
+
+.field-invalid {
+    @apply border-red-500 focus:ring-red-500;
+}
+
+/* Validation summary styles */
+.validation-summary {
+    @apply mb-4;
+}
+
+/* Progress indicator styles */
+.form-progress .bg-blue-600 {
+    @apply transition-all duration-300 ease-in-out;
+}
+
+/* Real-time feedback styles */
+.real-time-feedback {
+    @apply mt-2;
+}
+
+/* Animation for validation messages */
+.validation-summary {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .field-valid {
+        @apply border-green-700;
+    }
+
+    .field-invalid {
+        @apply border-red-700;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .validation-summary {
+        animation: none;
+    }
+
+    .form-progress .bg-blue-600 {
+        transition: none;
+    }
+}
+</style>

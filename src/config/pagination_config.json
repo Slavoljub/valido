@@ -1,0 +1,10 @@
+{
+  "default_page_size": 25,
+  "max_page_size": 100,
+  "enable_cursor_pagination": true,
+  "enable_offset_pagination": true,
+  "prefetch_related": true,
+  "select_related": true,
+  "defer_heavy_fields": true,
+  "use_queryset_iterator": true
+}

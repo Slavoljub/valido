@@ -1,0 +1,192 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Scraping Configuration{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">Scraping Configuration</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <form>
+                                <div class="mb-3">
+                                    <label for="scraperName" class="form-label">Scraper Name</label>
+                                    <input type="text" class="form-control" id="scraperName" placeholder="My Scraper">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="targetUrl" class="form-label">Target URL Pattern</label>
+                                    <input type="text" class="form-control" id="targetUrl" placeholder="https://example.com/*">
+                                    <div class="form-text">Use * for wildcards</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="scrapeInterval" class="form-label">Scraping Interval (minutes)</label>
+                                    <input type="number" class="form-control" id="scrapeInterval" value="60" min="1">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Data to Extract</label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="extractTitle" checked>
+                                                <label class="form-check-label" for="extractTitle">
+                                                    Page Title
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="extractMeta" checked>
+                                                <label class="form-check-label" for="extractMeta">
+                                                    Meta Description
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="extractLinks">
+                                                <label class="form-check-label" for="extractLinks">
+                                                    Links
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="extractImages">
+                                                <label class="form-check-label" for="extractImages">
+                                                    Images
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="extractText">
+                                                <label class="form-check-label" for="extractText">
+                                                    Main Content
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="userAgent" class="form-label">User Agent</label>
+                                    <select class="form-select" id="userAgent">
+                                        <option value="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36">Chrome Desktop</option>
+                                        <option value="Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X)">iPhone Safari</option>
+                                        <option value="Mozilla/5.0 (Linux; Android 10)">Android Chrome</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="delay" class="form-label">Delay Between Requests (seconds)</label>
+                                    <input type="number" class="form-control" id="delay" value="2" min="0" step="0.5">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Save Configuration</button>
+                                <button type="button" class="btn btn-secondary" onclick="testConfiguration()">Test Configuration</button>
+                            </form>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Configuration Tips</h5>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <strong>URL Patterns:</strong><br>
+                                            Use * for wildcards, e.g., https://example.com/products/*
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Respect robots.txt:</strong><br>
+                                            Always check and respect website's robots.txt file
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Rate Limiting:</strong><br>
+                                            Don't overwhelm target websites with too many requests
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Data Storage:</strong><br>
+                                            Consider the volume of data you'll be collecting
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="card mt-3">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Quick Actions</h5>
+                                </div>
+                                <div class="card-body">
+                                    <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="loadPreset('news')">📰 News Scraper</button>
+                                    <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="loadPreset('ecommerce')">🛒 E-commerce</button>
+                                    <button class="btn btn-outline-primary btn-sm w-100 mb-2" onclick="loadPreset('social')">📱 Social Media</button>
+                                    <button class="btn btn-outline-primary btn-sm w-100" onclick="loadPreset('blog')">📝 Blog Posts</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function testConfiguration() {
+    alert('Testing configuration... (This would test the scraping setup)');
+}
+
+function loadPreset(type) {
+    const presets = {
+        'news': {
+            name: 'News Scraper',
+            url: 'https://news.example.com/*',
+            interval: 30,
+            extractTitle: true,
+            extractMeta: true,
+            extractText: true
+        },
+        'ecommerce': {
+            name: 'E-commerce Scraper',
+            url: 'https://store.example.com/products/*',
+            interval: 60,
+            extractTitle: true,
+            extractImages: true,
+            extractLinks: true
+        },
+        'social': {
+            name: 'Social Media Scraper',
+            url: 'https://social.example.com/posts/*',
+            interval: 15,
+            extractText: true,
+            extractImages: true,
+            extractLinks: true
+        },
+        'blog': {
+            name: 'Blog Scraper',
+            url: 'https://blog.example.com/posts/*',
+            interval: 120,
+            extractTitle: true,
+            extractMeta: true,
+            extractText: true
+        }
+    };
+
+    const preset = presets[type];
+    if (preset) {
+        document.getElementById('scraperName').value = preset.name;
+        document.getElementById('targetUrl').value = preset.url;
+        document.getElementById('scrapeInterval').value = preset.interval;
+        document.getElementById('extractTitle').checked = preset.extractTitle;
+        document.getElementById('extractMeta').checked = preset.extractMeta;
+        document.getElementById('extractText').checked = preset.extractText;
+        document.getElementById('extractImages').checked = preset.extractImages || false;
+        document.getElementById('extractLinks').checked = preset.extractLinks || false;
+    }
+}
+</script>
+{% endblock %}

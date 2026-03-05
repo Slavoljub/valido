@@ -1,0 +1,86 @@
+{
+  "dashboard": {
+    "css": ["css/dashboard.css"],
+    "dependencies": ["base", "animations"],
+    "critical": true,
+    "description": "Main dashboard component styles"
+  },
+  "charts": {
+    "css": ["css/charts.css"],
+    "dependencies": ["base"],
+    "critical": false,
+    "description": "Chart and visualization styles"
+  },
+  "forms": {
+    "css": ["css/forms.css"],
+    "dependencies": ["base"],
+    "critical": true,
+    "description": "Form input and validation styles"
+  },
+  "tables": {
+    "css": ["css/tables.css"],
+    "dependencies": ["base"],
+    "critical": false,
+    "description": "Data table and grid styles"
+  },
+  "modals": {
+    "css": ["css/modals.css"],
+    "dependencies": ["base", "animations"],
+    "critical": false,
+    "description": "Modal and overlay styles"
+  },
+  "notifications": {
+    "css": ["css/notifications.css"],
+    "dependencies": ["base", "animations"],
+    "critical": true,
+    "description": "Notification and toast styles"
+  },
+  "widgets": {
+    "css": ["css/widgets.css"],
+    "dependencies": ["base", "charts"],
+    "critical": false,
+    "description": "Dashboard widget styles"
+  },
+  "animations": {
+    "css": ["css/animations.css"],
+    "dependencies": [],
+    "critical": true,
+    "description": "Animation and transition styles"
+  },
+  "base": {
+    "css": ["css/base.css"],
+    "dependencies": [],
+    "critical": true,
+    "description": "Base component styles and utilities"
+  },
+  "navigation": {
+    "css": ["css/navigation.css"],
+    "dependencies": ["base"],
+    "critical": true,
+    "description": "Navigation and menu styles"
+  },
+  "layout": {
+    "css": ["css/layout.css"],
+    "dependencies": ["base"],
+    "critical": true,
+    "description": "Layout and grid system styles"
+  },
+  "responsive": {
+    "css": ["css/responsive.css"],
+    "dependencies": ["base"],
+    "critical": true,
+    "description": "Responsive design utilities"
+  },
+  "themes": {
+    "css": ["css/themes.css"],
+    "dependencies": ["base"],
+    "critical": true,
+    "description": "Theme and color system styles"
+  },
+  "utilities": {
+    "css": ["css/utilities.css"],
+    "dependencies": [],
+    "critical": false,
+    "description": "Utility classes and helpers"
+  }
+}

@@ -1,0 +1,332 @@
+/* HTMX Loading Indicators and Styles */
+
+/* Loading state for HTMX elements */
+.htmx-loading {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
+
+.htmx-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #3b82f6;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: htmx-spin 1s linear infinite;
+    z-index: 10;
+}
+
+@keyframes htmx-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* HTMX request indicators */
+.htmx-request {
+    cursor: wait;
+}
+
+.htmx-request * {
+    cursor: wait;
+}
+
+/* HTMX swap animations */
+.htmx-swapping {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.htmx-swapped {
+    opacity: 1;
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* HTMX error states */
+.htmx-error {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+.htmx-error::before {
+    content: '⚠️ Error loading content';
+    color: #dc2626;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* HTMX success states */
+.htmx-success {
+    border-color: #22c55e;
+    background-color: #f0fdf4;
+}
+
+/* HTMX loading bars */
+.htmx-loading-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+    z-index: 9999;
+    animation: htmx-loading-bar 1s ease-in-out infinite;
+}
+
+@keyframes htmx-loading-bar {
+    0% { width: 0%; }
+    50% { width: 70%; }
+    100% { width: 100%; }
+}
+
+/* HTMX form styles */
+.htmx-form {
+    transition: all 0.2s ease-in-out;
+}
+
+.htmx-form.htmx-request {
+    transform: scale(0.98);
+}
+
+/* HTMX button states */
+.htmx-button {
+    position: relative;
+    overflow: hidden;
+}
+
+.htmx-button.htmx-request::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: htmx-spin 1s linear infinite;
+}
+
+/* HTMX table styles */
+.htmx-table {
+    transition: opacity 0.2s ease-in-out;
+}
+
+.htmx-table.htmx-request {
+    opacity: 0.6;
+}
+
+/* HTMX modal styles */
+.htmx-modal {
+    transition: all 0.3s ease-in-out;
+}
+
+.htmx-modal.htmx-request {
+    filter: blur(1px);
+}
+
+/* HTMX card styles */
+.htmx-card {
+    transition: all 0.2s ease-in-out;
+}
+
+.htmx-card.htmx-request {
+    transform: translateY(2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* HTMX list styles */
+.htmx-list {
+    transition: all 0.2s ease-in-out;
+}
+
+.htmx-list.htmx-request {
+    opacity: 0.7;
+}
+
+/* HTMX input styles */
+.htmx-input {
+    transition: all 0.2s ease-in-out;
+}
+
+.htmx-input.htmx-request {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* HTMX select styles */
+.htmx-select {
+    transition: all 0.2s ease-in-out;
+}
+
+.htmx-select.htmx-request {
+    border-color: #3b82f6;
+    background-color: #f8fafc;
+}
+
+/* HTMX textarea styles */
+.htmx-textarea {
+    transition: all 0.2s ease-in-out;
+}
+
+.htmx-textarea.htmx-request {
+    border-color: #3b82f6;
+    resize: none;
+}
+
+/* HTMX progress indicators */
+.htmx-progress {
+    width: 100%;
+    height: 4px;
+    background-color: #e5e7eb;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.htmx-progress::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+    animation: htmx-progress 2s ease-in-out infinite;
+}
+
+@keyframes htmx-progress {
+    0% { width: 0%; }
+    50% { width: 70%; }
+    100% { width: 100%; }
+}
+
+/* HTMX skeleton loading */
+.htmx-skeleton {
+    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+    background-size: 200% 100%;
+    animation: htmx-skeleton 1.5s infinite;
+}
+
+@keyframes htmx-skeleton {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* HTMX pulse animation */
+.htmx-pulse {
+    animation: htmx-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes htmx-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* HTMX bounce animation */
+.htmx-bounce {
+    animation: htmx-bounce 1s infinite;
+}
+
+@keyframes htmx-bounce {
+    0%, 20%, 53%, 80%, 100% { transform: translate3d(0, 0, 0); }
+    40%, 43% { transform: translate3d(0, -30px, 0); }
+    70% { transform: translate3d(0, -15px, 0); }
+    90% { transform: translate3d(0, -4px, 0); }
+}
+
+/* HTMX fade animations */
+.htmx-fade-in {
+    animation: htmx-fade-in 0.3s ease-in-out;
+}
+
+@keyframes htmx-fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.htmx-fade-out {
+    animation: htmx-fade-out 0.3s ease-in-out;
+}
+
+@keyframes htmx-fade-out {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* HTMX slide animations */
+.htmx-slide-in {
+    animation: htmx-slide-in 0.3s ease-in-out;
+}
+
+@keyframes htmx-slide-in {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+.htmx-slide-out {
+    animation: htmx-slide-out 0.3s ease-in-out;
+}
+
+@keyframes htmx-slide-out {
+    from { transform: translateX(0); }
+    to { transform: translateX(100%); }
+}
+
+/* HTMX scale animations */
+.htmx-scale-in {
+    animation: htmx-scale-in 0.3s ease-in-out;
+}
+
+@keyframes htmx-scale-in {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.htmx-scale-out {
+    animation: htmx-scale-out 0.3s ease-in-out;
+}
+
+@keyframes htmx-scale-out {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0.8); opacity: 0; }
+}
+
+/* HTMX responsive utilities */
+@media (max-width: 640px) {
+    .htmx-loading::after {
+        width: 16px;
+        height: 16px;
+        margin: -8px 0 0 -8px;
+    }
+    
+    .htmx-button.htmx-request::after {
+        width: 14px;
+        height: 14px;
+        margin: -7px 0 0 -7px;
+    }
+}
+
+/* HTMX dark mode support */
+@media (prefers-color-scheme: dark) {
+    .htmx-loading::after {
+        border-color: #60a5fa;
+        border-top-color: transparent;
+    }
+    
+    .htmx-loading-bar {
+        background: linear-gradient(90deg, #60a5fa, #3b82f6);
+    }
+    
+    .htmx-progress::after {
+        background: linear-gradient(90deg, #60a5fa, #3b82f6);
+    }
+    
+    .htmx-skeleton {
+        background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+    }
+}

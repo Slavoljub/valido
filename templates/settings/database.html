@@ -1,0 +1,961 @@
+<!-- Database Settings Page -->
+{% extends "layouts/base.html"" %}
+
+{% block title %}Database Settings - ValidoAI{% endblock %}
+
+{% block page_title %}Database Configuration{% endblock %}
+{% block page_description %}Configure and test database connections{% endblock %}
+
+{% block head %}
+<style>
+.database-card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+}
+
+.database-status {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.status-success {
+    @apply bg-green-100 text-green-800;
+}
+
+.status-failed {
+    @apply bg-red-100 text-red-800;
+}
+
+.status-warning {
+    @apply bg-yellow-100 text-yellow-800;
+}
+
+.config-form {
+    @apply space-y-4;
+}
+
+.config-field {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+.form-group {
+    @apply space-y-2;
+}
+
+.form-label {
+    @apply block text-sm font-medium text-gray-700;
+}
+
+.form-input {
+    @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm;
+}
+
+.env-editor {
+    @apply w-full h-96 font-mono text-sm border border-gray-300 rounded-md;
+}
+
+.test-results {
+    @apply space-y-3;
+}
+
+.test-result {
+    @apply flex items-center justify-between p-3 bg-gray-50 rounded-lg;
+}
+
+.stats-grid {
+    @apply grid grid-cols-1 md:grid-cols-3 gap-4;
+}
+
+.stat-card {
+    @apply bg-blue-50 p-4 rounded-lg;
+}
+
+.stat-value {
+    @apply text-2xl font-bold text-blue-600;
+}
+
+.stat-label {
+    @apply text-sm text-blue-600;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Database Statistics Overview -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ database_stats.system_info.total_databases or 0 }}</div>
+            <div class="stat-label">Total Databases</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ database_stats.system_info.active_connections or 0 }}</div>
+            <div class="stat-label">Active Connections</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ database_stats.system_info.total_tables or 0 }}</div>
+            <div class="stat-label">Total Tables</div>
+        </div>
+    </div>
+
+    <!-- Database Connection Tests -->
+    <div class="database-card">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-medium text-gray-900">Database Connection Tests</h3>
+            <button
+                @click="testAllDatabases()"
+                :disabled="testingAll"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+                <i class="fas fa-vial mr-2"></i>
+                <span x-show="!testingAll">Test All Connections</span>
+                <span x-show="testingAll">Testing...</span>
+            </button>
+        </div>
+
+        <div class="test-results">
+            <template x-for="(result, dbName) in testResults" :key="dbName">
+                <div class="test-result">
+                    <div class="flex items-center space-x-3">
+                        <div class="database-status"
+                             :class="getStatusClass(result.status)">
+                            <span x-text="getStatusIcon(result.status)"></span>
+                            <span class="ml-1" x-text="result.status"></span>
+                        </div>
+                        <span class="font-medium" x-text="dbName.toUpperCase()"></span>
+                        <span class="text-sm text-gray-500" x-text="result.message"></span>
+                    </div>
+                    <button
+                        @click="testDatabase(dbName)"
+                        :disabled="testingDatabases.includes(dbName)"
+                        class="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm bg-white hover:bg-gray-50"
+                    >
+                        <i class="fas fa-redo mr-1"></i>
+                        Test
+                    </button>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Database Configuration Forms -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Main Database Configuration -->
+        <div class="database-card">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Main Database</h3>
+            <form @submit.prevent="updateMainDatabase()" class="config-form">
+                <div class="config-field">
+                    <div class="form-group">
+                        <label class="form-label">Database Type</label>
+                        <select x-model="mainDbConfig.type" class="form-input">
+                            <option value="sqlite">SQLite</option>
+                            <option value="postgresql">PostgreSQL</option>
+                            <option value="mysql">MySQL</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Host</label>
+                        <input x-model="mainDbConfig.host" type="text" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Port</label>
+                        <input x-model="mainDbConfig.port" type="number" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Database Name</label>
+                        <input x-model="mainDbConfig.database" type="text" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input x-model="mainDbConfig.username" type="text" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input x-model="mainDbConfig.password" type="password" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">SSL Enabled</label>
+                        <input x-model="mainDbConfig.ssl" type="checkbox" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Timeout (seconds)</label>
+                        <input x-model="mainDbConfig.timeout" type="number" class="form-input">
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button
+                        type="submit"
+                        :disabled="updatingMain"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                    >
+                        <span x-show="!updatingMain">Update Main Database</span>
+                        <span x-show="updatingMain">Updating...</span>
+                    </button>
+                    <button
+                        type="button"
+                        @click="resetMainDatabase()"
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                    >
+                        Reset to Defaults
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Embeddings Database Configuration -->
+        <div class="database-card">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Embeddings Database</h3>
+            <form @submit.prevent="updateEmbeddingsDatabase()" class="config-form">
+                <div class="config-field">
+                    <div class="form-group">
+                        <label class="form-label">Database Type</label>
+                        <select x-model="embeddingsDbConfig.type" class="form-input">
+                            <option value="postgresql">PostgreSQL</option>
+                            <option value="sqlite">SQLite</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Host</label>
+                        <input x-model="embeddingsDbConfig.host" type="text" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Port</label>
+                        <input x-model="embeddingsDbConfig.port" type="number" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Database Name</label>
+                        <input x-model="embeddingsDbConfig.database" type="text" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input x-model="embeddingsDbConfig.username" type="text" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input x-model="embeddingsDbConfig.password" type="password" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">SSL Enabled</label>
+                        <input x-model="embeddingsDbConfig.ssl" type="checkbox" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Timeout (seconds)</label>
+                        <input x-model="embeddingsDbConfig.timeout" type="number" class="form-input">
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button
+                        type="submit"
+                        :disabled="updatingEmbeddings"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+                    >
+                        <span x-show="!updatingEmbeddings">Update Embeddings Database</span>
+                        <span x-show="updatingEmbeddings">Updating...</span>
+                    </button>
+                    <button
+                        type="button"
+                        @click="resetEmbeddingsDatabase()"
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                    >
+                        Reset to Defaults
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Analytics Database Configuration -->
+    <div class="database-card">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Analytics Database</h3>
+        <form @submit.prevent="updateAnalyticsDatabase()" class="config-form">
+            <div class="config-field">
+                <div class="form-group">
+                    <label class="form-label">Database Type</label>
+                    <select x-model="analyticsDbConfig.type" class="form-input">
+                        <option value="sqlite">SQLite</option>
+                        <option value="postgresql">PostgreSQL</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Database Path/Name</label>
+                    <input x-model="analyticsDbConfig.database" type="text" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Timeout (seconds)</label>
+                    <input x-model="analyticsDbConfig.timeout" type="number" class="form-input">
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button
+                    type="submit"
+                    :disabled="updatingAnalytics"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
+                >
+                    <span x-show="!updatingAnalytics">Update Analytics Database</span>
+                    <span x-show="updatingAnalytics">Updating...</span>
+                </button>
+                <button
+                    type="button"
+                    @click="resetAnalyticsDatabase()"
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                >
+                    Reset to Defaults
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- .env File Editor -->
+    <div class="database-card">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-medium text-gray-900">Environment Configuration (.env)</h3>
+            <div class="flex items-center space-x-3">
+                <button
+                    @click="loadEnvFile()"
+                    class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                >
+                    <i class="fas fa-sync mr-2"></i>
+                    Reload
+                </button>
+                <button
+                    @click="saveEnvFile()"
+                    :disabled="savingEnv"
+                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+                >
+                    <i class="fas fa-save mr-2"></i>
+                    <span x-show="!savingEnv">Save Changes</span>
+                    <span x-show="savingEnv">Saving...</span>
+                </button>
+            </div>
+        </div>
+
+        <textarea
+            x-model="envFileContent"
+            class="env-editor"
+            placeholder="Loading .env file content..."
+        ></textarea>
+
+        <div class="mt-4 text-sm text-gray-600">
+            <p><strong>Note:</strong> Changes to the .env file require restarting the application to take effect.</p>
+        </div>
+    </div>
+
+    <!-- Database Backup & Restore -->
+    <div class="database-card">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-medium text-gray-900">Database Backup & Restore</h3>
+            <button @click="refreshBackupHistory()"
+                    class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                <i class="fas fa-sync mr-2"></i>
+                Refresh
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Backup Section -->
+            <div class="space-y-4">
+                <h4 class="font-medium text-gray-900 flex items-center">
+                    <i class="fas fa-download text-green-600 mr-2"></i>
+                    Create Backup
+                </h4>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="form-label">Select Database</label>
+                        <select x-model="backupConfig.database" class="form-input">
+                            <option value="app">Main Application Database (app.db)</option>
+                            <option value="sample">Sample Data Database (sample.db)</option>
+                            <option value="ticketing">Ticketing Database (ticketing.db)</option>
+                            <option value="all">All Databases</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Backup Type</label>
+                        <select x-model="backupConfig.type" class="form-input">
+                            <option value="full">Full Backup</option>
+                            <option value="incremental">Incremental Backup</option>
+                            <option value="schema">Schema Only</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Backup Name (optional)</label>
+                        <input x-model="backupConfig.name"
+                               type="text"
+                               class="form-input"
+                               placeholder="Auto-generated if empty">
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input x-model="backupConfig.includeData" type="checkbox" class="rounded border-gray-300">
+                            <span class="ml-2 text-sm text-gray-700">Include Data</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input x-model="backupConfig.compress" type="checkbox" class="rounded border-gray-300">
+                            <span class="ml-2 text-sm text-gray-700">Compress</span>
+                        </label>
+                    </div>
+
+                    <button @click="createBackup()"
+                            :disabled="creatingBackup"
+                            class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50">
+                        <i class="fas fa-download mr-2"></i>
+                        <span x-show="!creatingBackup">Create Backup</span>
+                        <span x-show="creatingBackup">Creating...</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Restore Section -->
+            <div class="space-y-4">
+                <h4 class="font-medium text-gray-900 flex items-center">
+                    <i class="fas fa-upload text-blue-600 mr-2"></i>
+                    Restore Database
+                </h4>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="form-label">Select Backup File</label>
+                        <select x-model="restoreConfig.backupFile" class="form-input">
+                            <option value="">Choose backup file...</option>
+                            <template x-for="backup in backupHistory" :key="backup.id">
+                                <option :value="backup.id" x-text="`${backup.name} (${backup.date})`"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Target Database</label>
+                        <select x-model="restoreConfig.targetDatabase" class="form-input">
+                            <option value="app">Main Application Database (app.db)</option>
+                            <option value="sample">Sample Data Database (sample.db)</option>
+                            <option value="ticketing">Ticketing Database (ticketing.db)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Restore Options</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input x-model="restoreConfig.dropExisting" type="checkbox" class="rounded border-gray-300">
+                                <span class="ml-2 text-sm text-gray-700">Drop existing tables</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input x-model="restoreConfig.createBackup" type="checkbox" class="rounded border-gray-300">
+                                <span class="ml-2 text-sm text-gray-700">Create backup before restore</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Restore Warnings -->
+                    <div x-show="restoreConfig.backupFile" class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                        <div class="flex items-start">
+                            <i class="fas fa-exclamation-triangle text-yellow-600 mt-0.5 mr-2"></i>
+                            <div class="text-sm text-yellow-800">
+                                <p class="font-medium mb-1">Restore Warning</p>
+                                <p>This will replace existing data. Make sure you have a backup of your current data.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button @click="restoreDatabase()"
+                            :disabled="!restoreConfig.backupFile || restoringDatabase"
+                            class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50">
+                        <i class="fas fa-upload mr-2"></i>
+                        <span x-show="!restoringDatabase">Restore Database</span>
+                        <span x-show="restoringDatabase">Restoring...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backup History -->
+        <div class="mt-6">
+            <h4 class="font-medium text-gray-900 mb-3 flex items-center">
+                <i class="fas fa-history text-gray-600 mr-2"></i>
+                Backup History
+            </h4>
+
+            <div class="bg-gray-50 rounded-lg overflow-hidden">
+                <div x-show="backupHistory.length === 0" class="text-center py-8 text-gray-500">
+                    <i class="fas fa-database text-4xl mb-2"></i>
+                    <p>No backups found</p>
+                </div>
+
+                <div x-show="backupHistory.length > 0" class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Database</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Size</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <template x-for="backup in backupHistory" :key="backup.id">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900" x-text="backup.name"></td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500" x-text="backup.database"></td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500" x-text="backup.type"></td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500" x-text="backup.size"></td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500" x-text="backup.date"></td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium space-x-2">
+                                        <button @click="downloadBackup(backup.id)"
+                                                class="text-blue-600 hover:text-blue-900">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <button @click="deleteBackup(backup.id)"
+                                                class="text-red-600 hover:text-red-900 ml-2">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Database Statistics -->
+    <div class="database-card">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Database Statistics</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <template x-for="(stats, dbName) in databaseStats.databases" :key="dbName">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-medium text-gray-900 mb-2" x-text="dbName.toUpperCase()"></h4>
+                    <div class="space-y-1 text-sm">
+                        <div class="flex justify-between">
+                            <span>Type:</span>
+                            <span x-text="stats.type"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Status:</span>
+                            <span :class="stats.status === 'connected' ? 'text-green-600' : 'text-red-600'"
+                                  x-text="stats.status"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Tables:</span>
+                            <span x-text="stats.tables || 0"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Host:</span>
+                            <span x-text="stats.config?.host || 'N/A'"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Port:</span>
+                            <span x-text="stats.config?.port || 'N/A'"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('databaseSettings', () => ({
+        // Test Results
+        testResults: {{ database_tests.results | tojson | safe }},
+        testingAll: false,
+        testingDatabases: [],
+
+        // Database Configurations
+        mainDbConfig: {{ database_config.main_database | tojson | safe }},
+        embeddingsDbConfig: {{ database_config.embeddings_database | tojson | safe }},
+        analyticsDbConfig: {{ database_config.analytics_database | tojson | safe }},
+
+        // Update States
+        updatingMain: false,
+        updatingEmbeddings: false,
+        updatingAnalytics: false,
+
+        // Environment File
+        envFileContent: {{ current_env_content | tojson | safe }},
+        savingEnv: false,
+
+        // Stats
+        databaseStats: {{ database_stats | tojson | safe }},
+
+        // Backup & Restore
+        backupConfig: {
+            database: 'app',
+            type: 'full',
+            name: '',
+            includeData: true,
+            compress: true
+        },
+        restoreConfig: {
+            backupFile: '',
+            targetDatabase: 'app',
+            dropExisting: false,
+            createBackup: true
+        },
+        backupHistory: [],
+        creatingBackup: false,
+        restoringDatabase: false,
+
+        // Initialize
+        async init() {
+            await this.refreshBackupHistory();
+        },
+
+        // Methods
+        async testAllDatabases() {
+            this.testingAll = true;
+            try {
+                const response = await fetch('/api/database/test');
+                const data = await response.json();
+                this.testResults = data.results;
+                this.showNotification('Database tests completed', 'success');
+            } catch (error) {
+                console.error('Error testing databases:', error);
+                this.showNotification('Error testing databases', 'error');
+            } finally {
+                this.testingAll = false;
+            }
+        },
+
+        async testDatabase(dbName) {
+            if (this.testingDatabases.includes(dbName)) return;
+
+            this.testingDatabases.push(dbName);
+            try {
+                const response = await fetch(`/api/database/test/${dbName}`);
+                const data = await response.json();
+                this.testResults[dbName] = data;
+                this.showNotification(`Test completed for ${dbName}`, 'success');
+            } catch (error) {
+                console.error(`Error testing ${dbName}:`, error);
+                this.showNotification(`Error testing ${dbName}`, 'error');
+            } finally {
+                this.testingDatabases = this.testingDatabases.filter(d => d !== dbName);
+            }
+        },
+
+        async updateMainDatabase() {
+            this.updatingMain = true;
+            try {
+                const response = await fetch('/api/database/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        database_type: 'sqlite', // This could be made dynamic
+                        main_database: this.mainDbConfig
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    this.showNotification(data.message, 'success');
+                } else {
+                    this.showNotification(data.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error updating main database:', error);
+                this.showNotification('Error updating main database', 'error');
+            } finally {
+                this.updatingMain = false;
+            }
+        },
+
+        async updateEmbeddingsDatabase() {
+            this.updatingEmbeddings = true;
+            try {
+                const response = await fetch('/api/database/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        embeddings_database: this.embeddingsDbConfig
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    this.showNotification(data.message, 'success');
+                } else {
+                    this.showNotification(data.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error updating embeddings database:', error);
+                this.showNotification('Error updating embeddings database', 'error');
+            } finally {
+                this.updatingEmbeddings = false;
+            }
+        },
+
+        async updateAnalyticsDatabase() {
+            this.updatingAnalytics = true;
+            try {
+                const response = await fetch('/api/database/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        analytics_database: this.analyticsDbConfig
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    this.showNotification(data.message, 'success');
+                } else {
+                    this.showNotification(data.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error updating analytics database:', error);
+                this.showNotification('Error updating analytics database', 'error');
+            } finally {
+                this.updatingAnalytics = false;
+            }
+        },
+
+        resetMainDatabase() {
+            this.mainDbConfig = {
+                type: 'sqlite',
+                database: 'data/sqlite/app.db',
+                timeout: 30
+            };
+        },
+
+        resetEmbeddingsDatabase() {
+            this.embeddingsDbConfig = {
+                type: 'postgresql',
+                host: 'localhost',
+                port: 5432,
+                database: 'ai_embeddings',
+                username: 'ai_user',
+                password: 'secure_password_123',
+                ssl: true,
+                timeout: 60
+            };
+        },
+
+        resetAnalyticsDatabase() {
+            this.analyticsDbConfig = {
+                type: 'sqlite',
+                database: 'data/sqlite/analytics.db',
+                timeout: 30
+            };
+        },
+
+        async loadEnvFile() {
+            try {
+                const response = await fetch('/api/database/config');
+                const data = await response.json();
+                // This would need a specific endpoint to get .env content
+                // For now, we'll just show a message
+                this.showNotification('Environment file reloaded', 'info');
+            } catch (error) {
+                console.error('Error loading .env file:', error);
+            }
+        },
+
+        async saveEnvFile() {
+            this.savingEnv = true;
+            try {
+                const response = await fetch('/api/database/save-env', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content: this.envFileContent
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    this.showNotification(data.message, 'success');
+                } else {
+                    this.showNotification(data.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error saving .env file:', error);
+                this.showNotification('Error saving .env file', 'error');
+            } finally {
+                this.savingEnv = false;
+            }
+        },
+
+        getStatusClass(status) {
+            switch (status) {
+                case 'success': return 'status-success';
+                case 'failed': return 'status-failed';
+                case 'warning': return 'status-warning';
+                default: return 'status-warning';
+            }
+        },
+
+        getStatusIcon(status) {
+            switch (status) {
+                case 'success': return '✅';
+                case 'failed': return '❌';
+                case 'warning': return '⚠️';
+                default: return '❓';
+            }
+        },
+
+        showNotification(message, type = 'info') {
+            // Simple notification - you can integrate with your existing notification system
+            console.log(`[${type.toUpperCase()}] ${message}`);
+
+            // Create a simple toast notification
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 px-4 py-2 rounded-md text-white z-50 ${
+                type === 'success' ? 'bg-green-500' :
+                type === 'error' ? 'bg-red-500' :
+                type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+            }`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        },
+
+        // Backup & Restore Methods
+        async refreshBackupHistory() {
+            try {
+                const response = await fetch('/api/database/backups');
+                if (!response.ok) throw new Error('Failed to fetch backup history');
+
+                const data = await response.json();
+                this.backupHistory = data.backups || [];
+                this.showNotification('Backup history refreshed', 'success');
+            } catch (error) {
+                console.error('Error refreshing backup history:', error);
+                this.showNotification('Error loading backup history', 'error');
+            }
+        },
+
+        async createBackup() {
+            this.creatingBackup = true;
+            try {
+                const response = await fetch('/api/database/backup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(this.backupConfig)
+                });
+
+                if (!response.ok) throw new Error('Failed to create backup');
+
+                const data = await response.json();
+                this.showNotification(`Backup created successfully: ${data.backupName}`, 'success');
+                await this.refreshBackupHistory();
+                this.resetBackupConfig();
+            } catch (error) {
+                console.error('Error creating backup:', error);
+                this.showNotification('Error creating backup', 'error');
+            } finally {
+                this.creatingBackup = false;
+            }
+        },
+
+        async restoreDatabase() {
+            if (!confirm('Are you sure you want to restore the database? This will replace existing data.')) {
+                return;
+            }
+
+            this.restoringDatabase = true;
+            try {
+                const response = await fetch('/api/database/restore', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(this.restoreConfig)
+                });
+
+                if (!response.ok) throw new Error('Failed to restore database');
+
+                const data = await response.json();
+                this.showNotification('Database restored successfully', 'success');
+                await this.refreshBackupHistory();
+                this.resetRestoreConfig();
+            } catch (error) {
+                console.error('Error restoring database:', error);
+                this.showNotification('Error restoring database', 'error');
+            } finally {
+                this.restoringDatabase = false;
+            }
+        },
+
+        async downloadBackup(backupId) {
+            try {
+                const response = await fetch(`/api/database/backups/${backupId}/download`);
+                if (!response.ok) throw new Error('Failed to download backup');
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `backup_${backupId}.sql`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                this.showNotification('Backup downloaded successfully', 'success');
+            } catch (error) {
+                console.error('Error downloading backup:', error);
+                this.showNotification('Error downloading backup', 'error');
+            }
+        },
+
+        async deleteBackup(backupId) {
+            if (!confirm('Are you sure you want to delete this backup? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/database/backups/${backupId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error('Failed to delete backup');
+
+                this.showNotification('Backup deleted successfully', 'success');
+                await this.refreshBackupHistory();
+            } catch (error) {
+                console.error('Error deleting backup:', error);
+                this.showNotification('Error deleting backup', 'error');
+            }
+        },
+
+        resetBackupConfig() {
+            this.backupConfig = {
+                database: 'app',
+                type: 'full',
+                name: '',
+                includeData: true,
+                compress: true
+            };
+        },
+
+        resetRestoreConfig() {
+            this.restoreConfig = {
+                backupFile: '',
+                targetDatabase: 'app',
+                dropExisting: false,
+                createBackup: true
+            };
+        }
+    }));
+});
+</script>
+{% endblock %}

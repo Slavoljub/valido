@@ -1,0 +1,416 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Test Suite - {{ config.get('site_name', 'ValidoAI') }}{% endblock %}
+
+{% block head %}
+<style>
+    .test-category-card {
+        transition: all 0.3s ease;
+    }
+    .test-category-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .test-status-running {
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    .progress-bar {
+        transition: width 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="p-4 md:p-6 2xl:p-10">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">🧪 Test Suite</h1>
+        <p class="text-gray-600 dark:text-gray-400">Comprehensive testing system with real-time execution and detailed reporting</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mb-6">
+        <div class="flex flex-wrap gap-4">
+            <button @click="runAllTests()" 
+                    :disabled="isRunning"
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg text-sm transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+                </svg>
+                Run All Tests
+            </button>
+            <button @click="runQuickTests()" 
+                    :disabled="isRunning"
+                    class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium rounded-lg text-sm transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                Quick Tests
+            </button>
+            <button @click="refreshStatus()" 
+                    :disabled="isRunning"
+                    class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white font-medium rounded-lg text-sm transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
+                </svg>
+                Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="mb-6" x-show="isRunning">
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 dark:bg-blue-900/20 dark:border-blue-800">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-blue-800 dark:text-blue-200">
+                        Tests are running... Please wait
+                    </p>
+                    <div class="mt-2">
+                        <div class="bg-blue-200 rounded-full h-2 dark:bg-blue-700">
+                            <div class="bg-blue-600 h-2 rounded-full progress-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Categories Grid -->
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Test Categories</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {% for category_name, category_info in test_categories.items() %}
+            <div class="test-category-card bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-4">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center">
+                        <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 mr-3 text-blue-500 bg-blue-100 rounded-lg dark:bg-blue-900 dark:text-blue-300">
+                            {% if category_name == 'unit' %}
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            {% elif category_name == 'integration' %}
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                            </svg>
+                            {% elif category_name == 'e2e' %}
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            {% elif category_name == 'performance' %}
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            {% elif category_name == 'security' %}
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            {% else %}
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-900 dark:text-white capitalize">{{ category_name.replace('_', ' ') }}</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ category_info.description }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        {% if category_info.available %}
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                            {{ category_info.test_files }} tests
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                            No tests
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                        Priority: {{ category_info.priority }}
+                    </div>
+                    {% if category_info.available %}
+                    <button @click="runCategoryTests('{{ category_name }}')" 
+                            :disabled="isRunning"
+                            class="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white text-xs font-medium rounded-md transition-colors">
+                        Run
+                    </button>
+                    {% else %}
+                    <button disabled class="inline-flex items-center px-3 py-1.5 bg-gray-400 text-white text-xs font-medium rounded-md cursor-not-allowed">
+                        Run
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Recent Results -->
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Test Results</h2>
+        <div id="recent-results">
+            {% if recent_results %}
+            <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Test</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Category</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Duration</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Message</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            {% for result in recent_results %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                    {{ result.name }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 capitalize">
+                                    {{ result.category.replace('_', ' ') }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if result.status == 'passed' %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                        Passed
+                                    </span>
+                                    {% elif result.status == 'failed' %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
+                                        Failed
+                                    </span>
+                                    {% elif result.status == 'skipped' %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                                        Skipped
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                        Error
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                    {{ "%.2f"|format(result.duration) }}s
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ result.message[:50] }}{% if result.message|length > 50 %}...{% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-8 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No test results</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Run some tests to see results here.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Alpine.js Script -->
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('testSuite', () => ({
+        isRunning: false,
+        progress: 0,
+        statusInterval: null,
+
+        init() {
+            this.refreshStatus();
+        },
+
+        async runAllTests() {
+            this.isRunning = true;
+            this.progress = 0;
+            this.startProgressAnimation();
+            
+            try {
+                const response = await fetch('/api/test-suite/run', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ run_all: true })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    this.showNotification('Tests started successfully', 'success');
+                    this.startStatusPolling();
+                } else {
+                    this.showNotification(result.error || 'Failed to start tests', 'error');
+                    this.isRunning = false;
+                }
+            } catch (error) {
+                console.error('Error running tests:', error);
+                this.showNotification('Error running tests', 'error');
+                this.isRunning = false;
+            }
+        },
+
+        async runQuickTests() {
+            this.isRunning = true;
+            this.progress = 0;
+            this.startProgressAnimation();
+            
+            try {
+                const response = await fetch('/api/test-suite/run', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ categories: ['imports', 'unit', 'routes'] })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    this.showNotification('Quick tests started successfully', 'success');
+                    this.startStatusPolling();
+                } else {
+                    this.showNotification(result.error || 'Failed to start quick tests', 'error');
+                    this.isRunning = false;
+                }
+            } catch (error) {
+                console.error('Error running quick tests:', error);
+                this.showNotification('Error running quick tests', 'error');
+                this.isRunning = false;
+            }
+        },
+
+        async runCategoryTests(category) {
+            this.isRunning = true;
+            this.progress = 0;
+            this.startProgressAnimation();
+            
+            try {
+                const response = await fetch('/api/test-suite/run', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ categories: [category] })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    this.showNotification(`${category} tests started successfully`, 'success');
+                    this.startStatusPolling();
+                } else {
+                    this.showNotification(result.error || 'Failed to start tests', 'error');
+                    this.isRunning = false;
+                }
+            } catch (error) {
+                console.error('Error running tests:', error);
+                this.showNotification('Error running tests', 'error');
+                this.isRunning = false;
+            }
+        },
+
+        async refreshStatus() {
+            try {
+                const response = await fetch('/api/test-suite/status');
+                const result = await response.json();
+                
+                if (response.ok) {
+                    this.isRunning = result.status === 'running';
+                    if (!this.isRunning) {
+                        this.stopProgressAnimation();
+                        this.stopStatusPolling();
+                    }
+                }
+            } catch (error) {
+                console.error('Error refreshing status:', error);
+            }
+        },
+
+        startProgressAnimation() {
+            const progressBar = document.querySelector('.progress-bar');
+            if (progressBar) {
+                this.progress = 0;
+                const interval = setInterval(() => {
+                    this.progress += Math.random() * 15;
+                    if (this.progress > 90) this.progress = 90;
+                    progressBar.style.width = `${this.progress}%`;
+                }, 500);
+                
+                this.progressInterval = interval;
+            }
+        },
+
+        stopProgressAnimation() {
+            if (this.progressInterval) {
+                clearInterval(this.progressInterval);
+                this.progressInterval = null;
+            }
+            
+            const progressBar = document.querySelector('.progress-bar');
+            if (progressBar) {
+                progressBar.style.width = '100%';
+                setTimeout(() => {
+                    progressBar.style.width = '0%';
+                }, 1000);
+            }
+        },
+
+        startStatusPolling() {
+            this.statusInterval = setInterval(() => {
+                this.refreshStatus();
+            }, 2000);
+        },
+
+        stopStatusPolling() {
+            if (this.statusInterval) {
+                clearInterval(this.statusInterval);
+                this.statusInterval = null;
+            }
+        },
+
+        showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
+        }
+    }));
+});
+</script>
+{% endblock %}

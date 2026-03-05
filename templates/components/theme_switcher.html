@@ -1,0 +1,400 @@
+{% macro theme_switcher_dropdown(position='bottom-right', size='medium', show_labels=true, show_icons=true) %}
+<!-- Universal Theme Switcher Dropdown Component -->
+<div class="theme-switcher relative"
+     x-data="{
+       isOpen: false,
+       currentTheme: localStorage.getItem('valido-theme') || 'valido-white',
+       themes: {
+         'valido-white': {
+           name: 'Valido White',
+           icon: 'fa-sun',
+           colors: { primary: 'blue', secondary: 'gray' }
+         },
+         'valido-dark': {
+           name: 'Valido Dark',
+           icon: 'fa-moon',
+           colors: { primary: 'blue', secondary: 'gray' }
+         },
+         'dracula': {
+           name: 'Dracula',
+           icon: 'fa-skull',
+           colors: { primary: 'purple', secondary: 'pink' }
+         },
+         'material': {
+           name: 'Material',
+           icon: 'fa-palette',
+           colors: { primary: 'blue', secondary: 'indigo' }
+         },
+         'nord': {
+           name: 'Nord',
+           icon: 'fa-snowflake',
+           colors: { primary: 'blue', secondary: 'cyan' }
+         },
+                         'auto': {
+                    name: 'Auto',
+                    icon: 'fa-adjust',
+                    colors: { primary: 'gray', secondary: 'blue' }
+                },
+                'valido-white': {
+                    name: 'Valido White',
+                    icon: 'fa-sun',
+                    colors: { primary: 'blue', secondary: 'gray' }
+                },
+                'valido-dark': {
+                    name: 'Valido Dark',
+                    icon: 'fa-moon',
+                    colors: { primary: 'blue', secondary: 'slate' }
+                },
+                'valido-high-contrast': {
+                    name: 'High Contrast',
+                    icon: 'fa-universal-access',
+                    colors: { primary: 'blue', secondary: 'black' }
+                },
+                'valido-minimal': {
+                    name: 'Minimal',
+                    icon: 'fa-minus',
+                    colors: { primary: 'gray', secondary: 'gray' }
+                }
+       }
+     }"
+     x-init="
+       // Initialize theme on load
+       setTheme(currentTheme);
+
+       // Listen for system theme changes
+       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+         if (currentTheme === 'auto') {
+           setTheme(e.matches ? 'valido-dark' : 'valido-white');
+         }
+       });
+     ">
+
+  <!-- Theme Switcher Button -->
+  <button
+    @click="isOpen = !isOpen"
+    @keydown.escape="isOpen = false"
+    @keydown.enter="isOpen = !isOpen"
+    @keydown.space.prevent="isOpen = !isOpen"
+    :aria-expanded="isOpen"
+    :aria-label="'Current theme: ' + themes[currentTheme].name"
+    class="theme-switcher-btn {{ 'w-8 h-8' if size == 'small' else 'w-10 h-10' if size == 'medium' else 'w-12 h-12' }} rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+    :class="{
+      'bg-blue-100 text-blue-600 hover:bg-blue-200': currentTheme === 'valido-white',
+      'bg-gray-700 text-gray-300 hover:bg-gray-600': currentTheme === 'valido-dark',
+      'bg-purple-900 text-purple-300 hover:bg-purple-800': currentTheme === 'dracula',
+      'bg-blue-800 text-blue-200 hover:bg-blue-700': currentTheme === 'material',
+      'bg-blue-600 text-blue-100 hover:bg-blue-500': currentTheme === 'nord',
+      'bg-gray-600 text-gray-300 hover:bg-gray-500': currentTheme === 'auto'
+    }">
+
+    {% if show_icons %}
+    <i class="fas {{ themes[currentTheme].icon }} {{ 'text-sm' if size == 'small' else 'text-base' if size == 'medium' else 'text-lg' }}"></i>
+    {% endif %}
+
+    {% if show_labels and size != 'small' %}
+    <span class="sr-only">{{ themes[currentTheme].name }}</span>
+    {% endif %}
+  </button>
+
+  <!-- Theme Options Dropdown -->
+  <div
+    x-show="isOpen"
+    x-transition:enter="transition ease-out duration-100"
+    x-transition:enter-start="transform opacity-0 scale-95"
+    x-transition:enter-end="transform opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-75"
+    x-transition:leave-start="transform opacity-100 scale-100"
+    x-transition:leave-end="transform opacity-0 scale-95"
+    @click.away="isOpen = false"
+    class="theme-options absolute z-50 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-gray-700 focus:outline-none"
+    :class="{
+      'bottom-full mb-2': position === 'top',
+      'bottom-full mb-2 left-0': position === 'top-left',
+      'bottom-full mb-2 right-0': position === 'top-right',
+      'top-full mt-2': position === 'bottom',
+      'top-full mt-2 left-0': position === 'bottom-left',
+      'top-full mt-2 right-0': position === 'bottom-right',
+      'bottom-full mb-2 left-1/2 transform -translate-x-1/2': position === 'top-center',
+      'top-full mt-2 left-1/2 transform -translate-x-1/2': position === 'bottom-center'
+    }">
+
+    <div class="py-2">
+      <div class="px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+        Choose Theme
+      </div>
+
+      <template x-for="(theme, themeKey) in themes" :key="themeKey">
+        <button
+          @click="setTheme(themeKey); isOpen = false"
+          class="theme-option w-full text-left px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors duration-150"
+          :class="{ 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300': themeKey === currentTheme }"
+          role="option"
+          :aria-selected="themeKey === currentTheme">
+
+          <div class="flex items-center">
+            <!-- Theme Color Indicator -->
+            <div class="flex-shrink-0 w-4 h-4 rounded-full mr-3"
+                 :class="{
+                   'bg-gradient-to-br from-blue-100 to-blue-200': themeKey === 'valido-white',
+                   'bg-gradient-to-br from-gray-700 to-gray-900': themeKey === 'valido-dark',
+                   'bg-gradient-to-br from-purple-900 to-pink-900': themeKey === 'dracula',
+                   'bg-gradient-to-br from-blue-800 to-blue-900': themeKey === 'material',
+                   'bg-gradient-to-br from-blue-400 to-blue-600': themeKey === 'nord',
+                   'bg-gradient-to-br from-gray-600 to-gray-700': themeKey === 'auto'
+                 }"></div>
+
+            <!-- Theme Icon -->
+            <div class="flex-shrink-0 w-6 h-6 flex items-center justify-center mr-3">
+              <i class="fas {{ theme.icon }}"
+                 :class="{
+                   'text-blue-600': themeKey === 'valido-white',
+                   'text-gray-300': themeKey === 'valido-dark',
+                   'text-purple-300': themeKey === 'dracula',
+                   'text-blue-200': themeKey === 'material',
+                   'text-blue-100': themeKey === 'nord',
+                   'text-gray-300': themeKey === 'auto'
+                 }"></i>
+            </div>
+
+            <!-- Theme Name -->
+            <div class="flex-1">
+              <div class="font-medium text-gray-900 dark:text-white"
+                   :class="{ 'text-blue-700 dark:text-blue-300': themeKey === currentTheme }">
+                {{ theme.name }}
+              </div>
+              {% if themeKey === 'auto' %}
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                Follows system preference
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Selected Indicator -->
+            <div class="flex-shrink-0 ml-3" x-show="themeKey === currentTheme">
+              <i class="fas fa-check text-blue-600 dark:text-blue-400"></i>
+            </div>
+          </div>
+        </button>
+      </template>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
+      <div class="flex items-center justify-between">
+        <div class="text-xs text-gray-500 dark:text-gray-400">
+          <i class="fas fa-info-circle mr-1"></i>
+          Changes apply instantly
+        </div>
+        <button
+          @click="isOpen = false"
+          class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Theme Switcher JavaScript -->
+<script>
+function setTheme(themeName) {
+  // Remove current theme classes
+  const currentThemes = ['valido-white', 'valido-dark', 'valido-high-contrast', 'valido-minimal'];
+  document.documentElement.classList.remove(...currentThemes.map(t => `theme-${t}`));
+
+  // Add new theme class
+  if (currentThemes.includes(themeName)) {
+    document.documentElement.classList.add(`theme-${themeName}`);
+  }
+
+  // Update localStorage
+  localStorage.setItem('valido-theme', themeName);
+
+  // Update document class for legacy themes
+  if (!currentThemes.includes(themeName)) {
+    document.documentElement.setAttribute('data-theme', themeName);
+  }
+
+  // Update Alpine.js data if available
+  if (window.Alpine && window.Alpine.store) {
+    window.Alpine.store('theme', themeName);
+  }
+
+  // Dispatch custom event for other components
+  window.dispatchEvent(new CustomEvent('themeChanged', {
+    detail: { theme: themeName }
+  }));
+
+  // Show notification
+  if (window.ValidoAI && window.ValidoAI.toast) {
+    const themeNames = {
+      'valido-white': 'Valido White',
+      'valido-dark': 'Valido Dark',
+      'valido-high-contrast': 'Valido High Contrast',
+      'valido-minimal': 'Valido Minimal',
+      'dracula': 'Dracula',
+      'material': 'Material',
+      'nord': 'Nord',
+      'auto': 'Auto (System)'
+    };
+
+    window.ValidoAI.toast.success(`Theme changed to ${themeNames[themeName] || themeName}`);
+  }
+
+  return themeName;
+}
+
+// Initialize theme on page load
+document.addEventListener('DOMContentLoaded', function() {
+  const savedTheme = localStorage.getItem('valido-theme') || 'valido-white';
+  setTheme(savedTheme);
+
+  // Listen for system theme changes
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    const currentTheme = localStorage.getItem('valido-theme') || 'valido-white';
+    if (currentTheme === 'auto') {
+      setTheme(e.matches ? 'valido-dark' : 'valido-white');
+    }
+  });
+});
+</script>
+
+<!-- CSS for Theme Support -->
+<style>
+/* Theme-specific color schemes */
+[data-theme="valido-white"] {
+  --primary-color: #3b82f6;
+  --secondary-color: #6b7280;
+  --background-color: #ffffff;
+  --surface-color: #f8fafc;
+  --text-primary: #111827;
+  --text-secondary: #374151;
+  --border-color: #e5e7eb;
+}
+
+[data-theme="valido-dark"] {
+  --primary-color: #3b82f6;
+  --secondary-color: #9ca3af;
+  --background-color: #0f172a;
+  --surface-color: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --border-color: #334155;
+}
+
+[data-theme="dracula"] {
+  --primary-color: #bd93f9;
+  --secondary-color: #6272a4;
+  --background-color: #282a36;
+  --surface-color: #44475a;
+  --text-primary: #f8f8f2;
+  --text-secondary: #6272a4;
+  --border-color: #6272a4;
+}
+
+[data-theme="material"] {
+  --primary-color: #2196f3;
+  --secondary-color: #757575;
+  --background-color: #263238;
+  --surface-color: #37474f;
+  --text-primary: #ffffff;
+  --text-secondary: #b0bec5;
+  --border-color: #455a64;
+}
+
+[data-theme="nord"] {
+  --primary-color: #88c0d0;
+  --secondary-color: #4c566a;
+  --background-color: #2e3440;
+  --surface-color: #3b4252;
+  --text-primary: #eceff4;
+  --text-secondary: #d8dee9;
+  --border-color: #4c566a;
+}
+
+/* Theme transition animations */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Focus styles for accessibility */
+.theme-switcher-btn:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.theme-option:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .theme-switcher-btn {
+    border: 2px solid currentColor;
+  }
+
+  .theme-option {
+    border: 1px solid currentColor;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .theme-switcher-btn,
+  .theme-option,
+  .theme-options {
+    transition: none;
+  }
+
+  .theme-options {
+    animation: none;
+  }
+}
+</style>
+{% endmacro %}
+
+{% macro theme_switcher_inline(show_labels=true, size='medium') %}
+<!-- Inline Theme Switcher Component -->
+<div class="inline-flex items-center space-x-2"
+     x-data="{
+       currentTheme: localStorage.getItem('valido-theme') || 'valido-white',
+       themes: {
+         'valido-white': { name: 'Light', icon: 'fa-sun' },
+         'valido-dark': { name: 'Dark', icon: 'fa-moon' },
+         'auto': { name: 'Auto', icon: 'fa-adjust' }
+       }
+     }">
+
+  {% if show_labels %}
+  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Theme:</span>
+  {% endif %}
+
+  <div class="flex rounded-lg bg-gray-100 dark:bg-gray-700 p-1">
+    <template x-for="(theme, themeKey) in themes" :key="themeKey">
+      <button
+        @click="setTheme(themeKey)"
+        class="theme-inline-btn {{ 'px-3 py-1.5' if size == 'medium' else 'px-2 py-1' }} text-xs font-medium rounded-md transition-all duration-200"
+        :class="{
+          'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm': themeKey === currentTheme,
+          'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200': themeKey !== currentTheme
+        }">
+
+        <i class="fas {{ theme.icon }} mr-1"></i>
+        <span class="{{ 'hidden sm:inline' if size == 'small' else '' }}">{{ theme.name }}</span>
+      </button>
+    </template>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro theme_switcher_minimal() %}
+<!-- Minimal Theme Switcher Component -->
+<button
+  @click="setTheme(currentTheme === 'valido-dark' ? 'valido-white' : 'valido-dark')"
+  class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+  x-data="{ currentTheme: localStorage.getItem('valido-theme') || 'valido-white' }"
+  :aria-label="currentTheme === 'valido-dark' ? 'Switch to light mode' : 'Switch to dark mode'">
+
+  <i class="fas" :class="currentTheme === 'valido-dark' ? 'fa-sun' : 'fa-moon'"></i>
+</button>
+{% endmacro %}

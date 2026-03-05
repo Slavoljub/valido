@@ -1,0 +1,990 @@
+{% extends "layouts/base.html" %}
+
+{% block head %}
+{{ super() }}
+
+<!-- Content Management SEO -->
+{% if seo_manager %}
+{{ seo_manager.generate_meta_tags('content-management') }}
+{{ seo_manager.generate_tracking_scripts('content-management') }}
+{% endif %}
+
+<!-- Content Management CSS -->
+<style>
+/* Content Management Container */
+.content-management {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    min-height: calc(100vh - 200px);
+}
+
+/* Header Section */
+.content-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: white;
+}
+
+.content-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0 0 1rem 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.content-subtitle {
+    font-size: 1.1rem;
+    font-weight: 400;
+    margin: 0 0 1.5rem 0;
+    opacity: 0.9;
+}
+
+.header-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+/* Upload Section */
+.upload-section {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.upload-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.upload-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    font-size: 1.25rem;
+}
+
+.upload-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.upload-form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.upload-input-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+}
+
+.upload-input {
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.upload-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.upload-button {
+    padding: 0.75rem 2rem;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.upload-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
+}
+
+.upload-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.upload-progress {
+    margin-top: 1rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+/* Content List */
+.content-list-section {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.content-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.content-search {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.search-input {
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    min-width: 300px;
+}
+
+.search-button {
+    padding: 0.75rem 1.5rem;
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.search-button:hover {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.content-filters {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filter-select {
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    background: white;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.content-card {
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.content-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    border-color: #3b82f6;
+}
+
+.content-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.content-icon.pdf { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+.content-icon.doc { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+.content-icon.image { background: linear-gradient(135deg, #059669, #047857); }
+.content-icon.video { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
+.content-icon.audio { background: linear-gradient(135deg, #d97706, #b45309); }
+.content-icon.other { background: linear-gradient(135deg, #64748b, #475569); }
+
+.content-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+    word-break: break-word;
+}
+
+.content-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.content-size {
+    font-size: 0.75rem;
+    color: #64748b;
+    background: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.content-date {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.content-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-button {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.action-button.view {
+    background: #3b82f6;
+    color: white;
+}
+
+.action-button.download {
+    background: #10b981;
+    color: white;
+}
+
+.action-button.delete {
+    background: #ef4444;
+    color: white;
+}
+
+.action-button:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+/* Loading and Empty States */
+.loading-state {
+    text-align: center;
+    padding: 3rem;
+    color: #64748b;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem auto;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #64748b;
+}
+
+.empty-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem auto;
+    font-size: 2rem;
+    color: #94a3b8;
+}
+
+.empty-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+}
+
+.empty-message {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Modal for Upload Progress */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 1rem 0;
+}
+
+.modal-message {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0 0 1rem 0;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 1024px) {
+    .content-management {
+        padding: 1rem;
+    }
+
+    .content-header {
+        padding: 1.5rem;
+    }
+
+    .content-title {
+        font-size: 2rem;
+    }
+
+    .upload-form {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .upload-input-group {
+        grid-template-columns: 1fr;
+    }
+
+    .content-controls {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .content-search {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .search-input {
+        min-width: auto;
+    }
+}
+
+@media (max-width: 640px) {
+    .header-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .content-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+
+    .content-actions {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .content-card {
+        background: rgba(30, 41, 59, 0.5);
+        border-color: rgba(71, 85, 105, 0.3);
+    }
+
+    .content-name {
+        color: #f8fafc;
+    }
+
+    .content-size {
+        background: rgba(51, 65, 85, 0.5);
+        color: #cbd5e1;
+    }
+
+    .search-input {
+        background: rgba(30, 41, 59, 0.5);
+        border-color: rgba(71, 85, 105, 0.3);
+        color: #f8fafc;
+    }
+
+    .search-input::placeholder {
+        color: #94a3b8;
+    }
+
+    .modal-content {
+        background: rgba(30, 41, 59, 0.95);
+        border: 1px solid rgba(71, 85, 105, 0.3);
+    }
+
+    .modal-title {
+        color: #f8fafc;
+    }
+
+    .modal-message {
+        color: #cbd5e1;
+    }
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+    .content-card,
+    .upload-section,
+    .content-list-section {
+        border-width: 2px;
+    }
+
+    .action-button {
+        border: 2px solid;
+    }
+
+    .upload-input,
+    .search-input,
+    .filter-select {
+        border-width: 2px;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .content-card,
+    .upload-button,
+    .action-button,
+    .search-button {
+        transition: none;
+    }
+
+    .content-card:hover {
+        transform: none;
+    }
+
+    .upload-button:hover,
+    .action-button:hover {
+        transform: none;
+    }
+
+    .loading-spinner {
+        animation: none;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-management" x-data="contentManagement()">
+    <!-- Header Section -->
+    <div class="content-header">
+        <h1 class="content-title">
+            <i class="fas fa-folder-open mr-4"></i>
+            Content Management
+        </h1>
+        <p class="content-subtitle">
+            Upload, organize, and manage your files with advanced content processing
+        </p>
+
+        <!-- Header Statistics -->
+        <div class="header-stats">
+            <div class="stat-card">
+                <div class="stat-number" x-text="stats.totalFiles">0</div>
+                <div class="stat-label">Total Files</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" x-text="stats.totalSize">0 MB</div>
+                <div class="stat-label">Storage Used</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" x-text="stats.categories">0</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" x-text="stats.recentUploads">0</div>
+                <div class="stat-label">Recent Uploads</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="upload-section">
+        <div class="upload-header">
+            <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <h3 class="upload-title">Upload Files</h3>
+        </div>
+
+        <form class="upload-form" @submit.prevent="uploadFile()">
+            <div class="upload-input-group">
+                <input type="file" class="upload-input" @change="handleFileSelect($event)" required>
+                <input type="text" class="upload-input" x-model="uploadData.category" placeholder="Category (e.g., documents, images)" required>
+                <input type="text" class="upload-input" x-model="uploadData.userId" placeholder="User ID" value="demo-user">
+            </div>
+            <button type="submit" class="upload-button" :disabled="!uploadData.file || isUploading">
+                <i class="fas fa-upload mr-2"></i>
+                Upload
+            </button>
+        </form>
+
+        <!-- Upload Progress -->
+        <div class="upload-progress" x-show="isUploading">
+            <div class="progress-bar">
+                <div class="progress-fill" :style="`width: ${uploadProgress}%`"></div>
+            </div>
+            <div class="progress-text" x-text="`Uploading... ${uploadProgress}%`"></div>
+        </div>
+    </div>
+
+    <!-- Content List Section -->
+    <div class="content-list-section">
+        <div class="content-controls">
+            <div class="content-search">
+                <input type="text" class="search-input" x-model="searchQuery" placeholder="Search files...">
+                <button class="search-button" @click="searchFiles()">
+                    <i class="fas fa-search mr-2"></i>
+                    Search
+                </button>
+            </div>
+            <div class="content-filters">
+                <select class="filter-select" x-model="filterCategory">
+                    <option value="">All Categories</option>
+                    <option value="documents">Documents</option>
+                    <option value="images">Images</option>
+                    <option value="videos">Videos</option>
+                    <option value="audio">Audio</option>
+                    <option value="other">Other</option>
+                </select>
+                <button class="search-button" @click="refreshContent()">
+                    <i class="fas fa-refresh mr-2"></i>
+                    Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-state" x-show="isLoading">
+            <div class="loading-spinner"></div>
+            <p>Loading content...</p>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid" x-show="!isLoading && contentList.length > 0">
+            <template x-for="item in filteredContent" :key="item.id">
+                <div class="content-card">
+                    <div class="content-icon" :class="getFileIconClass(item.extension)">
+                        <i :class="getFileIcon(item.extension)"></i>
+                    </div>
+                    <h4 class="content-name" x-text="item.filename"></h4>
+                    <div class="content-meta">
+                        <span class="content-size" x-text="formatFileSize(item.size)"></span>
+                        <span class="content-date" x-text="formatDate(item.uploaded_at)"></span>
+                    </div>
+                    <div class="content-actions">
+                        <button class="action-button view" @click="viewFile(item.id)" title="View">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-button download" @click="downloadFile(item.id)" title="Download">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button class="action-button delete" @click="deleteFile(item.id)" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" x-show="!isLoading && contentList.length === 0">
+            <div class="empty-icon">
+                <i class="fas fa-folder-open"></i>
+            </div>
+            <h3 class="empty-title">No files uploaded yet</h3>
+            <p class="empty-message">Upload your first file to get started with content management.</p>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal-overlay" x-show="showUploadModal">
+        <div class="modal-content">
+            <h3 class="modal-title">Upload Complete!</h3>
+            <p class="modal-message" x-text="uploadResult.message"></p>
+            <button class="upload-button" @click="showUploadModal = false">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Content Management JavaScript -->
+<script>
+function contentManagement() {
+    return {
+        // Data
+        contentList: [],
+        filteredContent: [],
+        searchQuery: '',
+        filterCategory: '',
+        isLoading: false,
+        isUploading: false,
+        uploadProgress: 0,
+        showUploadModal: false,
+        uploadResult: {},
+        stats: {
+            totalFiles: 0,
+            totalSize: '0 MB',
+            categories: 0,
+            recentUploads: 0
+        },
+        uploadData: {
+            file: null,
+            category: 'general',
+            userId: 'demo-user'
+        },
+
+        // Initialize
+        async init() {
+            console.log('🚀 Initializing Content Management...');
+            await this.loadContent();
+            await this.loadStats();
+            console.log('✅ Content Management initialized');
+        },
+
+        // File handling
+        handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.uploadData.file = file;
+                // Auto-detect category based on file type
+                const ext = file.name.split('.').pop().toLowerCase();
+                if (['pdf', 'doc', 'docx', 'txt'].includes(ext)) {
+                    this.uploadData.category = 'documents';
+                } else if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
+                    this.uploadData.category = 'images';
+                } else if (['mp4', 'avi', 'mov'].includes(ext)) {
+                    this.uploadData.category = 'videos';
+                } else if (['mp3', 'wav', 'ogg'].includes(ext)) {
+                    this.uploadData.category = 'audio';
+                }
+            }
+        },
+
+        async uploadFile() {
+            if (!this.uploadData.file) return;
+
+            this.isUploading = true;
+            this.uploadProgress = 0;
+
+            try {
+                const formData = new FormData();
+                formData.append('file', this.uploadData.file);
+                formData.append('category', this.uploadData.category);
+                formData.append('user_id', this.uploadData.userId);
+
+                // Simulate upload progress
+                const progressInterval = setInterval(() => {
+                    if (this.uploadProgress < 90) {
+                        this.uploadProgress += Math.random() * 10;
+                    }
+                }, 200);
+
+                const response = await fetch('/api/content/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                clearInterval(progressInterval);
+                this.uploadProgress = 100;
+
+                if (response.ok) {
+                    const result = await response.json();
+                    this.uploadResult = result;
+                    this.showUploadModal = true;
+
+                    // Reset form
+                    this.uploadData.file = null;
+                    this.uploadData.category = 'general';
+                    document.querySelector('input[type="file"]').value = '';
+
+                    // Reload content
+                    await this.loadContent();
+                    await this.loadStats();
+                } else {
+                    const error = await response.json();
+                    alert('Upload failed: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('Upload failed: ' + error.message);
+            } finally {
+                this.isUploading = false;
+                this.uploadProgress = 0;
+            }
+        },
+
+        // Content management
+        async loadContent() {
+            this.isLoading = true;
+            try {
+                const response = await fetch('/api/content/list');
+                if (response.ok) {
+                    const data = await response.json();
+                    this.contentList = data.content || [];
+                    this.applyFilters();
+                }
+            } catch (error) {
+                console.error('Error loading content:', error);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        async loadStats() {
+            try {
+                const response = await fetch('/api/content/stats');
+                if (response.ok) {
+                    const data = await response.json();
+                    const stats = data.stats;
+                    this.stats = {
+                        totalFiles: stats.total_content || 0,
+                        totalSize: stats.total_size_mb ? `${stats.total_size_mb.toFixed(1)} MB` : '0 MB',
+                        categories: Object.keys(stats.categories || {}).length,
+                        recentUploads: stats.total_content || 0
+                    };
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        },
+
+        applyFilters() {
+            let filtered = [...this.contentList];
+
+            if (this.searchQuery) {
+                const query = this.searchQuery.toLowerCase();
+                filtered = filtered.filter(item =>
+                    item.filename.toLowerCase().includes(query) ||
+                    item.category.toLowerCase().includes(query)
+                );
+            }
+
+            if (this.filterCategory) {
+                filtered = filtered.filter(item => item.category === this.filterCategory);
+            }
+
+            this.filteredContent = filtered;
+        },
+
+        async searchFiles() {
+            if (!this.searchQuery.trim()) {
+                this.applyFilters();
+                return;
+            }
+
+            this.isLoading = true;
+            try {
+                const response = await fetch(`/api/content/search?q=${encodeURIComponent(this.searchQuery)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    this.filteredContent = data.results || [];
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        async viewFile(contentId) {
+            window.open(`/api/content/${contentId}/view`, '_blank');
+        },
+
+        async downloadFile(contentId) {
+            const link = document.createElement('a');
+            link.href = `/api/content/${contentId}/download`;
+            link.download = '';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+
+        async deleteFile(contentId) {
+            if (!confirm('Are you sure you want to delete this file?')) return;
+
+            try {
+                const response = await fetch(`/api/content/${contentId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    await this.loadContent();
+                    await this.loadStats();
+                    alert('File deleted successfully');
+                } else {
+                    const error = await response.json();
+                    alert('Delete failed: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                alert('Delete failed: ' + error.message);
+            }
+        },
+
+        refreshContent() {
+            this.loadContent();
+            this.loadStats();
+        },
+
+        // Utility methods
+        getFileIcon(extension) {
+            const icons = {
+                'pdf': 'fas fa-file-pdf',
+                'doc': 'fas fa-file-word',
+                'docx': 'fas fa-file-word',
+                'txt': 'fas fa-file-alt',
+                'jpg': 'fas fa-file-image',
+                'jpeg': 'fas fa-file-image',
+                'png': 'fas fa-file-image',
+                'gif': 'fas fa-file-image',
+                'mp4': 'fas fa-file-video',
+                'avi': 'fas fa-file-video',
+                'mov': 'fas fa-file-video',
+                'mp3': 'fas fa-file-audio',
+                'wav': 'fas fa-file-audio'
+            };
+            return icons[extension] || 'fas fa-file';
+        },
+
+        getFileIconClass(extension) {
+            const classes = {
+                'pdf': 'pdf',
+                'doc': 'doc',
+                'docx': 'doc',
+                'txt': 'other',
+                'jpg': 'image',
+                'jpeg': 'image',
+                'png': 'image',
+                'gif': 'image',
+                'mp4': 'video',
+                'avi': 'video',
+                'mov': 'video',
+                'mp3': 'audio',
+                'wav': 'audio'
+            };
+            return classes[extension] || 'other';
+        },
+
+        formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        },
+
+        formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+    };
+}
+
+// Auto-initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Content Management loaded successfully');
+});
+</script>
+{% endblock %}

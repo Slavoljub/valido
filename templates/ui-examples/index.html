@@ -1,0 +1,3158 @@
+{% extends "layouts/base.html"" %}
+
+{% block title %}UI Examples - ValidoAI{% endblock %}
+
+{% block head %}
+<style>
+/* Copy-to-clipboard functionality */
+.copy-container {
+    position: relative;
+}
+
+.copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.copy-container:hover .copy-btn {
+    opacity: 1;
+}
+
+.copy-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.copy-btn.copied {
+    background: #10b981 !important;
+    opacity: 1;
+}
+
+/* Language selector */
+.language-selector {
+    position: relative;
+    display: inline-block;
+}
+
+.language-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-primary, #ffffff);
+    border: 1px solid var(--border-primary, #e5e7eb);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 200px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.language-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.language-option:hover {
+    background: var(--bg-secondary, #f9fafb);
+}
+
+.language-option.active {
+    background: var(--primary-50, #eff6ff);
+    color: var(--primary-700, #1d4ed8);
+}
+
+.flag-icon {
+    width: 20px;
+    height: 15px;
+    object-fit: cover;
+    border-radius: 2px;
+}
+
+/* Component categories */
+.category-section {
+    border: 1px solid var(--border-primary, #e5e7eb);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    background: var(--bg-primary, #ffffff);
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--primary-500, #3b82f6);
+}
+
+.category-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--primary-100, #dbeafe);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-600, #2563eb);
+    font-size: 1.25rem;
+}
+
+.dependency-info {
+    background: var(--bg-secondary, #f9fafb);
+    border: 1px solid var(--border-primary, #e5e7eb);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.dependency-code {
+    background: var(--bg-primary, #ffffff);
+    border: 1px solid var(--border-primary, #e5e7eb);
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    overflow-x: auto;
+    position: relative;
+}
+
+/* Component grid */
+.component-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.component-card {
+    border: 1px solid var(--border-primary, #e5e7eb);
+    border-radius: 8px;
+    padding: 1.5rem;
+    background: var(--bg-primary, #ffffff);
+    transition: all 0.2s ease;
+}
+
+.component-card:hover {
+    border-color: var(--primary-500, #3b82f6);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.component-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary, #374151);
+}
+
+.component-description {
+    font-size: 0.9rem;
+    color: var(--text-secondary, #6b7280);
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+/* Dark theme support */
+[data-theme="valido-dark"] .copy-btn {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="valido-dark"] .copy-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="valido-dark"] .language-dropdown {
+    background: #1f2937;
+    border-color: #4b5563;
+}
+
+[data-theme="valido-dark"] .language-option:hover {
+    background: #374151;
+}
+
+[data-theme="valido-dark"] .language-option.active {
+    background: #1e3a8a;
+    color: #dbeafe;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .component-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .category-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .language-dropdown {
+        right: auto;
+        left: 0;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <!-- Header with Language Selector -->
+    <div class="mb-8">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h1 class="text-3xl font-bold text-neutral-900 dark:text-white mb-2">UI Examples & Components</h1>
+                <p class="text-neutral-600 dark:text-neutral-400">Explore all design system components and interactions</p>
+            </div>
+
+            <!-- Language Selector -->
+            <div class="language-selector">
+                <button onclick="toggleLanguageDropdown()" class="btn btn-outline-secondary flex items-center gap-2">
+                    <img src="/static/images/flags/us.svg" alt="English" class="flag-icon">
+                    <span id="current-language">English</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div id="language-dropdown" class="language-dropdown hidden">
+                    <div class="language-option active" onclick="changeLanguage('en')">
+                        <img src="/static/images/flags/us.svg" alt="English" class="flag-icon">
+                        <span>English</span>
+                    </div>
+                    <div class="language-option" onclick="changeLanguage('es')">
+                        <img src="/static/images/flags/es.svg" alt="Spanish" class="flag-icon">
+                        <span>Español</span>
+                    </div>
+                    <div class="language-option" onclick="changeLanguage('fr')">
+                        <img src="/static/images/flags/fr.svg" alt="French" class="flag-icon">
+                        <span>Français</span>
+                    </div>
+                    <div class="language-option" onclick="changeLanguage('de')">
+                        <img src="/static/images/flags/de.svg" alt="German" class="flag-icon">
+                        <span>Deutsch</span>
+                    </div>
+                    <div class="language-option" onclick="changeLanguage('it')">
+                        <img src="/static/images/flags/it.svg" alt="Italian" class="flag-icon">
+                        <span>Italiano</span>
+                    </div>
+                    <div class="language-option" onclick="changeLanguage('pt')">
+                        <img src="/static/images/flags/pt.svg" alt="Portuguese" class="flag-icon">
+                        <span>Português</span>
+                    </div>
+                    <div class="language-option" onclick="changeLanguage('ru')">
+                        <img src="/static/images/flags/ru.svg" alt="Russian" class="flag-icon">
+                        <span>Русский</span>
+                    </div>
+                    <div class="language-option" onclick="changeLanguage('zh')">
+                        <img src="/static/images/flags/cn.svg" alt="Chinese" class="flag-icon">
+                        <span>中文</span>
+                    </div>
+                    <div class="language-option" onclick="changeLanguage('ja')">
+                        <img src="/static/images/flags/jp.svg" alt="Japanese" class="flag-icon">
+                        <span>日本語</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+            <div class="bg-primary-50 dark:bg-primary-900/20 p-4 rounded-lg text-center">
+                <div class="text-2xl font-bold text-primary-600 dark:text-primary-400">50+</div>
+                <div class="text-sm text-primary-600 dark:text-primary-400">Components</div>
+            </div>
+            <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg text-center">
+                <div class="text-2xl font-bold text-green-600 dark:text-green-400">8</div>
+                <div class="text-sm text-green-600 dark:text-green-400">Themes</div>
+            </div>
+            <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg text-center">
+                <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">100%</div>
+                <div class="text-sm text-blue-600 dark:text-blue-400">Responsive</div>
+            </div>
+            <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg text-center">
+                <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">WCAG AA</div>
+                <div class="text-sm text-purple-600 dark:text-purple-400">Compliant</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. MODAL SYSTEM -->
+    <div class="category-section">
+        <div class="category-header">
+            <div class="category-icon">
+                <i class="fas fa-window-maximize"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-0">Modal System</h2>
+                <p class="text-neutral-600 dark:text-neutral-400">Theme-aware modals with search, confirmation, and Quick Actions</p>
+            </div>
+        </div>
+
+        <div class="dependency-info">
+            <h4 class="font-semibold text-neutral-900 dark:text-white mb-2">Dependencies</h4>
+            <div class="copy-container">
+                <div class="dependency-code" id="modal-dependencies">
+&lt;!-- CSS Dependencies --&gt;
+&lt;link rel="stylesheet" href="/static/css/modal-system.css"&gt;
+
+&lt;!-- JavaScript Dependencies --&gt;
+&lt;script src="/static/js/modal-system.js"&gt;&lt;/script&gt;
+&lt;script src="/static/js/theme-manager.js"&gt;&lt;/script&gt;
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('modal-dependencies')">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+        </div>
+
+        <div class="component-grid">
+            <!-- Basic Modal -->
+            <div class="component-card">
+                <div class="component-title">Basic Modal</div>
+                <div class="component-description">Simple modal with content and theme support</div>
+                <button onclick="showBasicModal()" class="btn btn-primary w-full">
+                    <i class="fas fa-window-maximize mr-2"></i>
+                    Open Basic Modal
+                </button>
+            </div>
+
+            <!-- Search Modal -->
+            <div class="component-card">
+                <div class="component-title">Search Modal</div>
+                <div class="component-description">Modal with search functionality and filtering</div>
+                <button onclick="showSearchModal()" class="btn btn-primary w-full">
+                    <i class="fas fa-search mr-2"></i>
+                    Open Search Modal
+                </button>
+            </div>
+
+            <!-- Quick Actions Modal -->
+            <div class="component-card">
+                <div class="component-title">Quick Actions</div>
+                <div class="component-description">No transparency modal for quick actions</div>
+                <button onclick="showQuickActionsModal()" class="btn btn-primary w-full">
+                    <i class="fas fa-bolt mr-2"></i>
+                    Open Quick Actions
+                </button>
+            </div>
+
+            <!-- Confirmation Modal -->
+            <div class="component-card">
+                <div class="component-title">Confirmation Modal</div>
+                <div class="component-description">Modal for confirmations with yes/no actions</div>
+                <button onclick="showConfirmationModal()" class="btn btn-primary w-full">
+                    <i class="fas fa-question-circle mr-2"></i>
+                    Open Confirmation
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. FORM ELEMENTS -->
+    <div class="category-section">
+        <div class="category-header">
+            <div class="category-icon">
+                <i class="fas fa-edit"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-0">Form Elements</h2>
+                <p class="text-neutral-600 dark:text-neutral-400">Input fields, checkboxes, radio buttons, and more</p>
+            </div>
+        </div>
+
+        <div class="dependency-info">
+            <h4 class="font-semibold text-neutral-900 dark:text-white mb-2">Dependencies</h4>
+            <div class="copy-container">
+                <div class="dependency-code" id="form-dependencies">
+&lt;!-- CSS Dependencies --&gt;
+&lt;link rel="stylesheet" href="/static/css/forms.css"&gt;
+
+&lt;!-- JavaScript Dependencies --&gt;
+&lt;script src="/static/js/form-validation.js"&gt;&lt;/script&gt;
+&lt;script src="/static/js/input-masks.js"&gt;&lt;/script&gt;
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('form-dependencies')">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+        </div>
+
+        <div class="component-grid">
+            <!-- Text Input -->
+            <div class="component-card">
+                <div class="component-title">Text Input</div>
+                <div class="component-description">Standard text input with validation</div>
+                <input type="text" placeholder="Enter text..." class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white">
+            </div>
+
+            <!-- Email Input -->
+            <div class="component-card">
+                <div class="component-title">Email Input</div>
+                <div class="component-description">Email input with validation</div>
+                <input type="email" placeholder="Enter email..." class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white">
+            </div>
+
+            <!-- Password Input -->
+            <div class="component-card">
+                <div class="component-title">Password Input</div>
+                <div class="component-description">Password input with show/hide toggle</div>
+                <input type="password" placeholder="Enter password..." class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white">
+            </div>
+
+            <!-- Select Dropdown -->
+            <div class="component-card">
+                <div class="component-title">Select Dropdown</div>
+                <div class="component-description">Standard select dropdown</div>
+                <select class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white">
+                    <option value="">Select option...</option>
+                    <option value="option1">Option 1</option>
+                    <option value="option2">Option 2</option>
+                    <option value="option3">Option 3</option>
+                </select>
+            </div>
+
+            <!-- Checkboxes -->
+            <div class="component-card">
+                <div class="component-title">Checkboxes</div>
+                <div class="component-description">Multiple checkbox options</div>
+                <div class="space-y-2">
+                    <label class="flex items-center">
+                        <input type="checkbox" class="mr-2">
+                        <span class="text-sm">Option 1</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" class="mr-2">
+                        <span class="text-sm">Option 2</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" class="mr-2">
+                        <span class="text-sm">Option 3</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Radio Buttons -->
+            <div class="component-card">
+                <div class="component-title">Radio Buttons</div>
+                <div class="component-description">Single selection radio buttons</div>
+                <div class="space-y-2">
+                    <label class="flex items-center">
+                        <input type="radio" name="radio-group" class="mr-2">
+                        <span class="text-sm">Radio 1</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="radio-group" class="mr-2">
+                        <span class="text-sm">Radio 2</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="radio-group" class="mr-2">
+                        <span class="text-sm">Radio 3</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Textarea -->
+            <div class="component-card">
+                <div class="component-title">Textarea</div>
+                <div class="component-description">Multi-line text input</div>
+                <textarea placeholder="Enter text..." rows="3" class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"></textarea>
+            </div>
+
+            <!-- File Input -->
+            <div class="component-card">
+                <div class="component-title">File Input</div>
+                <div class="component-description">File upload with drag & drop</div>
+                <input type="file" class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white">
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. BUTTONS & CONTROLS -->
+    <div class="category-section">
+        <div class="category-header">
+            <div class="category-icon">
+                <i class="fas fa-mouse-pointer"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-0">Buttons & Controls</h2>
+                <p class="text-neutral-600 dark:text-neutral-400">Various button styles and interactive controls</p>
+            </div>
+        </div>
+
+        <div class="dependency-info">
+            <h4 class="font-semibold text-neutral-900 dark:text-white mb-2">Dependencies</h4>
+            <div class="copy-container">
+                <div class="dependency-code" id="button-dependencies">
+&lt;!-- CSS Dependencies --&gt;
+&lt;link rel="stylesheet" href="/static/css/buttons.css"&gt;
+
+&lt;!-- JavaScript Dependencies --&gt;
+&lt;script src="/static/js/button-interactions.js"&gt;&lt;/script&gt;
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('button-dependencies')">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+        </div>
+
+        <div class="component-grid">
+            <!-- Primary Buttons -->
+            <div class="component-card">
+                <div class="component-title">Primary Buttons</div>
+                <div class="component-description">Main action buttons</div>
+                <div class="space-y-2">
+                    <button class="btn btn-primary w-full">Primary Button</button>
+                    <button class="btn btn-primary btn-sm w-full">Small Primary</button>
+                    <button class="btn btn-primary btn-lg w-full">Large Primary</button>
+                </div>
+            </div>
+
+            <!-- Secondary Buttons -->
+            <div class="component-card">
+                <div class="component-title">Secondary Buttons</div>
+                <div class="component-description">Alternative action buttons</div>
+                <div class="space-y-2">
+                    <button class="btn btn-secondary w-full">Secondary Button</button>
+                    <button class="btn btn-secondary btn-sm w-full">Small Secondary</button>
+                    <button class="btn btn-secondary btn-lg w-full">Large Secondary</button>
+                </div>
+            </div>
+
+            <!-- Success Buttons -->
+            <div class="component-card">
+                <div class="component-title">Success Buttons</div>
+                <div class="component-description">Success action buttons</div>
+                <div class="space-y-2">
+                    <button class="btn btn-success w-full">Success Button</button>
+                    <button class="btn btn-success btn-sm w-full">Small Success</button>
+                    <button class="btn btn-success btn-lg w-full">Large Success</button>
+                </div>
+            </div>
+
+            <!-- Danger Buttons -->
+            <div class="component-card">
+                <div class="component-title">Danger Buttons</div>
+                <div class="component-description">Destructive action buttons</div>
+                <div class="space-y-2">
+                    <button class="btn btn-danger w-full">Danger Button</button>
+                    <button class="btn btn-danger btn-sm w-full">Small Danger</button>
+                    <button class="btn btn-danger btn-lg w-full">Large Danger</button>
+                </div>
+            </div>
+
+            <!-- Outline Buttons -->
+            <div class="component-card">
+                <div class="component-title">Outline Buttons</div>
+                <div class="component-description">Outlined style buttons</div>
+                <div class="space-y-2">
+                    <button class="btn btn-outline-primary w-full">Outline Primary</button>
+                    <button class="btn btn-outline-secondary w-full">Outline Secondary</button>
+                    <button class="btn btn-outline-success w-full">Outline Success</button>
+                </div>
+            </div>
+
+            <!-- Loading Buttons -->
+            <div class="component-card">
+                <div class="component-title">Loading Buttons</div>
+                <div class="component-description">Buttons with loading states</div>
+                <div class="space-y-2">
+                    <button class="btn btn-primary w-full" disabled>
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                        Loading...
+                    </button>
+                    <button class="btn btn-secondary w-full" disabled>
+                        <i class="fas fa-circle-notch fa-spin mr-2"></i>
+                        Processing...
+                    </button>
+                </div>
+            </div>
+
+            <!-- Icon Buttons -->
+            <div class="component-card">
+                <div class="component-title">Icon Buttons</div>
+                <div class="component-description">Buttons with icons</div>
+                <div class="flex flex-wrap gap-2">
+                    <button class="btn btn-outline-primary">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="btn btn-outline-success">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button class="btn btn-outline-danger">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Button Groups -->
+            <div class="component-card">
+                <div class="component-title">Button Groups</div>
+                <div class="component-description">Grouped buttons</div>
+                <div class="flex">
+                    <button class="btn btn-primary rounded-r-none">Left</button>
+                    <button class="btn btn-primary rounded-none border-l-0">Center</button>
+                    <button class="btn btn-primary rounded-l-none border-l-0">Right</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. NOTIFICATIONS & ALERTS -->
+    <div class="category-section">
+        <div class="category-header">
+            <div class="category-icon">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-0">Notifications & Alerts</h2>
+                <p class="text-neutral-600 dark:text-neutral-400">Toast notifications, alerts, and status messages</p>
+            </div>
+        </div>
+
+        <div class="dependency-info">
+            <h4 class="font-semibold text-neutral-900 dark:text-white mb-2">Dependencies</h4>
+            <div class="copy-container">
+                <div class="dependency-code" id="notification-dependencies">
+&lt;!-- CSS Dependencies --&gt;
+&lt;link rel="stylesheet" href="/static/css/notifications.css"&gt;
+
+&lt;!-- JavaScript Dependencies --&gt;
+&lt;script src="/static/js/toast-system.js"&gt;&lt;/script&gt;
+&lt;script src="/static/js/alert-system.js"&gt;&lt;/script&gt;
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('notification-dependencies')">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+        </div>
+
+        <div class="component-grid">
+            <!-- Toast Notifications -->
+            <div class="component-card">
+                <div class="component-title">Toast Notifications</div>
+                <div class="component-description">Positioned notification toasts</div>
+                <div class="space-y-2">
+                    <button onclick="showToast('success', 'Success message!')" class="btn btn-success btn-sm w-full">Success Toast</button>
+                    <button onclick="showToast('error', 'Error message!')" class="btn btn-danger btn-sm w-full">Error Toast</button>
+                    <button onclick="showToast('warning', 'Warning message!')" class="btn btn-warning btn-sm w-full">Warning Toast</button>
+                    <button onclick="showToast('info', 'Info message!')" class="btn btn-info btn-sm w-full">Info Toast</button>
+                </div>
+            </div>
+
+            <!-- Alert Boxes -->
+            <div class="component-card">
+                <div class="component-title">Alert Boxes</div>
+                <div class="component-description">Static alert messages</div>
+                <div class="space-y-3">
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        Success alert message
+                    </div>
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        Error alert message
+                    </div>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Warning alert message
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Info alert message
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Badges -->
+            <div class="component-card">
+                <div class="component-title">Status Badges</div>
+                <div class="component-description">Status indicators</div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="badge badge-success">Active</span>
+                    <span class="badge badge-error">Error</span>
+                    <span class="badge badge-warning">Warning</span>
+                    <span class="badge badge-info">Info</span>
+                    <span class="badge badge-neutral">Neutral</span>
+                </div>
+            </div>
+
+            <!-- Progress Notifications -->
+            <div class="component-card">
+                <div class="component-title">Progress Notifications</div>
+                <div class="component-description">Loading and progress indicators</div>
+                <div class="space-y-3">
+                    <div class="flex items-center">
+                        <div class="loading-spinner w-4 h-4 mr-2"></div>
+                        <span class="text-sm">Loading...</span>
+                    </div>
+                    <div class="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
+                        <div class="bg-primary-600 h-2 rounded-full" style="width: 65%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. TYPOGRAPHY & TEXT -->
+    <div class="category-section">
+        <div class="category-header">
+            <div class="category-icon">
+                <i class="fas fa-font"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-0">Typography & Text</h2>
+                <p class="text-neutral-600 dark:text-neutral-400">Text styles, headings, and formatting</p>
+            </div>
+        </div>
+
+        <div class="dependency-info">
+            <h4 class="font-semibold text-neutral-900 dark:text-white mb-2">Dependencies</h4>
+            <div class="copy-container">
+                <div class="dependency-code" id="typography-dependencies">
+&lt;!-- CSS Dependencies --&gt;
+&lt;link rel="stylesheet" href="/static/css/typography.css"&gt;
+
+&lt;!-- Font Dependencies --&gt;
+&lt;link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"&gt;
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('typography-dependencies')">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+        </div>
+
+        <div class="component-grid">
+            <!-- Headings -->
+            <div class="component-card">
+                <div class="component-title">Headings</div>
+                <div class="component-description">All heading levels</div>
+                <div class="space-y-2">
+                    <h1 class="text-4xl font-bold">H1 Heading</h1>
+                    <h2 class="text-3xl font-semibold">H2 Heading</h2>
+                    <h3 class="text-2xl font-medium">H3 Heading</h3>
+                    <h4 class="text-xl font-medium">H4 Heading</h4>
+                    <h5 class="text-lg font-medium">H5 Heading</h5>
+                    <h6 class="text-base font-medium">H6 Heading</h6>
+                </div>
+            </div>
+
+            <!-- Text Styles -->
+            <div class="component-card">
+                <div class="component-title">Text Styles</div>
+                <div class="component-description">Various text formatting</div>
+                <div class="space-y-2">
+                    <p class="text-lg font-semibold">Bold text</p>
+                    <p class="text-lg italic">Italic text</p>
+                    <p class="text-lg underline">Underlined text</p>
+                    <p class="text-lg line-through">Strikethrough text</p>
+                </div>
+            </div>
+
+            <!-- Text Sizes -->
+            <div class="component-card">
+                <div class="component-title">Text Sizes</div>
+                <div class="component-description">Different text sizes</div>
+                <div class="space-y-2">
+                    <p class="text-xs">Extra small text</p>
+                    <p class="text-sm">Small text</p>
+                    <p class="text-base">Base text</p>
+                    <p class="text-lg">Large text</p>
+                    <p class="text-xl">Extra large text</p>
+                    <p class="text-2xl">2XL text</p>
+                </div>
+            </div>
+
+            <!-- Text Colors -->
+            <div class="component-card">
+                <div class="component-title">Text Colors</div>
+                <div class="component-description">Theme-aware text colors</div>
+                <div class="space-y-2">
+                    <p class="text-primary">Primary text</p>
+                    <p class="text-secondary">Secondary text</p>
+                    <p class="text-success">Success text</p>
+                    <p class="text-warning">Warning text</p>
+                    <p class="text-error">Error text</p>
+                    <p class="text-muted">Muted text</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. DATA DISPLAY -->
+    <div class="category-section">
+        <div class="category-header">
+            <div class="category-icon">
+                <i class="fas fa-table"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-0">Data Display</h2>
+                <p class="text-neutral-600 dark:text-neutral-400">Tables, cards, lists, and data visualization</p>
+            </div>
+        </div>
+
+        <div class="dependency-info">
+            <h4 class="font-semibold text-neutral-900 dark:text-white mb-2">Dependencies</h4>
+            <div class="copy-container">
+                <div class="dependency-code" id="data-dependencies">
+&lt;!-- CSS Dependencies --&gt;
+&lt;link rel="stylesheet" href="/static/css/data-tables.css"&gt;
+&lt;link rel="stylesheet" href="/static/css/charts.css"&gt;
+
+&lt;!-- JavaScript Dependencies --&gt;
+&lt;script src="/static/js/datatables-enhanced.js"&gt;&lt;/script&gt;
+&lt;script src="/static/js/interactive-charts.js"&gt;&lt;/script&gt;
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('data-dependencies')">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+        </div>
+
+        <div class="component-grid">
+            <!-- Data Table -->
+            <div class="component-card">
+                <div class="component-title">Data Tables</div>
+                <div class="component-description">Advanced data tables with sorting and filtering</div>
+                <table class="w-full text-sm border border-neutral-200 dark:border-neutral-700">
+                    <thead class="bg-neutral-50 dark:bg-neutral-800">
+                        <tr>
+                            <th class="px-4 py-2 text-left">Name</th>
+                            <th class="px-4 py-2 text-left">Status</th>
+                            <th class="px-4 py-2 text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-t border-neutral-200 dark:border-neutral-700">
+                            <td class="px-4 py-2">John Doe</td>
+                            <td class="px-4 py-2"><span class="badge badge-success">Active</span></td>
+                            <td class="px-4 py-2">
+                                <button class="btn btn-sm btn-outline-primary">Edit</button>
+                            </td>
+                        </tr>
+                        <tr class="border-t border-neutral-200 dark:border-neutral-700">
+                            <td class="px-4 py-2">Jane Smith</td>
+                            <td class="px-4 py-2"><span class="badge badge-warning">Pending</span></td>
+                            <td class="px-4 py-2">
+                                <button class="btn btn-sm btn-outline-primary">Edit</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Cards -->
+            <div class="component-card">
+                <div class="component-title">Info Cards</div>
+                <div class="component-description">Information display cards</div>
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="card">
+                        <h4 class="font-semibold mb-2">Card Title</h4>
+                        <p class="text-sm text-neutral-600 dark:text-neutral-400">Card content goes here with some description text.</p>
+                    </div>
+                    <div class="card bg-primary-50 dark:bg-primary-900/20">
+                        <h4 class="font-semibold mb-2 text-primary-700 dark:text-primary-300">Primary Card</h4>
+                        <p class="text-sm text-primary-600 dark:text-primary-400">Themed card with primary colors.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lists -->
+            <div class="component-card">
+                <div class="component-title">Lists</div>
+                <div class="component-description">Various list styles</div>
+                <div class="space-y-4">
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Unordered list item 1</li>
+                        <li>Unordered list item 2</li>
+                        <li>Unordered list item 3</li>
+                    </ul>
+                    <ol class="list-decimal list-inside space-y-1">
+                        <li>Ordered list item 1</li>
+                        <li>Ordered list item 2</li>
+                        <li>Ordered list item 3</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Progress Bars -->
+            <div class="component-card">
+                <div class="component-title">Progress Bars</div>
+                <div class="component-description">Progress indicators</div>
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Progress</span>
+                            <span>75%</span>
+                        </div>
+                        <div class="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
+                            <div class="bg-primary-600 h-2 rounded-full" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Success</span>
+                            <span>90%</span>
+                        </div>
+                        <div class="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
+                            <div class="bg-green-600 h-2 rounded-full" style="width: 90%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. NAVIGATION & MENUS -->
+    <div class="category-section">
+        <div class="category-header">
+            <div class="category-icon">
+                <i class="fas fa-compass"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-0">Navigation & Menus</h2>
+                <p class="text-neutral-600 dark:text-neutral-400">Navigation bars, breadcrumbs, tabs, and menu systems</p>
+            </div>
+        </div>
+
+        <div class="dependency-info">
+            <h4 class="font-semibold text-neutral-900 dark:text-white mb-2">Dependencies</h4>
+            <div class="copy-container">
+                <div class="dependency-code" id="navigation-dependencies">
+&lt;!-- CSS Dependencies --&gt;
+&lt;link rel="stylesheet" href="/static/css/navigation.css"&gt;
+
+&lt;!-- JavaScript Dependencies --&gt;
+&lt;script src="/static/js/navigation.js"&gt;&lt;/script&gt;
+&lt;script src="/static/js/breadcrumbs.js"&gt;&lt;/script&gt;
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('navigation-dependencies')">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+        </div>
+
+        <div class="component-grid">
+            <!-- Breadcrumbs -->
+            <div class="component-card">
+                <div class="component-title">Breadcrumbs</div>
+                <div class="component-description">Navigation breadcrumbs</div>
+                <nav class="breadcrumb">
+                    <a href="#" class="breadcrumb-item">Home</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a href="#" class="breadcrumb-item">Products</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-item active">Current Page</span>
+                </nav>
+            </div>
+
+            <!-- Tabs -->
+            <div class="component-card">
+                <div class="component-title">Tabs</div>
+                <div class="component-description">Tabbed navigation</div>
+                <div class="tabs">
+                    <button class="tab tab-active">Tab 1</button>
+                    <button class="tab">Tab 2</button>
+                    <button class="tab">Tab 3</button>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane active">Content for Tab 1</div>
+                </div>
+            </div>
+
+            <!-- Dropdown Menu -->
+            <div class="component-card">
+                <div class="component-title">Dropdown Menu</div>
+                <div class="component-description">Navigation dropdown</div>
+                <div class="dropdown">
+                    <button class="dropdown-toggle btn btn-outline-secondary">
+                        Menu <i class="fas fa-chevron-down ml-2"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item">Action 1</a>
+                        <a href="#" class="dropdown-item">Action 2</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item">Separated Action</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="component-card">
+                <div class="component-title">Pagination</div>
+                <div class="component-description">Page navigation</div>
+                <div class="pagination">
+                    <button class="pagination-btn pagination-prev">Previous</button>
+                    <button class="pagination-btn">1</button>
+                    <button class="pagination-btn active">2</button>
+                    <button class="pagination-btn">3</button>
+                    <span class="pagination-ellipsis">...</span>
+                    <button class="pagination-btn">10</button>
+                    <button class="pagination-btn pagination-next">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. LAYOUT & CONTAINERS -->
+    <div class="category-section">
+        <div class="category-header">
+            <div class="category-icon">
+                <i class="fas fa-th-large"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-0">Layout & Containers</h2>
+                <p class="text-neutral-600 dark:text-neutral-400">Grid systems, containers, and layout components</p>
+            </div>
+        </div>
+
+        <div class="dependency-info">
+            <h4 class="font-semibold text-neutral-900 dark:text-white mb-2">Dependencies</h4>
+            <div class="copy-container">
+                <div class="dependency-code" id="layout-dependencies">
+&lt;!-- CSS Dependencies --&gt;
+&lt;link rel="stylesheet" href="/static/css/layout.css"&gt;
+&lt;link rel="stylesheet" href="/static/css/grid.css"&gt;
+
+&lt;!-- JavaScript Dependencies --&gt;
+&lt;script src="/static/js/layout-manager.js"&gt;&lt;/script&gt;
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('layout-dependencies')">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+        </div>
+
+        <div class="component-grid">
+            <!-- Grid System -->
+            <div class="component-card">
+                <div class="component-title">Grid System</div>
+                <div class="component-description">Responsive grid layouts</div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-primary-100 dark:bg-primary-900/20 p-4 rounded">Grid Item 1</div>
+                    <div class="bg-secondary-100 dark:bg-secondary-900/20 p-4 rounded">Grid Item 2</div>
+                    <div class="bg-success-100 dark:bg-success-900/20 p-4 rounded">Grid Item 3</div>
+                </div>
+            </div>
+
+            <!-- Flexbox Layout -->
+            <div class="component-card">
+                <div class="component-title">Flexbox Layout</div>
+                <div class="component-description">Flexible layouts</div>
+                <div class="flex space-x-4">
+                    <div class="flex-1 bg-primary-100 dark:bg-primary-900/20 p-4 rounded">Flex Item 1</div>
+                    <div class="flex-1 bg-secondary-100 dark:bg-secondary-900/20 p-4 rounded">Flex Item 2</div>
+                    <div class="flex-1 bg-success-100 dark:bg-success-900/20 p-4 rounded">Flex Item 3</div>
+                </div>
+            </div>
+
+            <!-- Container -->
+            <div class="component-card">
+                <div class="component-title">Container</div>
+                <div class="component-description">Content containers</div>
+                <div class="container bg-neutral-100 dark:bg-neutral-800 p-4 rounded">
+                    <p class="text-sm">This is a container with max-width and centered content.</p>
+                </div>
+            </div>
+
+            <!-- Spacing Utilities -->
+            <div class="component-card">
+                <div class="component-title">Spacing</div>
+                <div class="component-description">Margin and padding utilities</div>
+                <div class="space-y-4">
+                    <div class="p-4 bg-primary-100 dark:bg-primary-900/20 rounded">Padding 4</div>
+                    <div class="m-4 bg-secondary-100 dark:bg-secondary-900/20 rounded">Margin 4</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 9. WYSIWYG EDITORS -->
+    <div class="category-section">
+        <div class="category-header">
+            <div class="category-icon">
+                <i class="fas fa-edit"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-0">WYSIWYG Editors</h2>
+                <p class="text-neutral-600 dark:text-neutral-400">Rich text editors with theme integration</p>
+            </div>
+        </div>
+
+        <div class="dependency-info">
+            <h4 class="font-semibold text-neutral-900 dark:text-white mb-2">Dependencies</h4>
+            <div class="copy-container">
+                <div class="dependency-code" id="editor-dependencies">
+&lt;!-- Editor Dependencies --&gt;
+&lt;script src="/static/js/editor-selector.js"&gt;&lt;/script&gt;
+&lt;script src="/static/js/ckeditor5-integration.js"&gt;&lt;/script&gt;
+&lt;script src="/static/js/tinymce-integration.js"&gt;&lt;/script&gt;
+&lt;script src="/static/js/froala-editor.js"&gt;&lt;/script&gt;
+&lt;script src="/static/js/quill-editor.js"&gt;&lt;/script&gt;
+&lt;script src="/static/js/summernote-editor.js"&gt;&lt;/script&gt;
+&lt;script src="/static/js/trix-editor.js"&gt;&lt;/script&gt;
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('editor-dependencies')">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+        </div>
+
+        <div class="component-grid">
+            <!-- Editor Selector -->
+            <div class="component-card">
+                <div class="component-title">Editor Selector</div>
+                <div class="component-description">Choose between different editors</div>
+                <div id="editor-selector-demo">
+                    <!-- Editor selector will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Editor Preview -->
+            <div class="component-card">
+                <div class="component-title">Editor Preview</div>
+                <div class="component-description">Quick editor demos</div>
+                <div class="space-y-2">
+                    <button onclick="initializeCKEditor5Demo()" class="btn btn-outline-primary btn-sm w-full">CKEditor 5</button>
+                    <button onclick="initializeTinyMCEDemo()" class="btn btn-outline-primary btn-sm w-full">TinyMCE</button>
+                    <button onclick="initializeQuillDemo()" class="btn btn-outline-primary btn-sm w-full">Quill</button>
+                </div>
+            </div>
+
+            <!-- Editor Features -->
+            <div class="component-card">
+                <div class="component-title">Editor Features</div>
+                <div class="component-description">Common editor capabilities</div>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        <span>Theme Integration</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        <span>Auto-save</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        <span>Export Options</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        <span>Word Count</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 10. CHARTS & DATA VISUALIZATION -->
+    <div class="category-section">
+        <div class="category-header">
+            <div class="category-icon">
+                <i class="fas fa-chart-bar"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-0">Charts & Data Visualization</h2>
+                <p class="text-neutral-600 dark:text-neutral-400">Interactive charts and data visualization components</p>
+            </div>
+        </div>
+
+        <div class="dependency-info">
+            <h4 class="font-semibold text-neutral-900 dark:text-white mb-2">Dependencies</h4>
+            <div class="copy-container">
+                <div class="dependency-code" id="chart-dependencies">
+&lt;!-- Chart Dependencies --&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/chart.js"&gt;&lt;/script&gt;
+&lt;script src="/static/js/interactive-charts.js"&gt;&lt;/script&gt;
+&lt;script src="/static/js/chart-themes.js"&gt;&lt;/script&gt;
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('chart-dependencies')">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+            </div>
+        </div>
+
+        <div class="component-grid">
+            <!-- Chart Demo -->
+            <div class="component-card">
+                <div class="component-title">Interactive Charts</div>
+                <div class="component-description">Chart.js integration with theme support</div>
+                <canvas id="demo-chart" width="300" height="200"></canvas>
+            </div>
+
+            <!-- Chart Types -->
+            <div class="component-card">
+                <div class="component-title">Chart Types</div>
+                <div class="component-description">Various chart types available</div>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center justify-between">
+                        <span>Bar Charts</span>
+                        <span class="badge badge-success">Available</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>Line Charts</span>
+                        <span class="badge badge-success">Available</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>Pie Charts</span>
+                        <span class="badge badge-success">Available</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>Area Charts</span>
+                        <span class="badge badge-success">Available</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart Features -->
+            <div class="component-card">
+                <div class="component-title">Chart Features</div>
+                <div class="component-description">Advanced chart capabilities</div>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        <span>Theme Integration</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        <span>Interactive Tooltips</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        <span>Data Labels</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        <span>Export Options</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Copy to clipboard functionality
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        const text = element.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = event.target.closest('.copy-btn');
+            if (btn) {
+                btn.classList.add('copied');
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                }, 2000);
+            }
+            if (window.showToast) {
+                showToast('success', 'Code copied to clipboard!');
+            }
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            if (window.showToast) {
+                showToast('error', 'Failed to copy code');
+            }
+        });
+    }
+}
+
+// Language selector functionality
+function toggleLanguageDropdown() {
+    const dropdown = document.getElementById('language-dropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('hidden');
+    }
+}
+
+function changeLanguage(langCode) {
+    const currentLangElement = document.getElementById('current-language');
+    const languageOptions = document.querySelectorAll('.language-option');
+
+    // Update current language display
+    const languageNames = {
+        'en': 'English',
+        'es': 'Español',
+        'fr': 'Français',
+        'de': 'Deutsch',
+        'it': 'Italiano',
+        'pt': 'Português',
+        'ru': 'Русский',
+        'zh': '中文',
+        'ja': '日本語'
+    };
+
+    if (currentLangElement && languageNames[langCode]) {
+        currentLangElement.textContent = languageNames[langCode];
+    }
+
+    // Update active state
+    languageOptions.forEach(option => {
+        option.classList.remove('active');
+    });
+
+    event.target.closest('.language-option').classList.add('active');
+
+    // Hide dropdown
+    const dropdown = document.getElementById('language-dropdown');
+    if (dropdown) {
+        dropdown.classList.add('hidden');
+    }
+
+    // Show notification
+    if (window.showToast) {
+        showToast('info', `Language changed to ${languageNames[langCode]}`);
+    }
+}
+
+// Close language dropdown when clicking outside
+document.addEventListener('click', (e) => {
+    const languageSelector = document.querySelector('.language-selector');
+    const dropdown = document.getElementById('language-dropdown');
+
+    if (languageSelector && dropdown && !languageSelector.contains(e.target)) {
+        dropdown.classList.add('hidden');
+    }
+});
+
+// Initialize editor selector demo
+function initializeEditorSelectorDemo() {
+    const container = document.getElementById('editor-selector-demo');
+    if (container && typeof ValidoAIEditorSelector !== 'undefined') {
+        ValidoAIEditorSelector.init('editor-selector-demo', 'tinymce');
+    }
+}
+
+// Initialize chart demo
+function initializeChartDemo() {
+    const ctx = document.getElementById('demo-chart');
+    if (ctx && typeof Chart !== 'undefined') {
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Sample Data',
+                    data: [12, 19, 3, 5, 2, 3],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                        'rgba(236, 72, 153, 0.8)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+}
+
+// Initialize all components when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize editor selector demo
+    initializeEditorSelectorDemo();
+
+    // Initialize chart demo
+    initializeChartDemo();
+
+    // Initialize TinyMCE if available (for existing functionality)
+    if (document.getElementById('tinymce-editor')) {
+        initializeTinyMCE();
+    }
+
+    // Initialize charts if canvas elements exist
+    if (document.querySelector('canvas[id$="-chart"]')) {
+        initializeCharts();
+    }
+});
+                <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4">Click any image to open gallery</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <img src="https://via.placeholder.com/150x100/3b82f6/ffffff?text=Image+1"
+                         alt="Sample Image 1"
+                         class="cursor-pointer rounded-lg hover:opacity-75 transition-opacity">
+                    <img src="https://via.placeholder.com/150x100/10b981/ffffff?text=Image+2"
+                         alt="Sample Image 2"
+                         class="cursor-pointer rounded-lg hover:opacity-75 transition-opacity">
+                    <img src="https://via.placeholder.com/150x100/f59e0b/ffffff?text=Image+3"
+                         alt="Sample Image 3"
+                         class="cursor-pointer rounded-lg hover:opacity-75 transition-opacity">
+                    <img src="https://via.placeholder.com/150x100/ef4444/ffffff?text=Image+4"
+                         alt="Sample Image 4"
+                         class="cursor-pointer rounded-lg hover:opacity-75 transition-opacity">
+                </div>
+            </div>
+
+            <!-- Sample Chart -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-2">Interactive Chart</h3>
+                <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4">Click to view in full screen</p>
+                <canvas width="300" height="200" class="border border-neutral-200 dark:border-neutral-700 rounded-lg cursor-pointer" data-caption="Sample Chart">
+                    <!-- Chart content would go here -->
+                </canvas>
+            </div>
+
+            <!-- Sample PDF -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-2">PDF Document</h3>
+                <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4">Click to view PDF in gallery</p>
+                <div class="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg cursor-pointer" data-pdf="true" data-src="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf">
+                    <i class="fas fa-file-pdf text-3xl text-red-500 mb-2"></i>
+                    <p class="text-sm font-medium">Sample PDF Document</p>
+                    <p class="text-xs text-neutral-500">Click to view</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Text Editor Demo -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">Text Editor</h2>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6">Double-click on text to edit inline</p>
+
+        <div class="card">
+            <h3 class="text-lg font-semibold mb-4">Editable Content</h3>
+            <div class="space-y-4">
+                <div data-editable class="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                    <h4 class="font-semibold mb-2">Double-click to edit this title</h4>
+                    <p class="text-sm text-neutral-600 dark:text-neutral-400">This is editable content. Double-click anywhere in this area to start editing.</p>
+                </div>
+
+                <div data-editable class="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                    <p class="text-sm">You can edit this paragraph too. Try selecting text and using the formatting toolbar that appears.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Template Examples -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">Email Template Examples</h2>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6">Professional email templates with responsive design</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Welcome Email -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Welcome Email Template</h3>
+                <div class="border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden">
+                    <div class="bg-primary-600 text-white p-4">
+                        <h4 class="font-bold text-lg">Welcome to ValidoAI!</h4>
+                        <p class="text-sm opacity-90">Your account has been successfully created</p>
+                    </div>
+                    <div class="p-6 bg-white dark:bg-neutral-900">
+                        <div class="space-y-4">
+                            <p class="text-neutral-700 dark:text-neutral-300">
+                                Hi <strong class="text-primary-600">[First Name]</strong>,
+                            </p>
+                            <p class="text-neutral-700 dark:text-neutral-300">
+                                Welcome to ValidoAI! We're excited to have you join our community of financial professionals.
+                            </p>
+                            <div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+                                <h5 class="font-semibold text-neutral-900 dark:text-white mb-2">What's next?</h5>
+                                <ul class="text-sm text-neutral-600 dark:text-neutral-400 space-y-1">
+                                    <li>✅ Complete your profile setup</li>
+                                    <li>✅ Explore our AI financial tools</li>
+                                    <li>✅ Connect your financial accounts</li>
+                                    <li>✅ Set up your first dashboard</li>
+                                </ul>
+                            </div>
+                            <div class="flex space-x-3 pt-4">
+                                <a href="#" class="btn btn-primary text-sm">Get Started</a>
+                                <a href="#" class="btn btn-outline text-sm">View Dashboard</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice Notification -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Invoice Notification Template</h3>
+                <div class="border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden">
+                    <div class="bg-green-600 text-white p-4">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-file-invoice text-xl"></i>
+                            <div>
+                                <h4 class="font-bold text-lg">Invoice Generated</h4>
+                                <p class="text-sm opacity-90">Invoice #INV-2024-001 has been created</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-white dark:bg-neutral-900">
+                        <div class="space-y-4">
+                            <p class="text-neutral-700 dark:text-neutral-300">
+                                Hello <strong class="text-neutral-900 dark:text-white">[Company Name]</strong>,
+                            </p>
+                            <p class="text-neutral-700 dark:text-neutral-300">
+                                Your invoice has been successfully generated and is ready for download.
+                            </p>
+                            <div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-neutral-500 dark:text-neutral-400">Invoice Number:</span>
+                                        <p class="font-semibold text-neutral-900 dark:text-white">INV-2024-001</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-neutral-500 dark:text-neutral-400">Amount:</span>
+                                        <p class="font-semibold text-green-600">$2,450.00</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-neutral-500 dark:text-neutral-400">Due Date:</span>
+                                        <p class="font-semibold text-neutral-900 dark:text-white">Aug 30, 2024</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-neutral-500 dark:text-neutral-400">Status:</span>
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <i class="fas fa-check-circle mr-1"></i>
+                                            Paid
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex space-x-3 pt-4">
+                                <a href="#" class="btn btn-success text-sm">Download PDF</a>
+                                <a href="#" class="btn btn-outline text-sm">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Password Reset -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Password Reset Template</h3>
+                <div class="border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden">
+                    <div class="bg-yellow-600 text-white p-4">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-key text-xl"></i>
+                            <div>
+                                <h4 class="font-bold text-lg">Reset Your Password</h4>
+                                <p class="text-sm opacity-90">Security update required</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-white dark:bg-neutral-900">
+                        <div class="space-y-4">
+                            <p class="text-neutral-700 dark:text-neutral-300">
+                                Hi <strong class="text-neutral-900 dark:text-white">[User Name]</strong>,
+                            </p>
+                            <p class="text-neutral-700 dark:text-neutral-300">
+                                We received a request to reset your password. Click the button below to create a new password.
+                            </p>
+                            <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg">
+                                <div class="flex items-start space-x-3">
+                                    <i class="fas fa-exclamation-triangle text-yellow-600 mt-0.5"></i>
+                                    <div>
+                                        <p class="text-sm font-medium text-yellow-800 dark:text-yellow-200">Security Notice</p>
+                                        <p class="text-sm text-yellow-700 dark:text-yellow-300">This link will expire in 24 hours for your security.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <a href="#" class="btn btn-warning text-sm inline-flex items-center">
+                                    <i class="fas fa-lock mr-2"></i>
+                                    Reset Password
+                                </a>
+                            </div>
+                            <p class="text-xs text-neutral-500 dark:text-neutral-400 text-center">
+                                If you didn't request this, please ignore this email or contact support.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Newsletter Template -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Newsletter Template</h3>
+                <div class="border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4">
+                        <div class="text-center">
+                            <h4 class="font-bold text-xl">ValidoAI Newsletter</h4>
+                            <p class="text-sm opacity-90">Your weekly financial insights</p>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-white dark:bg-neutral-900">
+                        <div class="space-y-4">
+                            <p class="text-neutral-700 dark:text-neutral-300">
+                                Hello <strong class="text-primary-600">[Subscriber Name]</strong>,
+                            </p>
+                            <p class="text-neutral-700 dark:text-neutral-300">
+                                Here are the latest updates from ValidoAI this week:
+                            </p>
+
+                            <div class="space-y-3">
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-chart-line text-primary-600 text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold text-neutral-900 dark:text-white">New AI Analytics Features</h5>
+                                        <p class="text-sm text-neutral-600 dark:text-neutral-400">We've added advanced predictive analytics to help forecast trends.</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-lightbulb text-green-600 text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold text-neutral-900 dark:text-white">Financial Tips</h5>
+                                        <p class="text-sm text-neutral-600 dark:text-neutral-400">Learn how to optimize your cash flow management.</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-users text-blue-600 text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold text-neutral-900 dark:text-white">Community Spotlight</h5>
+                                        <p class="text-sm text-neutral-600 dark:text-neutral-400">Meet successful users who've transformed their businesses.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-neutral-200 dark:border-neutral-700 pt-4">
+                                <div class="flex flex-wrap gap-2">
+                                    <a href="#" class="btn btn-primary text-xs">View Analytics</a>
+                                    <a href="#" class="btn btn-outline text-xs">Read Tips</a>
+                                    <a href="#" class="btn btn-outline text-xs">Join Community</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Template Actions -->
+        <div class="mt-6 p-6 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
+            <h3 class="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Email Template Features</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-mobile-alt text-primary-600"></i>
+                    </div>
+                    <h4 class="font-semibold text-neutral-900 dark:text-white mb-2">Responsive Design</h4>
+                    <p class="text-sm text-neutral-600 dark:text-neutral-400">All templates are mobile-friendly and adapt to different screen sizes.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-palette text-green-600"></i>
+                    </div>
+                    <h4 class="font-semibold text-neutral-900 dark:text-white mb-2">Theme Integration</h4>
+                    <p class="text-sm text-neutral-600 dark:text-neutral-400">Templates automatically adapt to your selected theme and branding.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-code text-blue-600"></i>
+                    </div>
+                    <h4 class="font-semibold text-neutral-900 dark:text-white mb-2">Easy Customization</h4>
+                    <p class="text-sm text-neutral-600 dark:text-neutral-400">Simple HTML/CSS structure makes customization straightforward.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DataTables Demo -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">Advanced DataTables</h2>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6">Feature-rich data tables with search, filtering, export, and bulk operations</p>
+
+        <div class="card">
+            <table id="example-datatable" class="display">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" class="select-all-checkbox"></th>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Office</th>
+                        <th>Age</th>
+                        <th>Start date</th>
+                        <th>Salary</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="checkbox" class="row-checkbox"></td>
+                        <td>Tiger Nixon</td>
+                        <td>System Architect</td>
+                        <td>Edinburgh</td>
+                        <td>61</td>
+                        <td>2011/04/25</td>
+                        <td>$320,800</td>
+                        <td><span class="badge bg-success">Active</span></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-checkbox"></td>
+                        <td>Garrett Winters</td>
+                        <td>Accountant</td>
+                        <td>Tokyo</td>
+                        <td>63</td>
+                        <td>2011/07/25</td>
+                        <td>$170,750</td>
+                        <td><span class="badge bg-warning">Pending</span></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-checkbox"></td>
+                        <td>Ashton Cox</td>
+                        <td>Junior Technical Author</td>
+                        <td>San Francisco</td>
+                        <td>66</td>
+                        <td>2009/01/12</td>
+                        <td>$86,000</td>
+                        <td><span class="badge bg-success">Active</span></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-checkbox"></td>
+                        <td>Cedric Kelly</td>
+                        <td>Senior Javascript Developer</td>
+                        <td>Edinburgh</td>
+                        <td>22</td>
+                        <td>2012/03/29</td>
+                        <td>$433,060</td>
+                        <td><span class="badge bg-danger">Inactive</span></td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" class="row-checkbox"></td>
+                        <td>Airi Satou</td>
+                        <td>Accountant</td>
+                        <td>Tokyo</td>
+                        <td>33</td>
+                        <td>2008/11/28</td>
+                        <td>$162,700</td>
+                        <td><span class="badge bg-success">Active</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TinyMCE WYSIWYG Editor Demo -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">TinyMCE WYSIWYG Editor</h2>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6">Most trusted rich text editor with advanced features</p>
+
+        <div class="card">
+            <textarea id="tinymce-editor" name="content">
+                <h2>Welcome to TinyMCE!</h2>
+                <p>This is the <strong>most trusted</strong> and <em>feature-rich</em> WYSIWYG editor available.</p>
+                <ul>
+                    <li>Advanced formatting options</li>
+                    <li>Image upload and management</li>
+                    <li>Code syntax highlighting</li>
+                    <li>Template system</li>
+                    <li>Voice typing support</li>
+                </ul>
+                <p>Try the voice typing feature by clicking the microphone icon!</p>
+            </textarea>
+        </div>
+    </div>
+
+    <!-- Interactive Charts Demo -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">Interactive Charts</h2>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6">Data visualization with Chart.js and interactive features</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Bar Chart -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Revenue Chart (Interactive)</h3>
+                <canvas id="revenue-chart" width="400" height="300"></canvas>
+            </div>
+
+            <!-- Pie Chart -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Market Share (Interactive)</h3>
+                <canvas id="market-chart" width="400" height="300"></canvas>
+            </div>
+
+            <!-- Line Chart -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Growth Trends (Interactive)</h3>
+                <canvas id="growth-chart" width="400" height="300"></canvas>
+            </div>
+
+            <!-- Area Chart -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Performance Metrics (Interactive)</h3>
+                <canvas id="performance-chart" width="400" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- DateTime Components Demo -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">DateTime Components</h2>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6">Comprehensive date, time, and calendar pickers</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Date Picker -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Date Picker</h3>
+                <input type="date" id="date-picker" class="form-control">
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="initializeDatePicker()">
+                        Initialize
+                    </button>
+                </div>
+            </div>
+
+            <!-- DateTime Picker -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">DateTime Picker</h3>
+                <input type="datetime-local" id="datetime-picker" class="form-control">
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="initializeDateTimePicker()">
+                        Initialize
+                    </button>
+                </div>
+            </div>
+
+            <!-- Range Picker -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Date Range Picker</h3>
+                <input type="text" id="range-picker" class="form-control">
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="initializeRangePicker()">
+                        Initialize
+                    </button>
+                </div>
+            </div>
+
+            <!-- Month Picker -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Month Picker</h3>
+                <input type="month" id="month-picker" class="form-control">
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="initializeMonthPicker()">
+                        Initialize
+                    </button>
+                </div>
+            </div>
+
+            <!-- Year Picker -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Year Picker</h3>
+                <input type="number" id="year-picker" class="form-control" min="2000" max="2030">
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="initializeYearPicker()">
+                        Initialize
+                    </button>
+                </div>
+            </div>
+
+            <!-- Time Picker -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Time Picker</h3>
+                <input type="time" id="time-picker" class="form-control">
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="initializeTimePicker()">
+                        Initialize
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Country Selector Demo -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">Country Selector</h2>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6">Advanced country selector with flags, search, and detailed information</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Basic Country Selector -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Basic Country Selector</h3>
+                <select id="basic-country" class="form-control">
+                    <option value="">Select a country...</option>
+                </select>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="initializeBasicCountrySelector()">
+                        Initialize
+                    </button>
+                </div>
+            </div>
+
+            <!-- Country with Dial Codes -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Country with Dial Codes</h3>
+                <select id="dial-country" class="form-control">
+                    <option value="">Select country with dial code...</option>
+                </select>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="initializeDialCountrySelector()">
+                        Initialize
+                    </button>
+                </div>
+            </div>
+
+            <!-- Country with Currency -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Country with Currency</h3>
+                <select id="currency-country" class="form-control">
+                    <option value="">Select country with currency...</option>
+                </select>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="initializeCurrencyCountrySelector()">
+                        Initialize
+                    </button>
+                </div>
+            </div>
+
+            <!-- European Countries Only -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">European Countries Only</h3>
+                <select id="europe-country" class="form-control">
+                    <option value="">Select European country...</option>
+                </select>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="initializeEuropeCountrySelector()">
+                        Initialize
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lazy Loading Demo -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">Lazy Loading</h2>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6">Images and content load as you scroll</p>
+
+        <div class="space-y-4">
+            <!-- Lazy loaded images -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <img data-src="https://via.placeholder.com/400x300/3b82f6/ffffff?text=Lazy+Image+1"
+                     alt="Lazy Loaded Image 1"
+                     class="w-full h-48 object-cover rounded-lg bg-neutral-200 dark:bg-neutral-800">
+                <img data-src="https://via.placeholder.com/400x300/10b981/ffffff?text=Lazy+Image+2"
+                     alt="Lazy Loaded Image 2"
+                     class="w-full h-48 object-cover rounded-lg bg-neutral-200 dark:bg-neutral-800">
+                <img data-src="https://via.placeholder.com/400x300/f59e0b/ffffff?text=Lazy+Image+3"
+                     alt="Lazy Loaded Image 3"
+                     class="w-full h-48 object-cover rounded-lg bg-neutral-200 dark:bg-neutral-800">
+            </div>
+
+            <!-- Lazy loaded iframe -->
+            <div class="mt-6">
+                <div class="bg-neutral-100 dark:bg-neutral-800 p-4 rounded-lg">
+                    <h3 class="font-semibold mb-2">Lazy Loaded Content</h3>
+                    <iframe data-src="https://www.example.com"
+                            class="w-full h-64 border border-neutral-200 dark:border-neutral-700 rounded bg-white dark:bg-neutral-700"
+                            title="Lazy loaded iframe">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Financial Chat Demo -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">AI Financial Chat Interface</h2>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6">Complete financial chat experience with AI integration, data visualization, and secure interactions</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Chat Interface Demo -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Financial Chat Interface</h3>
+                <div class="bg-neutral-50 dark:bg-neutral-800 rounded-lg p-4 h-96 flex flex-col">
+                    <!-- Chat Header -->
+                    <div class="flex items-center justify-between mb-4 pb-2 border-b border-neutral-200 dark:border-neutral-700">
+                        <div>
+                            <h4 class="font-medium text-neutral-900 dark:text-white">AI Financial Assistant</h4>
+                            <p class="text-sm text-neutral-500 dark:text-neutral-400">Online • Secure Connection</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span class="text-xs text-green-600 dark:text-green-400">Active</span>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages -->
+                    <div class="flex-1 overflow-y-auto space-y-4 mb-4">
+                        <div class="flex justify-end">
+                            <div class="bg-primary-600 text-white rounded-lg px-4 py-2 max-w-xs">
+                                <p class="text-sm">What's my account balance?</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-start">
+                            <div class="bg-neutral-200 dark:bg-neutral-700 rounded-lg px-4 py-2 max-w-sm">
+                                <p class="text-sm text-neutral-900 dark:text-white">Your current balance is $15,234.67</p>
+                                <div class="mt-2 p-2 bg-white dark:bg-neutral-600 rounded">
+                                    <p class="text-xs font-medium">Available Funds: $15,234.67</p>
+                                    <p class="text-xs text-neutral-500 dark:text-neutral-400">Pending: $0.00</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <div class="bg-primary-600 text-white rounded-lg px-4 py-2 max-w-xs">
+                                <p class="text-sm">Show me spending trends</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-start">
+                            <div class="bg-neutral-200 dark:bg-neutral-700 rounded-lg px-4 py-2 max-w-md">
+                                <p class="text-sm text-neutral-900 dark:text-white mb-2">Here's your spending analysis:</p>
+                                <div class="bg-white dark:bg-neutral-600 p-3 rounded">
+                                    <canvas width="300" height="150" class="w-full cursor-pointer" data-gallery="spending-chart" data-src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzNiODJmNiIvPjx0ZXh0IHg9IjUwIiB5PSI1NSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCI+U3BlbmRpbmcgQ2hhcnQ8L3RleHQ+PC9zdmc+"></canvas>
+                                    <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1">Click chart to view full size</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="flex items-center space-x-2 pt-2 border-t border-neutral-200 dark:border-neutral-700">
+                        <div class="flex-1 relative">
+                            <input type="text"
+                                   placeholder="Ask about your finances..."
+                                   class="w-full px-4 py-2 bg-white dark:bg-neutral-700 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex space-x-1">
+                                <button class="p-1 hover:bg-neutral-200 dark:hover:bg-neutral-600 rounded">
+                                    <i class="fas fa-microphone text-neutral-400 text-sm"></i>
+                                </button>
+                                <button class="p-1 hover:bg-neutral-200 dark:hover:bg-neutral-600 rounded">
+                                    <i class="fas fa-paperclip text-neutral-400 text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <button class="px-3 py-1 text-xs bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 rounded-full transition-colors">
+                            💰 Check Balance
+                        </button>
+                        <button class="px-3 py-1 text-xs bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 rounded-full transition-colors">
+                            📊 View Transactions
+                        </button>
+                        <button class="px-3 py-1 text-xs bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 rounded-full transition-colors">
+                            🎯 Budget Goals
+                        </button>
+                        <button class="px-3 py-1 text-xs bg-neutral-100 dark:bg-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-600 rounded-full transition-colors">
+                            💡 Financial Tips
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Dashboard Preview -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Financial Dashboard Integration</h3>
+                <div class="space-y-4">
+                    <!-- Account Overview -->
+                    <div class="bg-gradient-to-r from-primary-500 to-primary-600 text-white p-4 rounded-lg">
+                        <h4 class="font-medium mb-2">Account Overview</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm opacity-75">Current Balance</p>
+                                <p class="text-2xl font-bold">$15,234.67</p>
+                            </div>
+                            <div>
+                                <p class="text-sm opacity-75">Available Credit</p>
+                                <p class="text-2xl font-bold">$5,000.00</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions Grid -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="p-3 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg transition-colors text-left">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-exchange-alt text-primary-600"></i>
+                                <span class="text-sm font-medium">Transfer</span>
+                            </div>
+                        </button>
+                        <button class="p-3 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg transition-colors text-left">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-credit-card text-green-600"></i>
+                                <span class="text-sm font-medium">Pay Bills</span>
+                            </div>
+                        </button>
+                        <button class="p-3 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg transition-colors text-left">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-chart-line text-blue-600"></i>
+                                <span class="text-sm font-medium">Invest</span>
+                            </div>
+                        </button>
+                        <button class="p-3 bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-lg transition-colors text-left">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-shield-alt text-purple-600"></i>
+                                <span class="text-sm font-medium">Security</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+                        <h4 class="font-medium mb-3 text-neutral-900 dark:text-white">Recent Activity</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between py-2 border-b border-neutral-200 dark:border-neutral-700">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-arrow-down text-green-600 text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-neutral-900 dark:text-white">Salary Deposit</p>
+                                        <p class="text-xs text-neutral-500 dark:text-neutral-400">Today, 2:30 PM</p>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-medium text-green-600">+$4,500.00</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-b border-neutral-200 dark:border-neutral-700">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-arrow-up text-red-600 text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-neutral-900 dark:text-white">Grocery Shopping</p>
+                                        <p class="text-xs text-neutral-500 dark:text-neutral-400">Yesterday, 6:15 PM</p>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-medium text-red-600">-$127.45</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security & Compliance Demo -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">Security & Compliance</h2>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6">Enterprise-grade security features for financial applications</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Authentication -->
+            <div class="card">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-green-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold">Multi-Factor Auth</h3>
+                        <p class="text-sm text-neutral-500 dark:text-neutral-400">Secure login process</p>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-sm">
+                        <span>Biometric Login</span>
+                        <span class="text-green-600">✓ Enabled</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span>SMS Verification</span>
+                        <span class="text-green-600">✓ Active</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span>Device Trust</span>
+                        <span class="text-green-600">✓ Verified</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Encryption -->
+            <div class="card">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-lock text-blue-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold">Data Encryption</h3>
+                        <p class="text-sm text-neutral-500 dark:text-neutral-400">End-to-end security</p>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-sm">
+                        <span>AES-256 Encryption</span>
+                        <span class="text-green-600">✓ Active</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span>TLS 1.3</span>
+                        <span class="text-green-600">✓ Secured</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span>Perfect Forward Secrecy</span>
+                        <span class="text-green-600">✓ Enabled</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compliance -->
+            <div class="card">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-check-circle text-purple-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold">Compliance</h3>
+                        <p class="text-sm text-neutral-500 dark:text-neutral-400">Regulatory standards</p>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-sm">
+                        <span>GDPR Compliant</span>
+                        <span class="text-green-600">✓ Certified</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span>SOC 2 Type II</span>
+                        <span class="text-green-600">✓ Audited</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span>PCI DSS</span>
+                        <span class="text-green-600">✓ Compliant</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Monitoring Demo -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">Performance & Analytics</h2>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6">Real-time monitoring and optimization for AI financial applications</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Real-time Metrics -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Real-time Performance</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium">Response Time</span>
+                        <span class="text-sm font-mono bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded">0.8s</span>
+                    </div>
+                    <div class="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
+                        <div class="bg-green-600 h-2 rounded-full" style="width: 85%"></div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium">AI Model Latency</span>
+                        <span class="text-sm font-mono bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">1.2s</span>
+                    </div>
+                    <div class="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
+                        <div class="bg-blue-600 h-2 rounded-full" style="width: 70%"></div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium">Memory Usage</span>
+                        <span class="text-sm font-mono bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-2 py-1 rounded">45%</span>
+                    </div>
+                    <div class="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
+                        <div class="bg-purple-600 h-2 rounded-full" style="width: 45%"></div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium">CPU Usage</span>
+                        <span class="text-sm font-mono bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 px-2 py-1 rounded">32%</span>
+                    </div>
+                    <div class="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
+                        <div class="bg-orange-600 h-2 rounded-full" style="width: 32%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Usage Analytics -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Usage Analytics</h3>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-primary-600">1,247</div>
+                            <div class="text-sm text-neutral-500 dark:text-neutral-400">Active Users</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-600">98.5%</div>
+                            <div class="text-sm text-neutral-500 dark:text-neutral-400">Uptime</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-sm">
+                            <span>Daily Active Sessions</span>
+                            <span class="font-medium">2,847</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span>Average Session Duration</span>
+                            <span class="font-medium">12.3 min</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span>Most Popular Feature</span>
+                            <span class="font-medium">Balance Inquiry</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span>AI Chat Interactions</span>
+                            <span class="font-medium">15,423</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme System Demo -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">Theme System</h2>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6">Switch between different themes to see all styling changes across the financial interface</p>
+
+        <div class="card">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold">Current Theme</h3>
+                    <p class="text-sm text-neutral-600 dark:text-neutral-400">Click the theme selector in the header to change themes</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm text-neutral-500">Current:</div>
+                    <div class="font-semibold text-primary-600" id="current-theme-display">Valido White</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Component Examples -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">Component Examples</h2>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6">Various UI components with theme support</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Buttons -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Buttons</h3>
+                <div class="space-y-2">
+                    <button class="btn btn-primary w-full">Primary Button</button>
+                    <button class="btn btn-secondary w-full">Secondary Button</button>
+                    <button class="btn btn-success w-full">Success Button</button>
+                    <button class="btn btn-danger w-full">Danger Button</button>
+                </div>
+            </div>
+
+            <!-- Cards -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Cards</h3>
+                <div class="space-y-4">
+                    <div class="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg">
+                        <h4 class="font-semibold">Card Title</h4>
+                        <p class="text-sm text-neutral-600 dark:text-neutral-400">Card content goes here</p>
+                    </div>
+                    <div class="p-4 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700 rounded-lg">
+                        <h4 class="font-semibold text-primary-700 dark:text-primary-300">Primary Card</h4>
+                        <p class="text-sm text-primary-600 dark:text-primary-400">Primary themed card</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Forms -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">Form Elements</h3>
+                <div class="space-y-3">
+                    <input type="text" placeholder="Text input" class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white">
+                    <select class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white">
+                        <option>Select option</option>
+                        <option>Option 1</option>
+                        <option>Option 2</option>
+                    </select>
+                    <textarea placeholder="Textarea" class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white" rows="3"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Editor Selector Demo -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">WYSIWYG Editor Selector</h2>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6">Choose and compare different WYSIWYG editors with unified interface</p>
+
+        <div class="card">
+            <div id="editor-selector-container">
+                <!-- Editor selector will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Individual Editor Demos -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-neutral-900 dark:text-white mb-4">Individual Editor Demos</h2>
+        <p class="text-neutral-600 dark:text-neutral-400 mb-6">Try each editor individually to see their unique features</p>
+
+        <div class="space-y-8">
+            <!-- CKEditor 5 Demo -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">📝 CKEditor 5 - Modern, Feature-Rich Editor</h3>
+                <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4">Advanced formatting, image upload, export to Word/PDF, word count, auto-save</p>
+                <textarea id="ckeditor5-editor" name="content">
+                    <h2>Welcome to CKEditor 5!</h2>
+                    <p>This is the <strong>modern</strong> and <em>feature-rich</em> editor with advanced capabilities.</p>
+                    <ul>
+                        <li>Advanced formatting options</li>
+                        <li>Image upload and management</li>
+                        <li>Export to Word and PDF</li>
+                        <li>Word count and auto-save</li>
+                        <li>Theme synchronization</li>
+                    </ul>
+                    <p>Try the export features using the toolbar buttons!</p>
+                </textarea>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="initializeCKEditor5Demo()">
+                        Initialize CKEditor 5
+                    </button>
+                </div>
+            </div>
+
+            <!-- TinyMCE Demo -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">⭐ TinyMCE - Most Trusted WYSIWYG Editor</h3>
+                <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4">30+ plugins, templates, image management, code editor, voice features</p>
+                <textarea id="tinymce-editor-demo" name="content">
+                    <h2>Welcome to TinyMCE!</h2>
+                    <p>This is the <strong>most trusted</strong> and <em>feature-rich</em> WYSIWYG editor available.</p>
+                    <ul>
+                        <li>Advanced formatting options</li>
+                        <li>Image upload and management</li>
+                        <li>Code syntax highlighting</li>
+                        <li>Template system</li>
+                        <li>Voice typing support</li>
+                    </ul>
+                    <p>Try the voice typing feature by clicking the microphone icon!</p>
+                </textarea>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="initializeTinyMCEDemo()">
+                        Initialize TinyMCE
+                    </button>
+                </div>
+            </div>
+
+            <!-- Froala Demo -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">✨ Froala - Beautiful and Intuitive</h3>
+                <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4">Intuitive UI, image editing, tables, lists, quick toolbar</p>
+                <textarea id="froala-editor-demo" name="content">
+                    <h2>Welcome to Froala!</h2>
+                    <p>This is the <strong>beautiful</strong> and <em>intuitive</em> WYSIWYG editor.</p>
+                    <ul>
+                        <li>Beautiful user interface</li>
+                        <li>Advanced image editing</li>
+                        <li>Table and list management</li>
+                        <li>Quick toolbar features</li>
+                        <li>Responsive design</li>
+                    </ul>
+                    <p>Experience the intuitive editing interface!</p>
+                </textarea>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="initializeFroalaDemo()">
+                        Initialize Froala
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quill Demo -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">🪶 Quill - Lightweight and Flexible</h3>
+                <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4">Fast performance, clean design, basic formatting, customizable</p>
+                <textarea id="quill-editor-demo" name="content">
+                    <h2>Welcome to Quill!</h2>
+                    <p>This is the <strong>lightweight</strong> and <em>flexible</em> WYSIWYG editor.</p>
+                    <ul>
+                        <li>Fast performance</li>
+                        <li>Clean and simple design</li>
+                        <li>Basic formatting options</li>
+                        <li>Highly customizable</li>
+                        <li>Small footprint</li>
+                    </ul>
+                    <p>Experience the lightweight editing experience!</p>
+                </textarea>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="initializeQuillDemo()">
+                        Initialize Quill
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summernote Demo -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">🌞 Summernote - Bootstrap-Based Editor</h3>
+                <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4">Bootstrap integration, simple UI, air mode, fullscreen</p>
+                <textarea id="summernote-editor-demo" name="content">
+                    <h2>Welcome to Summernote!</h2>
+                    <p>This is the <strong>Bootstrap-based</strong> and <em>simple</em> WYSIWYG editor.</p>
+                    <ul>
+                        <li>Bootstrap integration</li>
+                        <li>Simple and clean UI</li>
+                        <li>Air mode support</li>
+                        <li>Fullscreen editing</li>
+                        <li>Easy customization</li>
+                    </ul>
+                    <p>Try the fullscreen mode for distraction-free writing!</p>
+                </textarea>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="initializeSummernoteDemo()">
+                        Initialize Summernote
+                    </button>
+                </div>
+            </div>
+
+            <!-- Trix Demo -->
+            <div class="card">
+                <h3 class="text-lg font-semibold mb-4">🏔️ Trix - Modern Editor from Basecamp</h3>
+                <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4">Clean interface, file attachments, no dependencies, modern UX</p>
+                <textarea id="trix-editor-demo" name="content">
+                    <h2>Welcome to Trix!</h2>
+                    <p>This is the <strong>modern</strong> editor from <em>Basecamp</em>.</p>
+                    <ul>
+                        <li>Clean and modern interface</li>
+                        <li>File attachment support</li>
+                        <li>No external dependencies</li>
+                        <li>Excellent user experience</li>
+                        <li>Secure by default</li>
+                    </ul>
+                    <p>Experience the modern editing approach!</p>
+                </textarea>
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary" onclick="initializeTrixDemo()">
+                        Initialize Trix
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Modal Demo Functions
+function showBasicModal() {
+    showGlobalModal({
+        title: 'Basic Modal Example',
+        content: `
+            <div class="space-y-4">
+                <p class="text-neutral-600 dark:text-neutral-400">
+                    This is a basic modal example. It demonstrates the theme-aware styling and responsive design.
+                </p>
+                <div class="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg">
+                    <h4 class="font-semibold mb-2">Features:</h4>
+                    <ul class="text-sm text-neutral-600 dark:text-neutral-400 space-y-1">
+                        <li>• Centered on screen</li>
+                        <li>• Closes on backdrop click</li>
+                        <li>• Closes on Escape key</li>
+                        <li>• Theme-aware styling</li>
+                        <li>• Smooth animations</li>
+                    </ul>
+                </div>
+            </div>
+        `,
+        size: 'max-w-lg'
+    });
+}
+
+function showSearchModal() {
+    const searchData = [
+        { id: 1, name: 'Dashboard', description: 'Main dashboard view' },
+        { id: 2, name: 'Analytics', description: 'Data analytics and reports' },
+        { id: 3, name: 'Settings', description: 'Application settings' },
+        { id: 4, name: 'Profile', description: 'User profile management' },
+        { id: 5, name: 'Notifications', description: 'System notifications' },
+        { id: 6, name: 'Help', description: 'Help and documentation' }
+    ];
+
+    showGlobalModal({
+        title: 'Search Modal Example',
+        showSearch: true,
+        searchPlaceholder: 'Search pages...',
+        searchData: searchData,
+        searchKey: 'name',
+        content: `
+            <div class="space-y-4">
+                <p class="text-neutral-600 dark:text-neutral-400">
+                    This modal includes search functionality. Try typing in the search box above.
+                </p>
+                <div id="search-results" class="space-y-2">
+                    ${searchData.map(item => `
+                        <div class="p-3 border border-neutral-200 dark:border-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors cursor-pointer">
+                            <div class="font-medium text-neutral-900 dark:text-white">${item.name}</div>
+                            <div class="text-sm text-neutral-500 dark:text-neutral-400">${item.description}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `,
+        onSearch: function(filteredData, searchTerm) {
+            const resultsContainer = document.getElementById('search-results');
+            if (resultsContainer) {
+                if (filteredData.length === 0) {
+                    resultsContainer.innerHTML = `
+                        <div class="text-center py-8 text-neutral-500 dark:text-neutral-400">
+                            <i class="fas fa-search text-3xl mb-2 opacity-50"></i>
+                            <p>No results found for "${searchTerm}"</p>
+                        </div>
+                    `;
+                } else {
+                    resultsContainer.innerHTML = filteredData.map(item => `
+                        <div class="p-3 border border-neutral-200 dark:border-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors cursor-pointer">
+                            <div class="font-medium text-neutral-900 dark:text-white">${item.name}</div>
+                            <div class="text-sm text-neutral-500 dark:text-neutral-400">${item.description}</div>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+    });
+}
+
+function showQuickActionsModal() {
+    const actions = [
+        {
+            title: 'Create New Project',
+            description: 'Start a new project with templates',
+            icon: 'fas fa-plus',
+            onClick: 'console.log("Create project clicked"); closeGlobalModal();'
+        },
+        {
+            title: 'Import Data',
+            description: 'Import data from external sources',
+            icon: 'fas fa-download',
+            onClick: 'console.log("Import data clicked"); closeGlobalModal();'
+        },
+        {
+            title: 'Export Report',
+            description: 'Export current data as report',
+            icon: 'fas fa-file-export',
+            onClick: 'console.log("Export report clicked"); closeGlobalModal();'
+        },
+        {
+            title: 'Settings',
+            description: 'Configure application settings',
+            icon: 'fas fa-cog',
+            onClick: 'console.log("Settings clicked"); closeGlobalModal();'
+        }
+    ];
+
+    showQuickActionsModal(actions);
+}
+
+function showConfirmationModal() {
+    showGlobalModal({
+        title: 'Confirm Action',
+        content: `
+            <div class="space-y-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-yellow-600 dark:text-yellow-400"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-neutral-900 dark:text-white">Are you sure?</h4>
+                        <p class="text-sm text-neutral-600 dark:text-neutral-400">This action cannot be undone.</p>
+                    </div>
+                </div>
+                <p class="text-neutral-600 dark:text-neutral-400">
+                    This will permanently delete the selected item and all associated data.
+                </p>
+            </div>
+        `,
+        actions: true,
+        actionText: 'Delete',
+        cancelText: 'Cancel',
+        onAction: function() {
+            showToast('success', 'Item deleted successfully!');
+        }
+    });
+}
+
+function showLargeContentModal() {
+    showGlobalModal({
+        title: 'Large Content Modal',
+        content: `
+            <div class="space-y-4">
+                <p class="text-neutral-600 dark:text-neutral-400">
+                    This modal demonstrates how the system handles large amounts of content with scrolling.
+                </p>
+                ${Array.from({length: 20}, (_, i) => `
+                    <div class="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg">
+                        <h4 class="font-semibold text-neutral-900 dark:text-white">Section ${i + 1}</h4>
+                        <p class="text-sm text-neutral-600 dark:text-neutral-400">
+                            This is content for section ${i + 1}. It demonstrates the scrolling behavior of the modal when content exceeds the viewport height.
+                        </p>
+                    </div>
+                `).join('')}
+            </div>
+        `,
+        size: 'max-w-4xl'
+    });
+}
+
+function showFormModal() {
+    showGlobalModal({
+        title: 'Form Modal Example',
+        content: `
+            <form class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                        Name
+                    </label>
+                    <input type="text" class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white" placeholder="Enter your name">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                        Email
+                    </label>
+                    <input type="email" class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white" placeholder="Enter your email">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                        Category
+                    </label>
+                    <select class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white">
+                        <option>Select a category</option>
+                        <option>Technology</option>
+                        <option>Business</option>
+                        <option>Personal</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                        Message
+                    </label>
+                    <textarea class="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white" rows="4" placeholder="Enter your message"></textarea>
+                </div>
+            </form>
+        `,
+        actions: true,
+        actionText: 'Submit',
+        cancelText: 'Cancel',
+        onAction: function() {
+            showToast('success', 'Form submitted successfully!');
+        }
+    });
+}
+
+// Update current theme display
+document.addEventListener('DOMContentLoaded', function() {
+    const currentTheme = localStorage.getItem('valido-theme') || 'valido-white';
+    const themeDisplay = document.getElementById('current-theme-display');
+    if (themeDisplay) {
+        themeDisplay.textContent = currentTheme.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+});
+
+// Listen for theme changes
+window.addEventListener('themeChanged', function(event) {
+    const themeDisplay = document.getElementById('current-theme-display');
+    if (themeDisplay) {
+        const themeName = event.detail.theme.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        themeDisplay.textContent = themeName;
+    }
+});
+
+// DataTables Initialization
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize DataTables if jQuery is available
+    if (typeof jQuery !== 'undefined' && typeof $ !== 'undefined') {
+        if (typeof ValidoAIDataTables !== 'undefined') {
+            // Initialize the example DataTable
+            const datatableId = ValidoAIDataTables.init('#example-datatable', {
+                pageLength: 10,
+                responsive: true,
+                order: [[1, 'asc']],
+                columnDefs: [
+                    {
+                        orderable: false,
+                        targets: 0
+                    }
+                ]
+            });
+        }
+    }
+});
+
+// TinyMCE Initialization Functions
+async function initializeTinyMCE() {
+    if (typeof ValidoAITinyMCE !== 'undefined') {
+        const editorId = await ValidoAITinyMCE.init('#tinymce-editor', {
+            height: 400,
+            menubar: true,
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount'
+            ],
+            toolbar: 'undo redo | blocks | ' +
+                'bold italic underline strikethrough | forecolor backcolor | ' +
+                'alignleft aligncenter alignright alignjustify | ' +
+                'bullist numlist outdent indent | removeformat | ' +
+                'link image media table | code fullscreen preview | ' +
+                'template codesample | ltr rtl | visualblocks visualchars | ' +
+                'searchreplace wordcount help',
+            content_style: `
+                body {
+                    font-family: 'Inter', sans-serif;
+                    font-size: 14px;
+                    line-height: 1.6;
+                    color: #374151;
+                }
+                .dark body {
+                    color: #f9fafb;
+                }
+            `
+        });
+        console.log('TinyMCE initialized with ID:', editorId);
+    }
+}
+
+// Chart.js Initialization Functions
+async function initializeCharts() {
+    if (typeof ValidoAICharts !== 'undefined') {
+        // Initialize Chart.js
+        await ValidoAICharts.init();
+
+        // Revenue Bar Chart
+        const revenueChartId = ValidoAICharts.createBarChart('revenue-chart', {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Revenue ($)',
+                data: [12000, 19000, 3000, 5000, 20000, 30000],
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(139, 92, 246, 0.8)',
+                    'rgba(236, 72, 153, 0.8)'
+                ],
+                borderColor: [
+                    'rgb(59, 130, 246)',
+                    'rgb(16, 185, 129)',
+                    'rgb(245, 158, 11)',
+                    'rgb(239, 68, 68)',
+                    'rgb(139, 92, 246)',
+                    'rgb(236, 72, 153)'
+                ],
+                borderWidth: 1
+            }]
+        }, {
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Monthly Revenue'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        });
+
+        // Market Share Pie Chart
+        const marketChartId = ValidoAICharts.createPieChart('market-chart', {
+            labels: ['Product A', 'Product B', 'Product C', 'Product D', 'Product E'],
+            datasets: [{
+                data: [30, 25, 20, 15, 10],
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(139, 92, 246, 0.8)'
+                ],
+                borderWidth: 2
+            }]
+        }, {
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Market Share Distribution'
+                }
+            }
+        });
+
+        // Growth Trends Line Chart
+        const growthChartId = ValidoAICharts.createLineChart('growth-chart', {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Growth Rate (%)',
+                data: [2.5, 3.1, 2.8, 4.2, 3.8, 5.1, 4.9, 6.2, 5.8, 7.1, 6.9, 8.3],
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        }, {
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Yearly Growth Trends'
+                }
+            }
+        });
+
+        // Performance Area Chart
+        const performanceChartId = ValidoAICharts.createAreaChart('performance-chart', {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
+            datasets: [{
+                label: 'Performance Score',
+                data: [65, 72, 68, 81, 76, 89],
+                borderColor: 'rgb(16, 185, 129)',
+                backgroundColor: 'rgba(16, 185, 129, 0.3)',
+                tension: 0.4,
+                fill: true
+            }]
+        }, {
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Weekly Performance Metrics'
+                }
+            }
+        });
+
+        console.log('Charts initialized successfully');
+    }
+}
+
+// DateTime Components Initialization Functions
+function initializeDatePicker() {
+    if (typeof ValidoAIDateTimeComponents !== 'undefined') {
+        const pickerId = ValidoAIDateTimeComponents.createDatePicker('#date-picker', {
+            minDate: '2024-01-01',
+            maxDate: '2024-12-31',
+            showTodayButton: true,
+            showClearButton: true
+        });
+        console.log('Date picker initialized with ID:', pickerId);
+    }
+}
+
+function initializeDateTimePicker() {
+    if (typeof ValidoAIDateTimeComponents !== 'undefined') {
+        const pickerId = ValidoAIDateTimeComponents.createDateTimePicker('#datetime-picker', {
+            enableTimezones: true,
+            minuteIncrement: 15,
+            showTodayButton: true
+        });
+        console.log('DateTime picker initialized with ID:', pickerId);
+    }
+}
+
+function initializeRangePicker() {
+    if (typeof ValidoAIDateTimeComponents !== 'undefined') {
+        const pickerId = ValidoAIDateTimeComponents.createRangePicker('#range-picker', {
+            mode: 'range',
+            showTodayButton: true
+        });
+        console.log('Range picker initialized with ID:', pickerId);
+    }
+}
+
+function initializeMonthPicker() {
+    if (typeof ValidoAIDateTimeComponents !== 'undefined') {
+        const pickerId = ValidoAIDateTimeComponents.createMonthPicker('#month-picker');
+        console.log('Month picker initialized with ID:', pickerId);
+    }
+}
+
+function initializeYearPicker() {
+    if (typeof ValidoAIDateTimeComponents !== 'undefined') {
+        const pickerId = ValidoAIDateTimeComponents.createYearPicker('#year-picker');
+        console.log('Year picker initialized with ID:', pickerId);
+    }
+}
+
+function initializeTimePicker() {
+    if (typeof ValidoAIDateTimeComponents !== 'undefined') {
+        const pickerId = ValidoAIDateTimeComponents.createTimePicker('#time-picker', {
+            minuteIncrement: 15
+        });
+        console.log('Time picker initialized with ID:', pickerId);
+    }
+}
+
+// Country Selector Initialization Functions
+function initializeBasicCountrySelector() {
+    if (typeof ValidoAICountrySelector !== 'undefined') {
+        const selectorId = ValidoAICountrySelector.init('#basic-country', {
+            showFlags: true,
+            placeholder: 'Select a country...',
+            preferredCountries: ['US', 'GB', 'DE', 'FR', 'JP']
+        });
+        console.log('Basic country selector initialized with ID:', selectorId);
+    }
+}
+
+function initializeDialCountrySelector() {
+    if (typeof ValidoAICountrySelector !== 'undefined') {
+        const selectorId = ValidoAICountrySelector.init('#dial-country', {
+            showFlags: true,
+            showDialCodes: true,
+            placeholder: 'Select country with dial code...'
+        });
+        console.log('Dial country selector initialized with ID:', selectorId);
+    }
+}
+
+function initializeCurrencyCountrySelector() {
+    if (typeof ValidoAICountrySelector !== 'undefined') {
+        const selectorId = ValidoAICountrySelector.init('#currency-country', {
+            showFlags: true,
+            showCurrencies: true,
+            placeholder: 'Select country with currency...'
+        });
+        console.log('Currency country selector initialized with ID:', selectorId);
+    }
+}
+
+function initializeEuropeCountrySelector() {
+    if (typeof ValidoAICountrySelector !== 'undefined') {
+        const selectorId = ValidoAICountrySelector.init('#europe-country', {
+            showFlags: true,
+            onlyCountries: ['GB', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'AT', 'CH', 'SE', 'NO', 'DK', 'FI', 'PL', 'CZ', 'HU', 'RO', 'BG', 'GR', 'PT', 'IE'],
+            placeholder: 'Select European country...'
+        });
+        console.log('Europe country selector initialized with ID:', selectorId);
+    }
+}
+
+// Editor initialization functions
+function initializeEditorSelector() {
+    if (typeof ValidoAIEditorSelector !== 'undefined') {
+        ValidoAIEditorSelector.init('#editor-selector-container', 'tinymce');
+    }
+}
+
+function initializeCKEditor5Demo() {
+    if (typeof ValidoAICKEditor5 !== 'undefined') {
+        ValidoAICKEditor5.init('#ckeditor5-editor');
+        if (window.showToast) {
+            showToast('success', 'CKEditor 5 initialized successfully!');
+        }
+    } else {
+        if (window.showToast) {
+            showToast('error', 'CKEditor 5 not loaded. Please refresh the page.');
+        }
+    }
+}
+
+function initializeTinyMCEDemo() {
+    if (typeof ValidoAITinyMCE !== 'undefined') {
+        ValidoAITinyMCE.init('#tinymce-editor-demo');
+        if (window.showToast) {
+            showToast('success', 'TinyMCE initialized successfully!');
+        }
+    } else {
+        if (window.showToast) {
+            showToast('error', 'TinyMCE not loaded. Please refresh the page.');
+        }
+    }
+}
+
+function initializeFroalaDemo() {
+    if (typeof ValidoAIFroala !== 'undefined') {
+        ValidoAIFroala.init('#froala-editor-demo');
+        if (window.showToast) {
+            showToast('success', 'Froala initialized successfully!');
+        }
+    } else {
+        if (window.showToast) {
+            showToast('error', 'Froala not loaded. Please refresh the page.');
+        }
+    }
+}
+
+function initializeQuillDemo() {
+    if (typeof ValidoAIQuill !== 'undefined') {
+        ValidoAIQuill.init('#quill-editor-demo');
+        if (window.showToast) {
+            showToast('success', 'Quill initialized successfully!');
+        }
+    } else {
+        if (window.showToast) {
+            showToast('error', 'Quill not loaded. Please refresh the page.');
+        }
+    }
+}
+
+function initializeSummernoteDemo() {
+    if (typeof ValidoAISummernote !== 'undefined') {
+        ValidoAISummernote.init('#summernote-editor-demo');
+        if (window.showToast) {
+            showToast('success', 'Summernote initialized successfully!');
+        }
+    } else {
+        if (window.showToast) {
+            showToast('error', 'Summernote not loaded. Please refresh the page.');
+        }
+    }
+}
+
+function initializeTrixDemo() {
+    if (typeof ValidoAITrix !== 'undefined') {
+        ValidoAITrix.init('#trix-editor-demo');
+        if (window.showToast) {
+            showToast('success', 'Trix initialized successfully!');
+        }
+    } else {
+        if (window.showToast) {
+            showToast('error', 'Trix not loaded. Please refresh the page.');
+        }
+    }
+}
+
+// Initialize all components when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize TinyMCE if available
+    if (document.getElementById('tinymce-editor')) {
+        initializeTinyMCE();
+    }
+
+    // Initialize editor selector if container exists
+    if (document.getElementById('editor-selector-container')) {
+        initializeEditorSelector();
+    }
+
+    // Initialize charts if canvas elements exist
+    if (document.querySelector('canvas[id$="-chart"]')) {
+        initializeCharts();
+    }
+});
+</script>
+{% endblock %}

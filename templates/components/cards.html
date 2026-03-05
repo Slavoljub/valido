@@ -1,0 +1,195 @@
+{% macro card_basic(title='', subtitle='', content='', class='bg-white', shadow='shadow-sm', actions=None) %}
+<!-- Basic Card Component -->
+<div class="card {{ class }} {{ shadow }} rounded-lg overflow-hidden">
+  {% if title or subtitle %}
+  <div class="card-header px-6 py-4 border-b border-gray-200">
+    {% if title %}
+    <h3 class="card-title text-lg font-medium text-gray-900">{{ title }}</h3>
+    {% endif %}
+    {% if subtitle %}
+    <p class="card-subtitle text-sm text-gray-500 mt-1">{{ subtitle }}</p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="card-body {{ 'px-6 py-4' if title or subtitle else 'p-6' }}">
+    {{ content }}
+  </div>
+
+  {% if actions %}
+  <div class="card-footer px-6 py-4 border-t border-gray-200 bg-gray-50">
+    {{ actions }}
+  </div>
+  {% endif %}
+</div>
+{% endmacro %}
+
+{% macro card_stat(icon='', title='', value='', change='', change_type='neutral', class='') %}
+<!-- Statistics Card Component -->
+<div class="card bg-white shadow rounded-lg p-6 {{ class }}">
+  <div class="flex items-center">
+    {% if icon %}
+    <div class="flex-shrink-0">
+      <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+        <i class="fas {{ icon }} text-white"></i>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="ml-5 w-0 flex-1">
+      <dl>
+        <dt class="text-sm font-medium text-gray-500 truncate">
+          {{ title }}
+        </dt>
+        <dd class="text-lg font-medium text-gray-900">
+          {{ value }}
+        </dd>
+        {% if change %}
+        <dd class="text-sm {{ 'text-green-600' if change_type == 'positive' else 'text-red-600' if change_type == 'negative' else 'text-gray-500' }}">
+          <i class="fas {{ 'fa-arrow-up' if change_type == 'positive' else 'fa-arrow-down' if change_type == 'negative' else 'fa-minus' }} mr-1"></i>
+          {{ change }}
+        </dd>
+        {% endif %}
+      </dl>
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro card_user(avatar='', name='', email='', role='', status='active', actions=None) %}
+<!-- User Card Component -->
+<div class="card bg-white shadow rounded-lg p-6">
+  <div class="flex items-center">
+    <div class="flex-shrink-0">
+      {% if avatar %}
+      <img class="h-12 w-12 rounded-full" src="{{ avatar }}" alt="{{ name }}">
+      {% else %}
+      <div class="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
+        <i class="fas fa-user text-gray-600"></i>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="ml-4 flex-1">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-medium text-gray-900">{{ name }}</h3>
+          {% if email %}
+          <p class="text-sm text-gray-500">{{ email }}</p>
+          {% endif %}
+          {% if role %}
+          <p class="text-xs text-gray-400 mt-1">{{ role }}</p>
+          {% endif %}
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ 'bg-green-100 text-green-800' if status == 'active' else 'bg-red-100 text-red-800' if status == 'inactive' else 'bg-yellow-100 text-yellow-800' }}">
+            <i class="fas fa-circle text-xs mr-1 {{ 'text-green-400' if status == 'active' else 'text-red-400' if status == 'inactive' else 'text-yellow-400' }}"></i>
+            {{ status.title() }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if actions %}
+  <div class="mt-4 flex justify-end space-x-2">
+    {{ actions }}
+  </div>
+  {% endif %}
+</div>
+{% endmacro %}
+
+{% macro card_action(icon='', title='', description='', href='', button_text='View', button_class='btn-primary', class='') %}
+<!-- Action Card Component -->
+<div class="card bg-white shadow hover:shadow-md transition-shadow duration-200 rounded-lg p-6 {{ class }}">
+  <div class="flex items-center">
+    {% if icon %}
+    <div class="flex-shrink-0">
+      <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+        <i class="fas {{ icon }} text-blue-600 text-xl"></i>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="ml-4 flex-1">
+      <h3 class="text-lg font-medium text-gray-900">{{ title }}</h3>
+      {% if description %}
+      <p class="mt-1 text-sm text-gray-600">{{ description }}</p>
+      {% endif %}
+    </div>
+
+    {% if href %}
+    <div class="ml-4">
+      <a href="{{ href }}" class="btn {{ button_class }} btn-sm">
+        {{ button_text }}
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}
+
+{% macro card_empty(icon='fas fa-inbox', title='No items found', description='Get started by creating your first item.', action_text='', action_href='', class='') %}
+<!-- Empty State Card Component -->
+<div class="card text-center py-12 {{ class }}">
+  <div class="flex flex-col items-center">
+    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+      <i class="fas {{ icon }} text-gray-400 text-2xl"></i>
+    </div>
+
+    <h3 class="text-lg font-medium text-gray-900 mb-2">{{ title }}</h3>
+
+    {% if description %}
+    <p class="text-gray-500 mb-6 max-w-sm">{{ description }}</p>
+    {% endif %}
+
+    {% if action_text and action_href %}
+    <a href="{{ action_href }}" class="btn btn-primary">
+      {{ action_text }}
+    </a>
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}
+
+{% macro card_grid(cards, columns='grid-cols-1 md:grid-cols-2 lg:grid-cols-3', gap='gap-6') %}
+<!-- Card Grid Component -->
+<div class="grid {{ columns }} {{ gap }}">
+  {% for card in cards %}
+  <div>
+    {{ card }}
+  </div>
+  {% endfor %}
+</div>
+{% endmacro %}
+
+{% macro card_tabs(tabs, active_tab='') %}
+<!-- Card with Tabs Component -->
+<div class="card bg-white shadow rounded-lg overflow-hidden">
+  <div class="border-b border-gray-200">
+    <nav class="flex space-x-8 px-6" aria-label="Tabs">
+      {% for tab in tabs %}
+      <a href="{{ tab.href }}"
+         class="tab-link py-4 px-1 border-b-2 font-medium text-sm {{ 'border-blue-500 text-blue-600' if tab.id == active_tab else 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+        {% if tab.icon %}<i class="fas {{ tab.icon }} mr-2"></i>{% endif %}
+        {{ tab.label }}
+        {% if tab.badge %}
+        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          {{ tab.badge }}
+        </span>
+        {% endif %}
+      </a>
+      {% endfor %}
+    </nav>
+  </div>
+
+  <div class="p-6">
+    {% for tab in tabs %}
+    {% if tab.id == active_tab %}
+    {{ tab.content }}
+    {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endmacro %}

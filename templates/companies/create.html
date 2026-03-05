@@ -1,0 +1,335 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Create Company - ValidoAI{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Create New Company</h1>
+                    <p class="text-gray-600">Add a new business entity to your organization</p>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{{ url_for('main_app.companies') }}"
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Back to Companies
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-white shadow rounded-lg">
+            <form method="POST" action="{{ url_for('main_app.companies_create') }}" class="space-y-8 divide-y divide-gray-200">
+                <!-- Basic Information -->
+                <div class="space-y-6 pt-8 sm:space-y-5 sm:pt-10">
+                    <div>
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Basic Information</h3>
+                        <p class="mt-1 max-w-2xl text-sm text-gray-500">Core company details and identification</p>
+                    </div>
+
+                    <div class="space-y-6 sm:space-y-5">
+                        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                            <label for="company_name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                Company Name *
+                            </label>
+                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                <input type="text" name="company_name" id="company_name" required
+                                       class="max-w-lg block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md">
+                            </div>
+                        </div>
+
+                        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                            <label for="legal_name" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                Legal Name
+                            </label>
+                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                <input type="text" name="legal_name" id="legal_name"
+                                       class="max-w-lg block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md">
+                            </div>
+                        </div>
+
+                        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                            <label for="tax_id" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                Tax ID *
+                            </label>
+                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                <input type="text" name="tax_id" id="tax_id" required
+                                       class="max-w-lg block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md">
+                            </div>
+                        </div>
+
+                        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                            <label for="industry" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                Industry *
+                            </label>
+                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                <select name="industry" id="industry" required
+                                        class="max-w-lg block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md">
+                                    <option value="">Select an industry</option>
+                                    <option value="Technology">Technology</option>
+                                    <option value="Healthcare">Healthcare</option>
+                                    <option value="Manufacturing">Manufacturing</option>
+                                    <option value="Financial Services">Financial Services</option>
+                                    <option value="Retail">Retail</option>
+                                    <option value="Energy">Energy</option>
+                                    <option value="Education">Education</option>
+                                    <option value="Real Estate">Real Estate</option>
+                                    <option value="Transportation">Transportation</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                            <label for="company_type" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                Company Type *
+                            </label>
+                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                <select name="company_type" id="company_type" required
+                                        class="max-w-lg block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md">
+                                    <option value="">Select company type</option>
+                                    <option value="Corporation">Corporation</option>
+                                    <option value="LLC">LLC</option>
+                                    <option value="Partnership">Partnership</option>
+                                    <option value="Sole Proprietorship">Sole Proprietorship</option>
+                                    <option value="Non-Profit">Non-Profit</option>
+                                    <option value="Government">Government</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                            <label for="company_size" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                Company Size *
+                            </label>
+                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                <select name="company_size" id="company_size" required
+                                        class="max-w-lg block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md">
+                                    <option value="">Select company size</option>
+                                    <option value="Small">Small (1-50 employees)</option>
+                                    <option value="Medium">Medium (51-200 employees)</option>
+                                    <option value="Large">Large (200+ employees)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                            <label for="status" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                Status
+                            </label>
+                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                <select name="status" id="status"
+                                        class="max-w-lg block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md">
+                                    <option value="active" selected>Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="pending">Pending</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="space-y-6 pt-8 sm:space-y-5 sm:pt-10">
+                    <div>
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Contact Information</h3>
+                        <p class="mt-1 max-w-2xl text-sm text-gray-500">Company contact details and communication information</p>
+                    </div>
+
+                    <div class="space-y-6 sm:space-y-5">
+                        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                            <label for="email" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                Email Address
+                            </label>
+                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                <input type="email" name="email" id="email"
+                                       class="max-w-lg block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md">
+                            </div>
+                        </div>
+
+                        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                            <label for="phone" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                Phone Number
+                            </label>
+                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                <input type="tel" name="phone" id="phone"
+                                       class="max-w-lg block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md">
+                            </div>
+                        </div>
+
+                        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                            <label for="website" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                Website
+                            </label>
+                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                <input type="url" name="website" id="website" placeholder="https://example.com"
+                                       class="max-w-lg block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Information -->
+                <div class="space-y-6 pt-8 sm:space-y-5 sm:pt-10">
+                    <div>
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Address Information</h3>
+                        <p class="mt-1 max-w-2xl text-sm text-gray-500">Company's physical address and location</p>
+                    </div>
+
+                    <div class="space-y-6 sm:space-y-5">
+                        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                            <label for="address_line1" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                Address Line 1
+                            </label>
+                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                <input type="text" name="address_line1" id="address_line1"
+                                       class="block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md">
+                            </div>
+                        </div>
+
+                        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                            <label for="address_line2" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                Address Line 2
+                            </label>
+                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                <input type="text" name="address_line2" id="address_line2"
+                                       class="block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md">
+                            </div>
+                        </div>
+
+                        <div class="sm:grid sm:grid-cols-2 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                            <div>
+                                <label for="city" class="block text-sm font-medium text-gray-700">City</label>
+                                <input type="text" name="city" id="city"
+                                       class="mt-1 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md">
+                            </div>
+                            <div>
+                                <label for="state" class="block text-sm font-medium text-gray-700">State/Province</label>
+                                <input type="text" name="state" id="state"
+                                       class="mt-1 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md">
+                            </div>
+                        </div>
+
+                        <div class="sm:grid sm:grid-cols-2 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                            <div>
+                                <label for="postal_code" class="block text-sm font-medium text-gray-700">Postal Code</label>
+                                <input type="text" name="postal_code" id="postal_code"
+                                       class="mt-1 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md">
+                            </div>
+                            <div>
+                                <label for="country" class="block text-sm font-medium text-gray-700">Country</label>
+                                <select name="country" id="country"
+                                        class="mt-1 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md">
+                                    <option value="">Select country</option>
+                                    <option value="Serbia">Serbia</option>
+                                    <option value="United States">United States</option>
+                                    <option value="United Kingdom">United Kingdom</option>
+                                    <option value="Germany">Germany</option>
+                                    <option value="France">France</option>
+                                    <option value="Italy">Italy</option>
+                                    <option value="Spain">Spain</option>
+                                    <option value="Netherlands">Netherlands</option>
+                                    <option value="Switzerland">Switzerland</option>
+                                    <option value="Austria">Austria</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="space-y-6 pt-8 sm:space-y-5 sm:pt-10">
+                    <div>
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Additional Information</h3>
+                        <p class="mt-1 max-w-2xl text-sm text-gray-500">Optional details about the company</p>
+                    </div>
+
+                    <div class="space-y-6 sm:space-y-5">
+                        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                            <label for="description" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                                Description
+                            </label>
+                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                <textarea name="description" id="description" rows="4"
+                                          class="block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md"
+                                          placeholder="Brief description of the company..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="pt-8">
+                    <div class="flex justify-end space-x-3">
+                        <a href="{{ url_for('main_app.companies') }}"
+                           class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Cancel
+                        </a>
+                        <button type="submit"
+                                class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Create Company
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Form validation and enhancement -->
+<script>
+    // Real-time form validation
+    document.getElementById('company_name').addEventListener('input', function(e) {
+        const value = e.target.value;
+        if (value.length < 2) {
+            e.target.setCustomValidity('Company name must be at least 2 characters long');
+        } else {
+            e.target.setCustomValidity('');
+        }
+    });
+
+    document.getElementById('tax_id').addEventListener('input', function(e) {
+        const value = e.target.value;
+        if (value.length < 5) {
+            e.target.setCustomValidity('Tax ID must be at least 5 characters long');
+        } else {
+            e.target.setCustomValidity('');
+        }
+    });
+
+    // Auto-generate legal name from company name if empty
+    document.getElementById('company_name').addEventListener('blur', function(e) {
+        const legalNameField = document.getElementById('legal_name');
+        if (!legalNameField.value) {
+            legalNameField.value = e.target.value;
+        }
+    });
+
+    // Form submission with loading state
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+
+        submitBtn.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Creating...
+        `;
+        submitBtn.disabled = true;
+    });
+</script>
+{% endblock %}

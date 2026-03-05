@@ -1,0 +1,40 @@
+[server]
+# Bind to all interfaces on port 5000 for HTTP
+bind = ["0.0.0.0:5000"]
+
+# Worker configuration
+workers = 4
+worker_class = "asyncio"
+
+# HTTP/2 and HTTP/3 support
+h2 = true
+h3 = true
+
+# Logging configuration
+accesslog = "-"
+errorlog = "-"
+loglevel = "info"
+
+# Performance settings
+max_requests = 1000
+max_requests_jitter = 50
+timeout = 30
+keepalive = 2
+
+# SSL configuration (if using HTTPS)
+# certfile = "certs/localhost-cert.crt"
+# keyfile = "certs/localhost-key.pem"
+
+# Additional bind for HTTPS (uncomment if using SSL)
+# bind = ["0.0.0.0:5001"]
+
+[server.ssl]
+# SSL settings when using HTTPS
+# certfile = "certs/localhost-cert.crt"
+# keyfile = "certs/localhost-key.pem"
+# ca_certs = "certs/ca.pem"
+
+[server.websocket]
+# WebSocket settings
+max_message_size = 16777216  # 16MB
+max_queue_size = 32

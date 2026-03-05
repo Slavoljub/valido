@@ -1,0 +1,423 @@
+# Cursor Editor Configuration for ValidoAI Project
+# GPU Support and Development Optimization        
+
+## GPU Configuration
+- Enable GPU acceleration for AI/ML tasks
+- Support both NVIDIA CUDA and AMD ROCm
+- Optimize for local model inference
+- Configure memory management for large models    
+
+## Development Environment
+- Use Python 3.12+ with GPU support
+- Enable PyTorch CUDA/ROCm acceleration
+- Configure TensorFlow GPU support
+- Optimize for local AI model development
+
+## Project Structure
+- Root: app.py, routes.py, configuration files no scattering of routes
+- src/: All Python logic and modules
+- docs/: Documentation organized by category (api/, architecture/, guides/, deployment/, security/, tutorials/)
+- templates/: HTML templates
+- static/: CSS, JS, images
+- data/: Database files and sample data
+- tests/: All tests organized by type (unit/, integration/, e2e/, performance/, security/)
+- configuration_scripts/: All .sh and .ps1 scripts for setup, deployment, and maintenance
+- All global desing style is defined in main.{css, js}
+
+## Template Structure Rules
+- All routes MUST follow the pattern: /templates/{route-name}/{CRUD}.html
+- Examples: /templates/dashboard/index.html, /templates/tickets/create.html, /templates/users/edit.html
+- CRUD operations: index.html (list/view), create.html, edit.html, show.html (view single), delete.html
+- ALWAYS check for existing files in the route directory before creating new ones
+- If existing file found, merge/update the existing file instead of creating duplicates
+- Follow the existing file structure and naming conventions
+- Each route directory should contain only the necessary CRUD templates
+- Base template (base.html) is shared across all routes
+
+## AI/ML Configuration
+- Local model management in src/ai_local_models/
+- GPU detection and optimization
+- Model downloading and caching
+- Inference engine with GPU support
+- Sample data in /data/sqlite/sample.db
+
+## Database Configuration
+- **PostgreSQL Connection Method**: Use PowerShell environment variable
+- **Standard Connection Command**:
+  ```
+  $env:PGPASSWORD = "postgres"
+  psql -h localhost -p 5432 -U postgres -d ai_valido_online
+  ```
+- **Connection Details**:
+  - Host: localhost
+  - Port: 5432
+  - Username: postgres
+  - Password: postgres
+  - Database: ai_valido_online
+- **ALWAYS use the environment variable method** to avoid interactive password prompts
+- **NEVER hardcode passwords** in scripts or configuration files
+- **Use this exact method** for all database operations and verifications
+
+## Code Style
+- Use PowerShell for CRUD on all files, this is faster method
+- Follow PEP 8 standards
+- Use the best patterns for Python
+- Use type hints
+- Implement OOP, MVVM (Model-View-ViewModel), MVC, ELM patterns
+- DRY principle - no code duplication
+- Find and check first code
+- Each route has component way of using css, js, images, fonts, icons, etc. is defined in /static/{route-name}/{route-name}.{css,js,image, font, icons, etc.}
+- All routes only in routes.py - no routes duplication
+- Try to have minimal number of files created
+- Don't create new files, try first to change/merge/update current files
+- Don't add enhanced and all other variants to the file names
+- Don't break the rules please follow them
+
+## Performance
+- Enable GPU acceleration where available
+- Optimize model loading and inference
+- Use efficient data structures
+- Implement caching strategies
+
+## Security
+- Validate all inputs
+- Use environment variables for secrets
+- Implement proper error handling
+- Secure API endpoints
+
+## Testing
+- Test GPU detection and configuration
+- Validate model loading and inference
+- Test error handling and logging
+- Verify route functionality
+- All routes and running the application with 0 errors
+
+## 🔍 **Truth Verification Rule**
+**MANDATORY**: All status indicators (✅) MUST be verified and tested before marking as complete. No false progress claims allowed.
+- **Before marking ✅**: Must run actual tests and verify functionality
+- **Before updating progress %**: Must validate all claimed features work
+- **Before claiming "COMPLETED"**: Must demonstrate working functionality
+- **Verification Required**: Each completed item must be tested and proven working
+- **Automated Testing**: Use verification scripts to validate all claimed features
+- **Quality Gates**: Implement mandatory verification before marking features complete
+- **Truthful Assessment**: Update progress based on actual verification results
+- **Continuous Monitoring**: Maintain ongoing verification system for quality assurance
+
+## 📁 **File Organization Standards**
+
+### **Documentation Organization (/docs)**
+- **MANDATORY**: All .md files must be organized in category-based subdirectories
+- **Categories**:
+  - `/docs/api/` - API documentation and endpoint specifications
+  - `/docs/architecture/` - System architecture, database schemas, component diagrams
+  - `/docs/guides/` - User guides, tutorials, and how-to documentation
+  - `/docs/deployment/` - Deployment guides, Docker configs, production setup
+  - `/docs/security/` - Security policies, authentication, data protection
+  - `/docs/tutorials/` - Step-by-step tutorials and learning materials
+  - `/docs/development/` - Developer guides, coding standards, contribution guidelines
+
+### **Script Organization**
+- **MANDATORY**: All .sh and .ps1 scripts must be placed in `/configuration_scripts/`
+- **Script Categories**:
+  - `setup_*.sh/ps1` - Initial setup and installation scripts
+  - `deploy_*.sh/ps1` - Deployment and production scripts
+  - `test_*.sh/ps1` - Testing and validation scripts
+  - `maintenance_*.sh/ps1` - Database maintenance and cleanup scripts
+
+### **Test Organization**
+- **MANDATORY**: All test files must be placed in `/tests/` organized by type:
+  - `/tests/unit/` - Unit tests for individual components
+  - `/tests/integration/` - Integration tests for system interactions
+  -   - `/tests/functional/` - functional tests for all routes
+  - `/tests/e2e/` - End-to-end tests for user workflows
+  - `/tests/performance/` - Performance and load testing
+  - `/tests/routes/` - Status testing for all routes have and return 200 OK no errors on the page
+  - `/tests/security/` - Security testing and vulnerability checks
+
+### **Component Organization**
+- **All reusable components must be in `/templates/components/`**
+- **Component Types**:
+  - `modals.html` - Modal dialogs and popups
+  - `toasts.html` - Notification toasts
+  - `captcha.html` - CAPTCHA components
+  - `datatable.html` - Data table components
+  - `ckeditor.html` - Rich text editor component
+  - `{component-name}.html` - Specific component implementations
+
+## 🔧 **Automation Rules**
+
+### **File Creation**
+- **Documentation**: Automatically categorize and place in appropriate `/docs` subdirectories
+- **Scripts**: Automatically move .sh/.ps1 files to `/configuration_scripts`
+- **Tests**: Automatically organize tests in appropriate `/tests` subdirectories
+
+### **Code Generation**
+- **CRUD Templates**: Automatically generate CRUD templates following established patterns
+- **API Endpoints**: Generate consistent API endpoint structures
+- **Component Structure**: Maintain consistent component architecture
+
+## 📊 **Quality Standards**
+
+### **DRY Principle Enforcement**
+- **No Code Duplication**: Use components, utilities, and shared functions
+- **Template Inheritance**: Use base templates and includes
+- **Component Reuse**: Create reusable components for common UI patterns
+- **Utility Functions**: Centralize common operations in utility modules
+
+### **Documentation Standards**
+- **Markdown Format**: All documentation must use consistent markdown
+- **Table of Contents**: Required for documents > 50 lines
+- **Cross-References**: Use relative links between documentation files
+- **Version Control**: Maintain changelog for major updates
+
+---
+
+## 📝 **Documentation Rules**
+
+### **Markdown File Creation**
+- **MANDATORY**: Ask user permission before creating any .md files
+- **NEVER** create documentation files unless explicitly requested
+- **AVOID** creating README files, guides, or tutorials without permission
+- **CHECK FIRST**: If similar content exists, ask before creating duplicates
+
+### **Documentation Standards**
+- Only create .md files when specifically requested by the user
+- Never proactively create documentation or README files
+- Ask permission before adding any form of written documentation
+- Respect user's preference for documentation creation
+
+---
+
+---
+
+## 🧠 **Recursive Self-Improvement (RSI) System**
+
+### **RSI Core Principles**
+- **Autonomous Learning**: System continuously analyzes performance and identifies improvement opportunities
+- **Iterative Enhancement**: Each improvement cycle builds upon previous optimizations
+- **Multi-dimensional Optimization**: Improve code quality, performance, maintainability, and functionality simultaneously
+- **Feedback Loop Integration**: Use results from improvements to guide future enhancement decisions
+- **Scalable Architecture**: Improvements should benefit the entire system, not just individual components
+
+### **RSI Implementation Strategy**
+
+#### **1. Performance Analysis & Monitoring**
+- **Code Quality Metrics**: Track complexity, maintainability, test coverage, and technical debt
+- **Performance Benchmarks**: Monitor execution time, memory usage, and resource utilization
+- **Error Rate Analysis**: Track and analyze error patterns and failure modes
+- **User Experience Metrics**: Measure responsiveness, reliability, and feature completeness
+- **System Health Monitoring**: Track overall system stability and dependency health
+
+#### **2. Automated Improvement Generation**
+- **Pattern Recognition**: Identify common issues and suboptimal implementations
+- **Refactoring Suggestions**: Generate specific code improvements and optimizations
+- **Test Enhancement**: Automatically expand test coverage for weak areas
+- **Documentation Updates**: Generate missing or outdated documentation
+- **Security Hardening**: Identify and fix security vulnerabilities proactively
+
+#### **3. Implementation & Validation**
+- **Safe Deployment**: Implement improvements with rollback capabilities
+- **A/B Testing**: Validate improvements through controlled testing
+- **Impact Assessment**: Measure the effects of each improvement
+- **Regression Prevention**: Ensure improvements don't break existing functionality
+- **Performance Validation**: Confirm improvements actually enhance performance
+
+#### **4. Learning & Adaptation**
+- **Success Pattern Recognition**: Learn which types of improvements work best
+- **Failure Analysis**: Understand why some improvements don't work and avoid similar mistakes
+- **Context Awareness**: Adapt improvement strategies based on project context and requirements
+- **Prioritization Intelligence**: Learn to focus on high-impact improvements first
+- **Continuous Evolution**: Update improvement strategies based on accumulated knowledge
+
+### **RSI Quality Gates**
+
+#### **Code Quality RSI Targets (100% Achievement)**
+- **Test Coverage**: Maintain 100% test coverage across all functionality
+- **Code Complexity**: Keep cyclomatic complexity below 10 for all functions
+- **Documentation**: 100% API documentation with examples and usage patterns
+- **Type Safety**: 100% type hints with strict mypy compliance
+- **Security**: Zero known security vulnerabilities (automated scanning)
+- **Performance**: Meet or exceed all performance benchmarks
+- **Maintainability**: Achieve A-grade maintainability scores across all modules
+
+#### **System Health RSI Targets**
+- **Error Rate**: Zero production errors (comprehensive error handling)
+- **Response Time**: Sub-100ms response times for all API endpoints
+- **Resource Usage**: Optimal memory and CPU utilization
+- **Scalability**: Handle 10x current load without performance degradation
+- **Reliability**: 99.99% uptime with automated recovery mechanisms
+- **Monitoring**: 100% observability with comprehensive logging and metrics
+
+#### **User Experience RSI Targets**
+- **Functionality**: 100% feature completeness with no broken functionality
+- **Usability**: Intuitive interfaces requiring no documentation to use
+- **Accessibility**: WCAG 2.1 AA compliance across all interfaces
+- **Performance**: Instant perceived performance (<100ms interactions)
+- **Reliability**: Zero user-facing errors or downtime
+- **Satisfaction**: Measure and optimize user satisfaction metrics
+
+### **RSI Automation Rules**
+
+#### **Continuous Improvement Pipeline**
+- **Daily Analysis**: Automatically analyze codebase for improvement opportunities
+- **Weekly Refactoring**: Implement identified improvements in weekly cycles
+- **Monthly Optimization**: Perform comprehensive system optimization reviews
+- **Quarterly Evolution**: Major architectural improvements and feature enhancements
+- **Continuous Monitoring**: Real-time performance and quality monitoring
+
+#### **Improvement Categories**
+- **Code Quality**: Refactoring, naming improvements, pattern consistency
+- **Performance**: Algorithm optimization, caching, database query optimization
+- **Security**: Vulnerability fixes, secure coding practices, access control
+- **Maintainability**: Documentation, testing, modularization, dependency management
+- **User Experience**: Interface improvements, workflow optimization, error handling
+- **Scalability**: Architecture improvements, resource optimization, load balancing
+
+#### **RSI Implementation Patterns**
+
+##### **1. Self-Documenting Code RSI**
+- Generate comprehensive docstrings for all public functions
+- Create usage examples and implementation guides
+- Maintain up-to-date API documentation
+- Generate architectural documentation from code analysis
+
+##### **2. Self-Optimizing Performance RSI**
+- Profile code execution and identify bottlenecks
+- Automatically optimize database queries and algorithms
+- Implement intelligent caching strategies
+- Optimize memory usage and resource allocation
+
+##### **3. Self-Healing Error Handling RSI**
+- Implement comprehensive error recovery mechanisms
+- Create fallback strategies for all critical operations
+- Generate detailed error logs with actionable insights
+- Implement automated error resolution where possible
+
+##### **4. Self-Expanding Test Coverage RSI**
+- Analyze code paths and generate missing tests
+- Create comprehensive edge case testing
+- Implement property-based testing for complex functions
+- Maintain 100% test coverage with meaningful tests
+
+##### **5. Self-Evolving Architecture RSI**
+- Analyze system usage patterns and optimize architecture
+- Implement modular design with clear separation of concerns
+- Create scalable patterns that grow with system needs
+- Maintain clean architecture principles across all components
+
+### **RSI Measurement & Tracking**
+
+#### **Key Performance Indicators (KPIs)**
+- **Improvement Velocity**: Number of successful improvements per week
+- **Quality Score**: Composite score of all quality metrics
+- **Performance Index**: Overall system performance relative to benchmarks
+- **User Satisfaction**: Measured improvement in user experience metrics
+- **Technical Debt Ratio**: Ratio of improvement opportunities to implemented fixes
+- **Innovation Rate**: New features and capabilities added per month
+
+#### **Success Metrics**
+- **100% Test Coverage**: All code paths covered by tests
+- **Zero Critical Issues**: No open critical bugs or security issues
+- **Optimal Performance**: All benchmarks met or exceeded
+- **Complete Documentation**: 100% API and architectural documentation
+- **User Satisfaction**: 100% user satisfaction with system functionality
+- **System Reliability**: 99.99% uptime and error-free operation
+
+### **RSI Integration with Development Workflow**
+
+#### **Automated RSI Pipeline**
+1. **Analysis Phase**: Scan codebase for improvement opportunities
+2. **Prioritization Phase**: Rank improvements by impact and effort
+3. **Implementation Phase**: Apply improvements with comprehensive testing
+4. **Validation Phase**: Verify improvements work correctly and improve metrics
+5. **Learning Phase**: Analyze results and update improvement strategies
+6. **Documentation Phase**: Document improvements and update knowledge base
+
+#### **RSI Development Best Practices**
+- **Always implement tests before making improvements**
+- **Measure impact of every improvement quantitatively**
+- **Document lessons learned from each improvement cycle**
+- **Share successful patterns across the development team**
+- **Maintain improvement backlog with clear prioritization**
+- **Celebrate achievements and learn from failures**
+
+#### **RSI Quality Assurance**
+- **Peer Review**: All improvements reviewed by team members
+- **Automated Testing**: Comprehensive test suite validates improvements
+- **Performance Validation**: Benchmarks confirm performance improvements
+- **Security Review**: Security implications of improvements assessed
+- **User Acceptance**: Critical improvements validated with users
+
+---
+
+## 📈 **RSI-Driven 100% Achievement Framework**
+
+### **100% Quality Achievement Strategy**
+The RSI system is designed to achieve 100% in all critical aspects through continuous, autonomous improvement. This framework ensures that the ValidoAI project reaches and maintains the highest possible standards across all dimensions.
+
+### **RSI Success Criteria**
+- **Code Quality**: 100% adherence to best practices and standards
+- **Functionality**: 100% feature completeness and correctness
+- **Performance**: 100% optimal resource utilization
+- **Security**: 100% protection against known threats
+- **Usability**: 100% user satisfaction and accessibility
+- **Maintainability**: 100% clear, well-documented, and extensible code
+- **Reliability**: 100% uptime and error-free operation
+- **Scalability**: 100% ability to handle growth and load
+
+### **Implementation Roadmap**
+1. **Phase 1**: Establish RSI monitoring and basic improvement capabilities
+2. **Phase 2**: Implement automated improvement generation and validation
+3. **Phase 3**: Achieve 100% in individual quality dimensions
+4. **Phase 4**: Integrate all improvements into cohesive system optimization
+5. **Phase 5**: Maintain continuous improvement and adaptation
+
+---
+
+## 🔢 **FP32 Precision Management**
+
+### **FP32 Configuration Standards**
+- **Default Precision**: All AI/ML models MUST use FP32 as the default precision
+- **Numerical Stability**: Ensure FP32 provides optimal numerical stability for all operations
+- **Training Configuration**: Set FP32 as the standard for model training unless otherwise specified
+- **Inference Precision**: Use FP32 for inference to maintain accuracy unless performance requires mixed precision
+- **Memory Optimization**: Optimize memory usage while maintaining FP32 precision
+
+### **Mixed Precision Integration Rules**
+- **Automatic Conversion**: Implement automatic FP16 conversion for computation speed when beneficial
+- **Dynamic Switching**: Allow runtime switching between FP32 and FP16 based on task requirements
+- **Gradient Scaling**: Automatically apply gradient scaling for mixed precision training
+- **Loss Scaling**: Optimize loss computation for numerical stability in mixed precision
+- **Precision Validation**: Always validate precision impact before and after changes
+
+### **AI Framework FP32 Support**
+- **TensorFlow**: Configure all TF models to use FP32 precision by default
+- **PyTorch**: Set PyTorch models to FP32 training and inference
+- **Hugging Face**: Ensure transformers use FP32 operations unless specified otherwise
+- **OpenAI Models**: Use FP32 precision when available for OpenAI model interactions
+- **Custom Models**: All custom AI models must default to FP32 precision
+
+### **FP32 Verification & Testing**
+- **Numerical Accuracy**: Verify numerical stability and accuracy in FP32 operations
+- **Model Performance**: Test and validate model performance with FP32 precision
+- **Benchmarking**: Compare FP32 vs mixed precision performance metrics
+- **Memory Analysis**: Monitor and optimize memory consumption with FP32
+- **Production Testing**: Ensure FP32 models are fully tested for production deployment
+
+### **Configuration Management**
+- **Environment Variables**: Set FP32 configuration through .env file variables
+- **Runtime Configuration**: Support dynamic FP32 settings during model execution
+- **Hardware Detection**: Auto-detect hardware capabilities for FP32 support
+- **Fallback Handling**: Implement graceful fallback mechanisms if FP32 is not supported
+- **Documentation**: Maintain comprehensive FP32 configuration and usage documentation
+
+### **FP32 Development Best Practices**
+- **Precision Declaration**: Always declare precision requirements in model documentation
+- **Testing Requirements**: Include FP32-specific tests in all AI/ML test suites
+- **Performance Monitoring**: Track precision vs performance trade-offs in all implementations
+- **Backward Compatibility**: Ensure FP32 implementations maintain compatibility with existing code
+- **Code Comments**: Document all precision-related decisions and configurations
+
+---
+
+*These rules ensure consistent, organized, and maintainable code structure across the ValidoAI project with autonomous self-improvement capabilities for achieving 100% in all aspects.*

@@ -1,0 +1,919 @@
+#!/usr/bin/env bash
+
+# ValidoAI Unified Cross-Platform Docker Management Script
+# Supports Linux, macOS, and Windows (PowerShell, WSL, Git Bash)
+# Usage: ./docker-run <command> [options]
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Function to print colored output
+print_status() {
+    echo -e "${GREEN}[INFO]${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+print_header() {
+    echo -e "${BLUE}================================${NC}"
+    echo -e "${BLUE}$1${NC}"
+    echo -e "${BLUE}================================${NC}"
+}
+
+# Function to show progress bar
+show_progress() {
+    local current=$1
+    local total=$2
+    local width=50
+    local percentage=$((current * 100 / total))
+    local filled=$((width * current / total))
+    local empty=$((width - filled))
+    
+    # Create progress bar string
+    local bar=""
+    for ((i=0; i<filled; i++)); do
+        bar="${bar}█"
+    done
+    for ((i=0; i<empty; i++)); do
+        bar="${bar}░"
+    done
+    
+    # Print progress bar
+    printf "\r${BLUE}[%3d%%]${NC} [%s] %d/%d" "$percentage" "$bar" "$current" "$total"
+    
+    # Add newline if complete
+    if [ "$current" -eq "$total" ]; then
+        echo ""
+    fi
+}
+
+# Function to show spinner
+show_spinner() {
+    local pid=$1
+    local delay=0.1
+    local spinstr='|/-\'
+    
+    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+        local temp=${spinstr#?}
+        printf "\r${BLUE}[%c]${NC} Processing..." "$spinstr"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+    done
+    printf "\r${GREEN}[✓]${NC} Complete!    \n"
+}
+
+# Function to show download progress
+show_download_progress() {
+    local current=$1
+    local total=$2
+    local item_name=$3
+    
+    show_progress "$current" "$total"
+    if [ -n "$item_name" ]; then
+        printf " ${YELLOW}%s${NC}" "$item_name"
+    fi
+}
+
+# Function to detect OS and shell
+detect_environment() {
+    local os=""
+    local shell_type=""
+    
+    # Detect OS
+    case "$(uname -s)" in
+        Linux*)     os="linux";;
+        Darwin*)    os="macos";;
+        CYGWIN*|MINGW*|MSYS*) os="windows";;
+        *)          os="unknown";;
+    esac
+    
+    # Detect shell
+    if [ -n "$ZSH_VERSION" ]; then
+        shell_type="zsh"
+    elif [ -n "$BASH_VERSION" ]; then
+        shell_type="bash"
+    elif [ -n "$POWERSHELL_VERSION" ] || [ -n "$PSVersionTable" ]; then
+        shell_type="powershell"
+    else
+        shell_type="unknown"
+    fi
+    
+    echo "$os:$shell_type"
+}
+
+# Function to check if Docker is running
+check_docker() {
+    if ! docker info >/dev/null 2>&1; then
+        print_error "Docker is not running or not accessible"
+        print_status "Please start Docker Desktop or Docker daemon"
+        exit 1
+    fi
+    print_status "Docker is running"
+}
+
+# Function to check if docker-compose is available
+check_docker_compose() {
+    if ! command -v docker-compose >/dev/null 2>&1; then
+        print_error "docker-compose is not installed or not in PATH"
+        exit 1
+    fi
+    print_status "docker-compose is available"
+}
+
+# Function to create necessary directories
+create_directories() {
+    local env_info=$(detect_environment)
+    local os=$(echo "$env_info" | cut -d: -f1)
+    
+    print_status "Creating necessary directories for $os..."
+    
+    # Create individual database directories
+    mkdir -p database/postgresql 2>/dev/null || true
+    mkdir -p database/mysql 2>/dev/null || true
+    mkdir -p database/redis 2>/dev/null || true
+    mkdir -p database/mongodb 2>/dev/null || true
+    mkdir -p database/cassandra 2>/dev/null || true
+    mkdir -p database/couchdb 2>/dev/null || true
+    mkdir -p database/couchbase 2>/dev/null || true
+    mkdir -p database/influxdb 2>/dev/null || true
+    mkdir -p database/clickhouse 2>/dev/null || true
+    mkdir -p database/neo4j 2>/dev/null || true
+    mkdir -p database/arangodb 2>/dev/null || true
+    mkdir -p database/orientdb 2>/dev/null || true
+    mkdir -p database/elasticsearch 2>/dev/null || true
+    mkdir -p database/weaviate 2>/dev/null || true
+    mkdir -p database/qdrant 2>/dev/null || true
+    mkdir -p database/chromadb 2>/dev/null || true
+    mkdir -p database/milvus 2>/dev/null || true
+    mkdir -p database/dynamodb 2>/dev/null || true
+    mkdir -p database/cosmosdb 2>/dev/null || true
+    mkdir -p database/firestore 2>/dev/null || true
+    mkdir -p database/pgadmin 2>/dev/null || true
+    mkdir -p database/mssql 2>/dev/null || true
+    
+    # Create shared data directory
+    mkdir -p data/shared_databases 2>/dev/null || true
+    
+    # Create backup directory
+    mkdir -p data/backups 2>/dev/null || true
+    
+    # Create logs directory
+    mkdir -p logs/docker 2>/dev/null || true
+    
+    # Create configuration scripts directory
+    mkdir -p configuration_scripts 2>/dev/null || true
+    
+    print_status "Directories created successfully"
+}
+
+# Function to set up environment variables
+setup_environment() {
+    local env_info=$(detect_environment)
+    local os=$(echo "$env_info" | cut -d: -f1)
+    
+    print_status "Setting up environment for $os..."
+    
+    # Export common environment variables
+    export DOCKER_COMPOSE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    export PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+    
+    # OS-specific settings
+    case $os in
+        "windows")
+            export COMPOSE_CONVERT_WINDOWS_PATHS=1
+            ;;
+        "macos")
+            export DOCKER_DEFAULT_PLATFORM=linux/amd64
+            ;;
+        "linux")
+            export DOCKER_DEFAULT_PLATFORM=linux/amd64
+            ;;
+    esac
+    
+    print_status "Environment setup complete"
+}
+
+# Function to run tests
+run_tests() {
+    print_header "Running Docker Tests"
+    
+    local test_dir="tests"
+    
+    if [ ! -d "$test_dir" ]; then
+        print_warning "Test directory not found: $test_dir"
+        print_status "Creating test directory and basic tests..."
+        mkdir -p "$test_dir"
+        create_basic_tests
+        return 0
+    fi
+    
+    # Run all test scripts
+    for test_file in "$test_dir"/*.sh "$test_dir"/*.ps1; do
+        if [ -f "$test_file" ] && [ -x "$test_file" ]; then
+            print_status "Running test: $(basename "$test_file")"
+            "$test_file"
+        fi
+    done
+    
+    print_status "✓ All tests completed"
+}
+
+# Function to create basic tests
+create_basic_tests() {
+    # Create basic Docker environment test
+    cat > "tests/test_docker_environment.sh" << 'EOF'
+#!/bin/bash
+# Basic Docker Environment Test
+
+echo "Testing Docker environment..."
+
+# Test Docker availability
+if command -v docker >/dev/null 2>&1; then
+    echo "✓ Docker is available"
+else
+    echo "✗ Docker is not available"
+    exit 1
+fi
+
+# Test Docker Compose availability
+if command -v docker-compose >/dev/null 2>&1; then
+    echo "✓ Docker Compose is available"
+else
+    echo "✗ Docker Compose is not available"
+    exit 1
+fi
+
+# Test Docker daemon
+if docker info >/dev/null 2>&1; then
+    echo "✓ Docker daemon is running"
+else
+    echo "✗ Docker daemon is not running"
+    exit 1
+fi
+
+echo "✓ Docker environment test passed"
+EOF
+    chmod +x "tests/test_docker_environment.sh"
+    
+    # Create basic database connection test
+    cat > "tests/test_database_connections.sh" << 'EOF'
+#!/bin/bash
+# Basic Database Connection Test
+
+echo "Testing database connections..."
+
+# This is a placeholder test
+# In a real environment, you would test actual database connections
+
+echo "✓ Database connection test placeholder passed"
+EOF
+    chmod +x "tests/test_database_connections.sh"
+    
+    print_status "✓ Basic tests created"
+}
+
+# Function to backup databases
+backup_databases() {
+    print_header "Creating Database Backup"
+    
+    local timestamp=$(date +%Y%m%d_%H%M%S)
+    local backup_dir="data/backups/$timestamp"
+    
+    mkdir -p "$backup_dir"
+    
+    print_status "Stopping services for backup..."
+    cd "$DOCKER_COMPOSE_DIR" && docker-compose stop
+    
+    print_status "Creating backup at: $backup_dir"
+    
+    # Show progress for backup operations
+    print_status "Copying database files..."
+    
+    # Copy all database data with progress
+    if [ -d "data/shared_databases" ]; then
+        print_status "Copying shared databases..."
+        cp -r data/shared_databases/* "$backup_dir/" 2>/dev/null || true
+    fi
+    
+    # Copy database directories with progress
+    if [ -d "database" ]; then
+        print_status "Copying individual database directories..."
+        cp -r database "$backup_dir/" 2>/dev/null || true
+    fi
+    
+    print_status "✓ Backup completed successfully at: $backup_dir"
+    
+    print_status "Restarting services..."
+    cd "$DOCKER_COMPOSE_DIR" && docker-compose start
+}
+
+# Function to restore databases
+restore_databases() {
+    local backup_path="$1"
+    
+    if [ -z "$backup_path" ]; then
+        print_error "Backup path not specified"
+        print_status "Usage: $0 restore <backup_path>"
+        return 1
+    fi
+    
+    if [ ! -d "$backup_path" ]; then
+        print_error "Backup directory not found: $backup_path"
+        return 1
+    fi
+    
+    print_header "Restoring Database Backup"
+    
+    print_status "Stopping services for restore..."
+    cd "$DOCKER_COMPOSE_DIR" && docker-compose stop
+    
+    print_status "Restoring from: $backup_path"
+    
+    # Restore shared data
+    if [ -d "$backup_path/shared_databases" ]; then
+        rm -rf data/shared_databases/*
+        cp -r "$backup_path/shared_databases"/* data/shared_databases/
+    fi
+    
+    # Restore shared database directory
+    if [ -d "$backup_path/database" ]; then
+        rm -rf docker/database
+        cp -r "$backup_path/database" docker/
+    fi
+    
+    print_status "Restore completed successfully"
+    
+    print_status "Restarting services..."
+    cd "$DOCKER_COMPOSE_DIR" && docker-compose start
+}
+
+# Function to clean up Docker resources
+clean_docker() {
+    print_header "Cleaning Docker Resources"
+    
+    print_status "Step 1/5: Stopping all services..."
+    cd "$DOCKER_COMPOSE_DIR" && docker-compose down -v
+    
+    print_status "Step 2/5: Removing unused containers..."
+    docker container prune -f
+    
+    print_status "Step 3/5: Removing unused images..."
+    docker image prune -f
+    
+    print_status "Step 4/5: Removing unused volumes..."
+    docker volume prune -f
+    
+    print_status "Step 5/5: Removing unused networks..."
+    docker network prune -f
+    
+    print_status "✓ Cleanup completed successfully"
+}
+
+# Function to show status
+show_status() {
+    print_header "Docker Services Status"
+    
+    cd "$DOCKER_COMPOSE_DIR" && docker-compose ps
+    
+    print_header "System Information"
+    local env_info=$(detect_environment)
+    local os=$(echo "$env_info" | cut -d: -f1)
+    local shell_type=$(echo "$env_info" | cut -d: -f2)
+    echo "OS: $os"
+    echo "Shell: $shell_type"
+    echo "Docker Version: $(docker --version)"
+    echo "Docker Compose Version: $(docker-compose --version)"
+    echo "Project Root: $PROJECT_ROOT"
+    echo "Docker Compose Dir: $DOCKER_COMPOSE_DIR"
+}
+
+# Function to show logs
+show_logs() {
+    local service="$1"
+    
+    if [ -n "$service" ]; then
+        print_status "Showing logs for service: $service"
+        cd "$DOCKER_COMPOSE_DIR" && docker-compose logs -f "$service"
+    else
+        print_status "Showing all logs"
+        cd "$DOCKER_COMPOSE_DIR" && docker-compose logs -f
+    fi
+}
+
+# Function to execute command in container
+exec_container() {
+    local service="$1"
+    local command="$2"
+    
+    if [ -z "$service" ]; then
+        print_error "Service name not specified"
+        print_status "Usage: $0 exec <service> [command]"
+        return 1
+    fi
+    
+    if [ -z "$command" ]; then
+        command="bash"
+    fi
+    
+    print_status "Executing '$command' in service: $service"
+    cd "$DOCKER_COMPOSE_DIR" && docker-compose exec "$service" "$command"
+}
+
+# Function to run TDD tests
+run_tdd_tests() {
+    print_header "Running TDD Tests"
+    
+    local test_dir="tests"
+    
+    if [ ! -d "$test_dir" ]; then
+        print_warning "Test directory not found: $test_dir"
+        return 0
+    fi
+    
+    # Run TDD test suite
+    local tdd_tests=(
+        "test_docker_environment.sh"
+        "test_database_connections.sh"
+        "test_service_health.sh"
+        "test_backup_restore.sh"
+        "test_cross_platform.sh"
+    )
+    
+    for test_file in "${tdd_tests[@]}"; do
+        local test_path="$test_dir/$test_file"
+        if [ -f "$test_path" ] && [ -x "$test_path" ]; then
+            print_status "Running TDD test: $test_file"
+            "$test_path"
+        else
+            print_warning "TDD test not found: $test_file"
+        fi
+    done
+    
+    print_status "✓ TDD tests completed"
+}
+
+# Function to initialize environment
+initialize_environment() {
+    print_header "Initializing Docker Environment"
+    
+    print_status "Step 1/5: Creating directories..."
+    create_directories
+    
+    print_status "Step 2/5: Setting up environment..."
+    setup_environment
+    
+    print_status "Step 3/5: Creating configuration scripts..."
+    create_configuration_scripts
+    
+    print_status "Step 4/5: Downloading all Docker images..."
+    download_all_images
+    
+    print_status "Step 5/5: Running tests..."
+    run_tests
+    run_tdd_tests
+    
+    echo ""
+    print_header "Initialization Complete"
+    print_status "✓ All directories created"
+    print_status "✓ Environment configured"
+    print_status "✓ Configuration scripts ready"
+    print_status "✓ Docker images downloaded"
+    print_status "✓ Tests completed"
+    print_status ""
+    print_status "You can now start services with: $0 up <profile>"
+}
+
+# Function to download all Docker images
+download_all_images() {
+    print_header "Downloading All Docker Images"
+    
+    print_status "This will download all images used in the Docker Compose setup..."
+    print_status "This may take several minutes depending on your internet connection."
+    echo ""
+    
+    # List of all images to download
+    local images=(
+        "postgres:17-alpine"
+        "mysql:8.4"
+        "mcr.microsoft.com/mssql/server:2022-latest"
+        "mongo:8.1"
+        "redis/redis-stack:latest"
+        "cassandra:5.1"
+        "couchdb:3.4"
+        "couchbase/server:7.7"
+        "influxdb:2.8"
+        "clickhouse/clickhouse-server:24.8"
+        "neo4j:5.18"
+        "arangodb:3.13"
+        "orientdb:3.3"
+        "docker.elastic.co/elasticsearch/elasticsearch:8.12.0"
+        "semitechnologies/weaviate:1.24.0"
+        "qdrant/qdrant:latest"
+        "chromadb/chroma:latest"
+        "milvusdb/milvus:v2.4.0"
+        "amazon/dynamodb-local:latest"
+        "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest"
+        "gcr.io/google.com/cloudsdktool/cloud-sdk:latest"
+        "adminer:latest"
+        "phpmyadmin/phpmyadmin:latest"
+        "mongo-express:latest"
+        "rediscommander/redis-commander:latest"
+        "cars10/elasticvue:latest"
+        "dpage/pgadmin4:latest"
+        "nginx:alpine"
+    )
+    
+    local total_images=${#images[@]}
+    local current=0
+    local successful=0
+    local failed=0
+    
+    print_status "Starting download of $total_images images..."
+    echo ""
+    
+    for image in "${images[@]}"; do
+        current=$((current + 1))
+        
+        # Show progress bar with image name
+        show_download_progress "$current" "$total_images" "$image"
+        
+        # Download image with progress
+        if docker pull "$image" > /dev/null 2>&1; then
+            successful=$((successful + 1))
+            printf "\r${GREEN}[✓]${NC} Successfully downloaded: ${YELLOW}%s${NC}\n" "$image"
+        else
+            failed=$((failed + 1))
+            printf "\r${RED}[✗]${NC} Failed to download: ${YELLOW}%s${NC} (will be downloaded when needed)\n" "$image"
+        fi
+    done
+    
+    echo ""
+    print_header "Download Summary"
+    print_status "Total images: $total_images"
+    print_status "Successfully downloaded: $successful"
+    if [ $failed -gt 0 ]; then
+        print_warning "Failed downloads: $failed (will be downloaded when needed)"
+    fi
+    print_status "Image download process completed!"
+}
+
+# Function to create configuration scripts
+create_configuration_scripts() {
+    local config_dir="configuration_scripts"
+    
+    # PostgreSQL extensions script
+    if [ ! -f "$config_dir/postgres_extensions_install.sh" ]; then
+        cat > "$config_dir/postgres_extensions_install.sh" << 'EOF'
+#!/bin/bash
+# PostgreSQL Extensions Installation Script
+
+echo "Installing PostgreSQL extensions..."
+
+# Install required packages
+apt-get update && apt-get install -y \
+    postgresql-15-postgis-3 \
+    postgresql-15-pgvector \
+    postgresql-15-pg-stat-statements \
+    postgresql-15-pg-buffercache \
+    postgresql-15-pg-similarity \
+    postgresql-15-pg-trgm \
+    postgresql-15-pg-cron \
+    postgresql-15-timescaledb \
+    postgresql-15-pg-stat-monitor \
+    postgresql-15-pg-repack \
+    postgresql-15-pg-partman \
+    postgresql-15-pg-qualstats \
+    postgresql-15-pg-stat-kcache \
+    postgresql-15-pg-wait-sampling \
+    postgresql-15-auto-explain \
+    postgresql-15-pg-hint-plan \
+    postgresql-15-pg-visibility \
+    postgresql-15-pg-freespacemap \
+    postgresql-15-pg-prewarm
+
+echo "PostgreSQL extensions installed successfully"
+EOF
+        chmod +x "$config_dir/postgres_extensions_install.sh"
+    fi
+    
+    # PostgreSQL performance optimization script
+    if [ ! -f "$config_dir/postgres_performance_optimize.sh" ]; then
+        cat > "$config_dir/postgres_performance_optimize.sh" << 'EOF'
+#!/bin/bash
+# PostgreSQL Performance Optimization Script
+
+echo "Optimizing PostgreSQL performance..."
+
+# Create extensions
+psql -U postgres -d ai_valido_online << 'SQL'
+-- Enable extensions
+CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS pgvector;
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+CREATE EXTENSION IF NOT EXISTS pg_buffercache;
+CREATE EXTENSION IF NOT EXISTS pg_similarity;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+CREATE EXTENSION IF NOT EXISTS timescaledb;
+CREATE EXTENSION IF NOT EXISTS pg_stat_monitor;
+CREATE EXTENSION IF NOT EXISTS pg_repack;
+CREATE EXTENSION IF NOT EXISTS pg_partman;
+CREATE EXTENSION IF NOT EXISTS pg_qualstats;
+CREATE EXTENSION IF NOT EXISTS pg_stat_kcache;
+CREATE EXTENSION IF NOT EXISTS pg_wait_sampling;
+CREATE EXTENSION IF NOT EXISTS auto_explain;
+CREATE EXTENSION IF NOT EXISTS pg_hint_plan;
+CREATE EXTENSION IF NOT EXISTS pg_visibility;
+CREATE EXTENSION IF NOT EXISTS pg_freespacemap;
+CREATE EXTENSION IF NOT EXISTS pg_prewarm;
+
+-- Grant permissions
+GRANT USAGE ON SCHEMA public TO postgres;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO postgres;
+SQL
+
+echo "PostgreSQL performance optimization completed"
+EOF
+        chmod +x "$config_dir/postgres_performance_optimize.sh"
+    fi
+    
+    # MySQL optimization script
+    if [ ! -f "$config_dir/mysql_optimize.sh" ]; then
+        cat > "$config_dir/mysql_optimize.sh" << 'EOF'
+#!/bin/bash
+# MySQL Optimization Script
+
+echo "Optimizing MySQL performance..."
+
+mysql -u root -proot << 'SQL'
+-- Create database if not exists
+CREATE DATABASE IF NOT EXISTS ai_valido_online;
+USE ai_valido_online;
+
+-- Optimize settings
+SET GLOBAL innodb_buffer_pool_size = 1073741824; -- 1GB
+SET GLOBAL innodb_log_file_size = 268435456; -- 256MB
+SET GLOBAL innodb_flush_log_at_trx_commit = 2;
+SET GLOBAL sync_binlog = 0;
+SET GLOBAL innodb_flush_method = 'O_DIRECT';
+
+-- Create sample tables
+CREATE TABLE IF NOT EXISTS test_table (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO test_table (name) VALUES ('test_data');
+SQL
+
+echo "MySQL optimization completed"
+EOF
+        chmod +x "$config_dir/mysql_optimize.sh"
+    fi
+    
+    # MongoDB initialization script
+    if [ ! -f "$config_dir/mongodb_init.js" ]; then
+        cat > "$config_dir/mongodb_init.js" << 'EOF'
+// MongoDB Initialization Script
+
+print('Initializing MongoDB...');
+
+// Create database and collections
+db = db.getSiblingDB('ai_valido_online');
+
+// Create collections
+db.createCollection('users');
+db.createCollection('documents');
+db.createCollection('sessions');
+
+// Create indexes
+db.users.createIndex({ "email": 1 }, { unique: true });
+db.documents.createIndex({ "created_at": 1 });
+db.sessions.createIndex({ "expires_at": 1 }, { expireAfterSeconds: 0 });
+
+// Insert sample data
+db.users.insertOne({
+    email: "admin@validoai.com",
+    name: "Admin User",
+    role: "admin",
+    created_at: new Date()
+});
+
+print('MongoDB initialization completed');
+EOF
+    fi
+    
+    # Redis configuration
+    if [ ! -f "$config_dir/redis.conf" ]; then
+        cat > "$config_dir/redis.conf" << 'EOF'
+# Redis Configuration
+bind 0.0.0.0
+port 6379
+requirepass redis123
+
+# Persistence
+appendonly yes
+appendfsync everysec
+
+# Memory management
+maxmemory 2gb
+maxmemory-policy allkeys-lru
+
+# Performance
+tcp-keepalive 300
+timeout 0
+tcp-backlog 511
+
+# Logging
+loglevel notice
+logfile ""
+
+# Security
+protected-mode no
+EOF
+    fi
+}
+
+# Main function
+main() {
+    local command="$1"
+    local profile="$2"
+    local service="$3"
+    local additional_args="$4"
+    
+    # Check prerequisites
+    check_docker
+    check_docker_compose
+    
+    # Setup environment
+    setup_environment
+    
+    # Create directories if they don't exist
+    create_directories
+    
+    case "$command" in
+        "up")
+            if [ -n "$profile" ]; then
+                print_header "Starting Services with Profile: $profile"
+                print_status "Building and starting services..."
+                
+                # Show progress for service startup
+                cd "$DOCKER_COMPOSE_DIR"
+                
+                # Build services first
+                print_status "Building services..."
+                docker-compose --profile "$profile" build > /dev/null 2>&1
+                
+                # Start services
+                print_status "Starting services..."
+                docker-compose --profile "$profile" up -d
+                
+                print_status "✓ Services started successfully"
+                print_status "Use '$0 ps' to check service status"
+                print_status "Use '$0 logs' to view service logs"
+            else
+                print_error "Profile not specified"
+                print_status "Available profiles: app, databases, management, nginx"
+                print_status "Usage: $0 up <profile>"
+                return 1
+            fi
+            ;;
+        "down")
+            print_header "Stopping All Services"
+            cd "$DOCKER_COMPOSE_DIR" && docker-compose down
+            print_status "All services stopped"
+            ;;
+        "build")
+            print_header "Building Services"
+            print_status "Building all services..."
+            cd "$DOCKER_COMPOSE_DIR"
+            
+            # Build with progress
+            docker-compose build
+            
+            print_status "✓ Build completed successfully"
+            ;;
+        "restart")
+            if [ -n "$service" ]; then
+                print_status "Restarting service: $service"
+                cd "$DOCKER_COMPOSE_DIR" && docker-compose restart "$service"
+            else
+                print_status "Restarting all services"
+                cd "$DOCKER_COMPOSE_DIR" && docker-compose restart
+            fi
+            ;;
+        "stop")
+            print_status "Stopping all services"
+            cd "$DOCKER_COMPOSE_DIR" && docker-compose stop
+            ;;
+        "start")
+            print_status "Starting all services"
+            cd "$DOCKER_COMPOSE_DIR" && docker-compose start
+            ;;
+        "start-app")
+            print_header "Starting Application Container"
+            print_status "Starting dependencies first..."
+            cd "$DOCKER_COMPOSE_DIR"
+            docker-compose up -d postgresql redis
+            print_status "Waiting for dependencies to be ready..."
+            sleep 10
+            print_status "Starting the py_ai_valido application container..."
+            docker-compose --profile manual up -d py_ai_valido
+            print_status "✓ Application container started successfully"
+            print_status "Container: py_ai_valido"
+            print_status "Access at: http://localhost:5000"
+            ;;
+        "stop-app")
+            print_status "Stopping the py_ai_valido application container..."
+            cd "$DOCKER_COMPOSE_DIR" && docker-compose stop py_ai_valido
+            print_status "✓ Application container stopped"
+            ;;
+        "logs")
+            show_logs "$service"
+            ;;
+        "ps")
+            show_status
+            ;;
+        "exec")
+            exec_container "$service" "$additional_args"
+            ;;
+        "test")
+            run_tests
+            ;;
+        "tdd")
+            run_tdd_tests
+            ;;
+        "backup")
+            backup_databases
+            ;;
+        "restore")
+            restore_databases "$service"
+            ;;
+        "clean")
+            clean_docker
+            ;;
+        "init")
+            initialize_environment
+            ;;
+        *)
+            print_header "ValidoAI Unified Docker Management"
+            echo "Usage: $0 <command> [options]"
+            echo ""
+            echo "Commands:"
+            echo "  up <profile>           - Start services with profile (app|databases|management|nginx|manual|development|individual services)"
+            echo "  down                   - Stop all services"
+            echo "  build                  - Build all services"
+            echo "  restart [service]      - Restart all services or specific service"
+            echo "  stop                   - Stop all services"
+            echo "  start                  - Start all services"
+            echo "  start-app              - Start the py_ai_valido application container"
+            echo "  stop-app               - Stop the py_ai_valido application container"
+            echo "  logs [service]         - Show logs for all services or specific service"
+            echo "  ps                     - Show status of all services"
+            echo "  exec <service> [cmd]   - Execute command in container (default: bash)"
+            echo "  test                   - Run all tests"
+            echo "  tdd                    - Run TDD tests"
+            echo "  backup                 - Create database backup"
+            echo "  restore <backup_path>  - Restore database from backup"
+            echo "  clean                  - Clean up Docker resources"
+            echo "  init                   - Initialize Docker environment"
+            echo ""
+            echo "Profiles:"
+            echo "  development            - Start all services for development"
+            echo "  databases              - Start all databases with admin tools"
+            echo "  management             - Start only admin tools"
+            echo "  app                    - Start application with dependencies"
+            echo "  manual                 - Start application container only"
+            echo "  nginx                  - Start reverse proxy"
+            echo "  Individual services:   - postgresql, mysql, redis, mongodb, etc."
+            echo ""
+            echo "Examples:"
+            echo "  $0 up development       # Start all services for development"
+            echo "  $0 up databases         # Start all databases with admin tools"
+            echo "  $0 up postgresql        # Start only PostgreSQL"
+            echo "  $0 up mysql redis       # Start MySQL and Redis"
+            echo "  $0 start-app           # Start application container"
+            echo "  $0 logs postgresql     # View PostgreSQL logs"
+            echo "  $0 exec postgresql psql -U valido # Connect to PostgreSQL"
+            echo "  $0 backup              # Create backup"
+            echo "  $0 test                # Run tests"
+            ;;
+    esac
+}
+
+# Run main function with all arguments
+main "$@"

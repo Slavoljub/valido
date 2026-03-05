@@ -1,0 +1,90 @@
+{% extends "layouts/base.html"" %}
+
+{% block title %}Base Layout Example - ValidoAI{% endblock %}
+
+{% block description %}Example page demonstrating the base layout with sidebar navigation{% endblock %}
+
+{% block page_title %}Base Layout Example{% endblock %}
+
+{% block page_subtitle %}This page demonstrates the standard base layout with sidebar navigation, header, and breadcrumbs{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Introduction Section -->
+    <div class="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+        <h2 class="text-lg font-semibold text-neutral-900 mb-4">Base Layout Features</h2>
+        <p class="text-neutral-600 mb-4">
+            This page uses the standard base layout which includes:
+        </p>
+        <ul class="list-disc list-inside space-y-2 text-neutral-600">
+            <li>Responsive sidebar navigation with collapsible sections</li>
+            <li>Sticky header with search, notifications, and user menu</li>
+            <li>Breadcrumb navigation for easy page hierarchy</li>
+            <li>Main content area with proper spacing and responsive design</li>
+            <li>Modal system and toast notifications</li>
+            <li>HTMX support for dynamic content loading</li>
+        </ul>
+    </div>
+
+    <!-- Content Example -->
+    <div class="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+        <h2 class="text-lg font-semibold text-neutral-900 mb-4">Sample Content</h2>
+        <p class="text-neutral-600 mb-4">
+            This is a sample page to demonstrate how content looks in the base layout. 
+            The layout provides a clean, professional appearance with proper spacing and typography.
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="bg-neutral-50 p-4 rounded-lg">
+                <h3 class="font-medium text-neutral-900 mb-2">Feature 1</h3>
+                <p class="text-sm text-neutral-600">Responsive design that works on all devices</p>
+            </div>
+            <div class="bg-neutral-50 p-4 rounded-lg">
+                <h3 class="font-medium text-neutral-900 mb-2">Feature 2</h3>
+                <p class="text-sm text-neutral-600">Clean and modern user interface</p>
+            </div>
+            <div class="bg-neutral-50 p-4 rounded-lg">
+                <h3 class="font-medium text-neutral-900 mb-2">Feature 3</h3>
+                <p class="text-sm text-neutral-600">Accessible and user-friendly navigation</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Elements -->
+    <div class="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+        <h2 class="text-lg font-semibold text-neutral-900 mb-4">Interactive Elements</h2>
+        <p class="text-neutral-600 mb-4">
+            The base layout supports various interactive elements and components.
+        </p>
+        
+        <div class="space-x-4">
+            <button 
+                onclick="showToast('success', 'This is a success message!')"
+                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+                Show Success Toast
+            </button>
+            
+            <button 
+                onclick="window.ModalSystem.showQuickActions()"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+                Show Modal
+            </button>
+            
+            <button 
+                hx-get="/test-htmx" 
+                hx-target="#htmx-demo" 
+                hx-swap="innerHTML"
+                class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+                Load HTMX Content
+            </button>
+        </div>
+        
+        <div id="htmx-demo" class="mt-4 p-4 bg-neutral-50 rounded-lg min-h-[100px]">
+            <p class="text-neutral-500">HTMX content will appear here when you click the button above...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,658 @@
+<!-- CKEditor 5 Rich Text Editor Component -->
+<div class="ckeditor-wrapper" x-data="ckeditorComponent()">
+    <div class="ckeditor-container">
+        <!-- Toolbar Container -->
+        <div class="ckeditor-toolbar mb-2" x-show="editor" x-cloak>
+            <div class="flex flex-wrap gap-1 p-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-t-lg">
+                <!-- Basic Formatting -->
+                <button type="button" @click="executeCommand('bold')" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" title="Bold">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z"></path>
+                    </svg>
+                </button>
+                <button type="button" @click="executeCommand('italic')" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" title="Italic">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H7a2 2 0 00-2 2v6a2 2 0 002 2h4m-6-4h6"></path>
+                    </svg>
+                </button>
+                <button type="button" @click="executeCommand('underline')" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" title="Underline">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10m-9 8v2a1 1 0 001 1h8a1 1 0 001-1v-2"></path>
+                    </svg>
+                </button>
+
+                <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+
+                <!-- Headings -->
+                <select @change="executeCommand('formatBlock', $event.target.value)" class="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded">
+                    <option value="">Paragraph</option>
+                    <option value="h1">Heading 1</option>
+                    <option value="h2">Heading 2</option>
+                    <option value="h3">Heading 3</option>
+                    <option value="h4">Heading 4</option>
+                    <option value="h5">Heading 5</option>
+                    <option value="h6">Heading 6</option>
+                </select>
+
+                <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+
+                <!-- Lists -->
+                <button type="button" @click="executeCommand('insertUnorderedList')" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" title="Bullet List">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h10M7 16h10"></path>
+                        <circle cx="3" cy="8" r="1" fill="currentColor"/>
+                        <circle cx="3" cy="12" r="1" fill="currentColor"/>
+                        <circle cx="3" cy="16" r="1" fill="currentColor"/>
+                    </svg>
+                </button>
+                <button type="button" @click="executeCommand('insertOrderedList')" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" title="Numbered List">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h10M7 16h10"></path>
+                        <text x="3" y="8.5" font-size="8" fill="currentColor">1.</text>
+                        <text x="3" y="12.5" font-size="8" fill="currentColor">2.</text>
+                        <text x="3" y="16.5" font-size="8" fill="currentColor">3.</text>
+                    </svg>
+                </button>
+
+                <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+
+                <!-- Links -->
+                <button type="button" @click="createLink()" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" title="Insert Link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                    </svg>
+                </button>
+
+                <!-- Images -->
+                <button type="button" @click="insertImage()" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" title="Insert Image">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </button>
+
+                <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+
+                <!-- Alignment -->
+                <button type="button" @click="executeCommand('justifyLeft')" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" title="Align Left">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h10M4 18h16"></path>
+                    </svg>
+                </button>
+                <button type="button" @click="executeCommand('justifyCenter')" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" title="Align Center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M7 12h10M4 18h16"></path>
+                    </svg>
+                </button>
+                <button type="button" @click="executeCommand('justifyRight')" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" title="Align Right">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M14 12h6M4 18h16"></path>
+                    </svg>
+                </button>
+
+                <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+
+                <!-- Source Toggle -->
+                <button type="button" @click="toggleSource()" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" title="Toggle Source Code" :class="{ 'bg-blue-100 dark:bg-blue-900': sourceMode }">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9l2 2-2 2M15 9l-2 2 2 2"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Editor Content -->
+        <div class="ckeditor-content border border-gray-200 dark:border-gray-700 rounded-b-lg" :class="{ 'rounded-t-none': editor }">
+            <textarea
+                :name="name || 'content'"
+                :id="id || 'ckeditor-editor'"
+                :placeholder="placeholder || 'Enter your content here...'"
+                class="w-full min-h-[200px] p-4 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none"
+                :class="{ 'hidden': !sourceMode && editor }"
+                x-model="content"
+                @input="updateContent"
+                :disabled="disabled"
+            ></textarea>
+
+            <div
+                x-ref="editor"
+                class="w-full min-h-[200px] p-4 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                :class="{ 'hidden': sourceMode || !editor }"
+                :contenteditable="!disabled"
+                @input="updateContent"
+                @blur="updateContent"
+                @keyup="updateContent"
+                @paste="handlePaste"
+                :style="editorStyles"
+            ></div>
+        </div>
+
+        <!-- Word Count -->
+        <div class="flex justify-between items-center mt-2 text-sm text-gray-500 dark:text-gray-400" x-show="showWordCount">
+            <div>
+                <span x-text="`Words: ${wordCount}`"></span>
+                <span x-text="` | Characters: ${charCount}`"></span>
+            </div>
+            <div>
+                <span x-text="`Lines: ${lineCount}`"></span>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="flex justify-between items-center mt-2 text-xs text-gray-400 dark:text-gray-500" x-show="showStatusBar">
+            <div class="flex items-center space-x-4">
+                <span x-text="`Mode: ${sourceMode ? 'Source' : 'Visual'}`"></span>
+                <span x-text="`Language: ${language}`"></span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span x-show="autoSave" class="flex items-center">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Auto-saved
+                </span>
+                <span x-show="isDirty" class="text-yellow-500">● Unsaved changes</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Upload Modal -->
+    <div x-show="showImageModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" @click="closeImageModal()">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                                Insert Image
+                            </h3>
+
+                            <div class="space-y-4">
+                                <!-- URL Input -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Image URL
+                                    </label>
+                                    <input type="url"
+                                           x-model="imageUrl"
+                                           placeholder="https://example.com/image.jpg"
+                                           class="form-control"
+                                           @keyup.enter="insertImageFromUrl()">
+                                </div>
+
+                                <!-- File Upload -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Or Upload Image
+                                    </label>
+                                    <input type="file"
+                                           accept="image/*"
+                                           @change="handleImageUpload"
+                                           class="form-control">
+                                </div>
+
+                                <!-- Preview -->
+                                <div x-show="imagePreview" class="border rounded-lg p-2">
+                                    <img :src="imagePreview" alt="Preview" class="max-w-full h-32 object-cover rounded">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button"
+                            @click="insertImageFromUrl()"
+                            class="btn btn-primary sm:ml-3 sm:w-auto"
+                            :disabled="!imageUrl && !imagePreview">
+                        Insert Image
+                    </button>
+                    <button type="button"
+                            @click="closeImageModal()"
+                            class="btn btn-secondary sm:mt-0 sm:w-auto">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link Modal -->
+    <div x-show="showLinkModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" @click="closeLinkModal()">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                                Insert Link
+                            </h3>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        URL
+                                    </label>
+                                    <input type="url"
+                                           x-model="linkUrl"
+                                           placeholder="https://example.com"
+                                           class="form-control"
+                                           @keyup.enter="insertLink()">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Link Text
+                                    </label>
+                                    <input type="text"
+                                           x-model="linkText"
+                                           placeholder="Link text"
+                                           class="form-control"
+                                           @keyup.enter="insertLink()">
+                                </div>
+
+                                <div class="flex items-center">
+                                    <input type="checkbox" x-model="linkNewTab" class="form-control w-auto mr-2">
+                                    <label class="text-sm text-gray-700 dark:text-gray-300">
+                                        Open in new tab
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button"
+                            @click="insertLink()"
+                            class="btn btn-primary sm:ml-3 sm:w-auto"
+                            :disabled="!linkUrl">
+                        Insert Link
+                    </button>
+                    <button type="button"
+                            @click="closeLinkModal()"
+                            class="btn btn-secondary sm:mt-0 sm:w-auto">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function ckeditorComponent() {
+    return {
+        editor: null,
+        content: '',
+        sourceMode: false,
+        language: 'sr',
+        placeholder: 'Enter your content here...',
+        disabled: false,
+        showWordCount: true,
+        showStatusBar: true,
+        autoSave: false,
+        isDirty: false,
+        showImageModal: false,
+        showLinkModal: false,
+        imageUrl: '',
+        imagePreview: '',
+        linkUrl: '',
+        linkText: '',
+        linkNewTab: false,
+        editorStyles: '',
+
+        init() {
+            this.$nextTick(() => {
+                this.initializeEditor();
+                this.loadContent();
+            });
+        },
+
+        initializeEditor() {
+            if (this.disabled) return;
+
+            const editorElement = this.$refs.editor;
+            if (!editorElement) return;
+
+            // Basic contentEditable setup
+            editorElement.setAttribute('contenteditable', 'true');
+            editorElement.setAttribute('spellcheck', 'true');
+
+            // Add basic styling
+            this.editorStyles = `
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+                outline: none;
+            `;
+
+            this.editor = true;
+        },
+
+        loadContent() {
+            const textarea = this.$el.querySelector('textarea');
+            if (textarea && textarea.value) {
+                this.content = textarea.value;
+                this.updateEditorContent();
+            }
+        },
+
+        updateContent() {
+            if (this.sourceMode) {
+                const textarea = this.$el.querySelector('textarea');
+                if (textarea) {
+                    this.content = textarea.value;
+                }
+            } else if (this.editor) {
+                const editorElement = this.$refs.editor;
+                if (editorElement) {
+                    this.content = editorElement.innerHTML;
+                }
+            }
+
+            this.isDirty = true;
+            this.updateTextarea();
+            this.updateWordCount();
+        },
+
+        updateEditorContent() {
+            if (!this.editor || this.sourceMode) return;
+
+            const editorElement = this.$refs.editor;
+            if (editorElement) {
+                editorElement.innerHTML = this.content || '<p><br></p>';
+            }
+        },
+
+        updateTextarea() {
+            const textarea = this.$el.querySelector('textarea');
+            if (textarea) {
+                textarea.value = this.content || '';
+            }
+        },
+
+        executeCommand(command, value = null) {
+            if (this.sourceMode) return;
+
+            document.execCommand(command, false, value);
+            this.updateContent();
+            this.$refs.editor.focus();
+        },
+
+        toggleSource() {
+            this.sourceMode = !this.sourceMode;
+
+            if (this.sourceMode) {
+                this.updateTextarea();
+            } else {
+                this.updateEditorContent();
+            }
+        },
+
+        createLink() {
+            if (this.sourceMode) return;
+
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                this.linkText = selection.toString();
+            }
+
+            this.showLinkModal = true;
+        },
+
+        insertLink() {
+            if (!this.linkUrl) return;
+
+            const linkHtml = this.linkNewTab
+                ? `<a href="${this.linkUrl}" target="_blank" rel="noopener noreferrer">${this.linkText || this.linkUrl}</a>`
+                : `<a href="${this.linkUrl}">${this.linkText || this.linkUrl}</a>`;
+
+            if (this.sourceMode) {
+                const textarea = this.$el.querySelector('textarea');
+                if (textarea) {
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const text = textarea.value;
+                    textarea.value = text.substring(0, start) + linkHtml + text.substring(end);
+                    this.content = textarea.value;
+                }
+            } else {
+                document.execCommand('insertHTML', false, linkHtml);
+            }
+
+            this.closeLinkModal();
+            this.updateContent();
+        },
+
+        closeLinkModal() {
+            this.showLinkModal = false;
+            this.linkUrl = '';
+            this.linkText = '';
+            this.linkNewTab = false;
+        },
+
+        insertImage() {
+            this.showImageModal = true;
+        },
+
+        insertImageFromUrl() {
+            if (!this.imageUrl && !this.imagePreview) return;
+
+            const imageUrl = this.imageUrl || this.imagePreview;
+            const imageHtml = `<img src="${imageUrl}" alt="Image" style="max-width: 100%; height: auto;">`;
+
+            if (this.sourceMode) {
+                const textarea = this.$el.querySelector('textarea');
+                if (textarea) {
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const text = textarea.value;
+                    textarea.value = text.substring(0, start) + imageHtml + text.substring(end);
+                    this.content = textarea.value;
+                }
+            } else {
+                document.execCommand('insertHTML', false, imageHtml);
+            }
+
+            this.closeImageModal();
+            this.updateContent();
+        },
+
+        handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.imagePreview = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        },
+
+        closeImageModal() {
+            this.showImageModal = false;
+            this.imageUrl = '';
+            this.imagePreview = '';
+        },
+
+        handlePaste(event) {
+            // Handle paste events for images and content
+            const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+
+            for (let item of items) {
+                if (item.type.startsWith('image/')) {
+                    event.preventDefault();
+                    const file = item.getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const imageHtml = `<img src="${e.target.result}" alt="Pasted image" style="max-width: 100%; height: auto;">`;
+                        document.execCommand('insertHTML', false, imageHtml);
+                        this.updateContent();
+                    };
+                    reader.readAsDataURL(file);
+                    break;
+                }
+            }
+        },
+
+        updateWordCount() {
+            if (!this.showWordCount) return;
+
+            const text = this.content.replace(/<[^>]*>/g, ' ').trim();
+            this.wordCount = text ? text.split(/\s+/).length : 0;
+            this.charCount = text.length;
+            this.lineCount = (this.content.match(/<p|<div|<h[1-6]|\n/g) || []).length + 1;
+        },
+
+        // API methods
+        getContent() {
+            return this.content;
+        },
+
+        setContent(content) {
+            this.content = content || '';
+            this.updateTextarea();
+            this.updateEditorContent();
+            this.updateWordCount();
+        },
+
+        focus() {
+            if (this.sourceMode) {
+                const textarea = this.$el.querySelector('textarea');
+                if (textarea) textarea.focus();
+            } else if (this.editor) {
+                this.$refs.editor.focus();
+            }
+        },
+
+        clear() {
+            this.content = '';
+            this.updateTextarea();
+            this.updateEditorContent();
+            this.updateWordCount();
+            this.isDirty = false;
+        }
+    }
+}
+</script>
+
+<style>
+/* CKEditor Component Styles */
+.ckeditor-wrapper {
+    @apply w-full;
+}
+
+.ckeditor-toolbar {
+    @apply border-b;
+}
+
+.ckeditor-content {
+    @apply bg-white dark:bg-gray-900;
+}
+
+.ckeditor-content[contenteditable]:focus {
+    @apply outline-none ring-2 ring-blue-500 ring-opacity-50;
+}
+
+/* Theme-specific styles */
+[data-theme="valido-white"] .ckeditor-content {
+    @apply bg-white border-gray-200;
+}
+
+[data-theme="valido-dark"] .ckeditor-content {
+    @apply bg-gray-900 border-gray-700;
+}
+
+[data-theme="dracula"] .ckeditor-content {
+    @apply bg-gray-900 border-purple-600;
+}
+
+[data-theme="material-light"] .ckeditor-content {
+    @apply bg-white border-gray-300;
+}
+
+[data-theme="material-dark"] .ckeditor-content {
+    @apply bg-gray-800 border-gray-600;
+}
+
+[data-theme="nord"] .ckeditor-content {
+    @apply bg-gray-800 border-gray-600;
+}
+
+[data-theme="solarized-light"] .ckeditor-content {
+    @apply bg-yellow-50 border-orange-300;
+}
+
+[data-theme="monokai"] .ckeditor-content {
+    @apply bg-gray-900 border-orange-600;
+}
+
+/* Print styles */
+@media print {
+    .ckeditor-toolbar {
+        display: none !important;
+    }
+
+    .ckeditor-content {
+        border: none !important;
+        background: white !important;
+        color: black !important;
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .ckeditor-toolbar .flex-wrap {
+        @apply justify-center;
+    }
+
+    .ckeditor-toolbar button {
+        @apply p-1;
+    }
+
+    .ckeditor-toolbar svg {
+        @apply w-3 h-3;
+    }
+}
+
+/* Accessibility improvements */
+.ckeditor-content[contenteditable] {
+    @apply focus:outline-none;
+}
+
+.ckeditor-content[contenteditable]:focus {
+    @apply ring-2 ring-blue-500 ring-opacity-50;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .ckeditor-content {
+        @apply border-2 border-black;
+    }
+
+    .ckeditor-toolbar button:hover {
+        @apply bg-black text-white;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .ckeditor-content {
+        transition: none !important;
+    }
+
+    .ckeditor-toolbar button {
+        transition: none !important;
+    }
+}
+</style>

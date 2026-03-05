@@ -1,0 +1,159 @@
+{% extends "layouts/base.html"" %}
+
+{% block title %}Layout Test - ValidoAI{% endblock %}
+
+{% block description %}Test page to verify layout functionality and HTMX integration{% endblock %}
+
+{% block page_title %}Layout Test Page{% endblock %}
+
+{% block page_subtitle %}Testing responsive layout and HTMX functionality{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Test Section 1: Basic Layout -->
+    <div class="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+        <h2 class="text-lg font-semibold text-neutral-900 mb-4">Basic Layout Test</h2>
+        <p class="text-neutral-600 mb-4">This section tests the basic layout structure and responsive behavior.</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="bg-neutral-50 p-4 rounded-lg">
+                <h3 class="font-medium text-neutral-900">Card 1</h3>
+                <p class="text-sm text-neutral-600">Responsive grid layout test</p>
+            </div>
+            <div class="bg-neutral-50 p-4 rounded-lg">
+                <h3 class="font-medium text-neutral-900">Card 2</h3>
+                <p class="text-sm text-neutral-600">Responsive grid layout test</p>
+            </div>
+            <div class="bg-neutral-50 p-4 rounded-lg">
+                <h3 class="font-medium text-neutral-900">Card 3</h3>
+                <p class="text-sm text-neutral-600">Responsive grid layout test</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Section 2: HTMX Integration -->
+    <div class="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+        <h2 class="text-lg font-semibold text-neutral-900 mb-4">HTMX Integration Test</h2>
+        <p class="text-neutral-600 mb-4">Testing HTMX functionality with dynamic content loading.</p>
+        
+        <!-- HTMX Button Test -->
+        <div class="space-y-4">
+            <button 
+                hx-get="/test-htmx" 
+                hx-target="#htmx-content" 
+                hx-swap="innerHTML"
+                class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+                Load HTMX Content
+            </button>
+            
+            <button 
+                hx-post="/test-htmx" 
+                hx-target="#htmx-content" 
+                hx-swap="innerHTML"
+                hx-include="[name='test-input']"
+                class="px-4 py-2 bg-secondary-600 text-white rounded-md hover:bg-secondary-700 focus:outline-none focus:ring-2 focus:ring-secondary-500 ml-2"
+            >
+                Submit Form Data
+            </button>
+            
+            <input type="text" name="test-input" placeholder="Enter test data" class="px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+        </div>
+        
+        <!-- HTMX Content Target -->
+        <div id="htmx-content" class="mt-4 p-4 bg-neutral-50 rounded-lg min-h-[100px]">
+            <p class="text-neutral-500">HTMX content will appear here...</p>
+        </div>
+    </div>
+
+    <!-- Test Section 3: Modal System -->
+    <div class="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+        <h2 class="text-lg font-semibold text-neutral-900 mb-4">Modal System Test</h2>
+        <p class="text-neutral-600 mb-4">Testing the dynamic modal system functionality.</p>
+        
+        <div class="space-x-4">
+            <button 
+                onclick="window.ModalSystem.showQuickActions()"
+                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+                Quick Actions Modal
+            </button>
+            
+            <button 
+                onclick="window.ModalSystem.showDashboardExamples()"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+                Dashboard Examples Modal
+            </button>
+            
+            <button 
+                onclick="window.ModalSystem.showConfirmation('Test Confirmation', 'Are you sure you want to proceed with this test?', function(data) { showToast('success', 'Confirmation accepted!'); })"
+                class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            >
+                Confirmation Modal
+            </button>
+        </div>
+    </div>
+
+    <!-- Test Section 4: Toast Notifications -->
+    <div class="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+        <h2 class="text-lg font-semibold text-neutral-900 mb-4">Toast Notifications Test</h2>
+        <p class="text-neutral-600 mb-4">Testing the toast notification system.</p>
+        
+        <div class="space-x-4">
+            <button 
+                onclick="showToast('success', 'Success message test!')"
+                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+                Success Toast
+            </button>
+            
+            <button 
+                onclick="showToast('error', 'Error message test!')"
+                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+            >
+                Error Toast
+            </button>
+            
+            <button 
+                onclick="showToast('warning', 'Warning message test!')"
+                class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+            >
+                Warning Toast
+            </button>
+            
+            <button 
+                onclick="showToast('info', 'Info message test!')"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+                Info Toast
+            </button>
+        </div>
+    </div>
+
+    <!-- Test Section 5: Responsive Design -->
+    <div class="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+        <h2 class="text-lg font-semibold text-neutral-900 mb-4">Responsive Design Test</h2>
+        <p class="text-neutral-600 mb-4">Testing responsive design across different screen sizes.</p>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-red-100 p-4 rounded-lg text-center">
+                <p class="text-sm font-medium text-red-800">Mobile (xs)</p>
+                <p class="text-xs text-red-600">320px+</p>
+            </div>
+            <div class="bg-yellow-100 p-4 rounded-lg text-center">
+                <p class="text-sm font-medium text-yellow-800">Tablet (sm)</p>
+                <p class="text-xs text-yellow-600">640px+</p>
+            </div>
+            <div class="bg-green-100 p-4 rounded-lg text-center">
+                <p class="text-sm font-medium text-green-800">Desktop (lg)</p>
+                <p class="text-xs text-green-600">1024px+</p>
+            </div>
+            <div class="bg-blue-100 p-4 rounded-lg text-center">
+                <p class="text-sm font-medium text-blue-800">Large (xl)</p>
+                <p class="text-xs text-blue-600">1280px+</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

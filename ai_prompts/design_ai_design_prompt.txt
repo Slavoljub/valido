@@ -1,0 +1,528 @@
+# AI Prompt for AI Valido Online Design System
+# Date: August 18, 2025, 12:39 AM CEST
+# Covers the design aspects of the chat interface, frontend performance, UI components, and template system for AI Valido Online. Provides modular, reusable HTML/CSS/JS examples using Tailwind CSS, Flowbite, DaisyUI, Pagedone, TailGrids, Preline, and ApexCharts, ensuring responsiveness, accessibility, and performance optimization.
+
+## Overview
+This prompt defines the design system for AI Valido Online, focusing on a responsive, accessible, and performant frontend. It includes a chat interface for AI-driven financial queries, UI components (tables, cards, menus, charts), and a template system, all built with Tailwind CSS and component libraries (Flowbite, DaisyUI, Pagedone, TailGrids, Preline). Examples demonstrate best practices for lazy loading, asset optimization, caching, responsive images, and a mobile-first approach with 2xl/3xl breakpoints. The system ensures a consistent design language, modular components, and accessibility (WCAG 2.1 compliance).
+
+## General Guidelines
+- **Framework**: Use Tailwind CSS for styling, with Flowbite, DaisyUI, Pagedone, TailGrids, and Preline for prebuilt components.
+- **Responsive Design**: Mobile-first with breakpoints (sm, md, lg, xl, 2xl, 3xl) for screens up to 2560px.
+- **Accessibility**: Follow WCAG 2.1 (ARIA labels, keyboard navigation, high-contrast modes).
+- **Performance**:
+  - Lazy load components/images using `loading="lazy"`.
+  - Minify CSS/JS with tools like `esbuild` or `terser`.
+  - Implement browser caching (Cache-Control headers) and CDN caching (e.g., Cloudflare).
+  - Use responsive images with `srcset` and `sizes`.
+- **Modularity**: Create reusable components as Tailwind utility classes or custom components in component libraries.
+- **Iteration Strategy**:
+  - **Iteration 1 (Days 1-2)**: Implement chat interface and basic UI components (Flowbite tables, DaisyUI cards).
+  - **Iteration 2 (Days 3-4)**: Add mega menu, charts (ApexCharts), and performance optimizations (lazy loading, minification).
+  - **Iteration 3 (Days 5-6)**: Finalize template system, caching, and accessibility enhancements.
+
+## Task 1: Chat Interface
+- **Objective**: Design a responsive chat interface for AI-driven financial queries, allowing model selection, data loading, question input, and insight display.
+- **Components**:
+  - Flowbite dropdown for model selection (Local: Phi-2, Gemma; Cloud: Mistral, Llama 2).
+  - DaisyUI file input for data upload (CSV, JSON, or database selection).
+  - TailGrids textarea for natural language queries.
+  - Preline accordion for displaying AI insights and recommendations.
+- **Prompt**:
+  ```
+  Task: Generate HTML for a chat interface.
+  Input: Component libraries: Flowbite, DaisyUI, TailGrids, Preline
+  Instructions:
+  1. Create a responsive chat container (Tailwind: flex, w-full, max-w-3xl).
+  2. Add Flowbite dropdown for model selection (aria-label, keyboard accessible).
+  3. Add DaisyUI file input for data upload (CSV, JSON, or database).
+  4. Add TailGrids textarea for query input (placeholder: "Ask about invoices...").
+  5. Add Preline accordion for insights (collapsible, animated).
+  6. Ensure mobile-first design with sm/md/lg breakpoints, WCAG 2.1 compliance.
+  Example Output:
+  <div class="flex flex-col w-full max-w-3xl mx-auto p-4">
+    <div class="mb-4">
+      <label for="model-select" class="sr-only">Select AI Model</label>
+      <select id="model-select" class="flowbite-select w-full p-2 rounded-md" aria-label="Select AI model">
+        <option value="phi-2">Local: Phi-2</option>
+        <option value="gemma">Local: Gemma</option>
+        <option value="mistral">Cloud: Mistral</option>
+        <option value="llama2">Cloud: Llama 2</option>
+      </select>
+    </div>
+    <div class="mb-4">
+      <label for="data-upload" class="block text-sm font-medium text-gray-700">Load Data</label>
+      <input type="file" id="data-upload" class="daisy-file-input w-full p-2" accept=".csv,.json" aria-label="Upload financial data" />
+      <select id="data-source" class="daisy-select w-full mt-2 p-2" aria-label="Select database source">
+        <option value="invoices">Invoices</option>
+        <option value="ledger">General Ledger</option>
+      </select>
+    </div>
+    <div class="mb-4">
+      <label for="query-input" class="sr-only">Ask a Question</label>
+      <textarea id="query-input" class="tailgrids-textarea w-full p-4 rounded-md" placeholder="Ask about invoices, taxes, or financial insights..." aria-label="Enter financial query"></textarea>
+    </div>
+    <div class="preline-accordion">
+      <div class="accordion-item">
+        <button class="accordion-header p-4 w-full text-left" aria-expanded="false">Insights</button>
+        <div class="accordion-content p-4 hidden">
+          <p>Invoice INV001 is overdue by 10 days. Total amount: 12000 RSD. Recommend sending a reminder.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  ```
+- **Implementation**:
+  ```html
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Valido Chat</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@1.6.5/dist/flowbite.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.51.5/dist/full.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailgrids@1.0.0/dist/tailgrids.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/preline@1.0.0/dist/preline.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-gray-100">
+    <div class="flex flex-col w-full max-w-3xl mx-auto p-4">
+      <div class="mb-4">
+        <label for="model-select" class="sr-only">Select AI Model</label>
+        <select id="model-select" class="flowbite-select w-full p-2 rounded-md border-gray-300 focus:ring-blue-500" aria-label="Select AI model">
+          <option value="phi-2">Local: Phi-2</option>
+          <option value="gemma">Local: Gemma</option>
+          <option value="mistral">Cloud: Mistral</option>
+          <option value="llama2">Cloud: Llama 2</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label for="data-upload" class="block text-sm font-medium text-gray-700">Load Data</label>
+        <input type="file" id="data-upload" class="daisy-file-input w-full p-2 border-gray-300 rounded-md" accept=".csv,.json" aria-label="Upload financial data" />
+        <select id="data-source" class="daisy-select w-full mt-2 p-2 border-gray-300 rounded-md" aria-label="Select database source">
+          <option value="invoices">Invoices</option>
+          <option value="ledger">General Ledger</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label for="query-input" class="sr-only">Ask a Question</label>
+        <textarea id="query-input" class="tailgrids-textarea w-full p-4 rounded-md border-gray-300 focus:ring-blue-500" placeholder="Ask about invoices, taxes, or financial insights..." rows="4" aria-label="Enter financial query"></textarea>
+      </div>
+      <div class="preline-accordion">
+        <div class="accordion-item">
+          <button class="accordion-header p-4 w-full text-left bg-gray-200 rounded-md" aria-expanded="false">Insights for INV001</button>
+          <div class="accordion-content p-4 hidden bg-white">
+            <p>Invoice INV001 is overdue by 10 days. Total amount: 12000 RSD. Recommend sending a reminder.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@1.6.5/dist/flowbite.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/preline@1.0.0/dist/preline.min.js"></script>
+    <script>
+      document.querySelectorAll('.accordion-header').forEach(button => {
+        button.addEventListener('click', () => {
+          const content = button.nextElementSibling;
+          content.classList.toggle('hidden');
+          button.setAttribute('aria-expanded', content.classList.contains('hidden') ? 'false' : 'true');
+        });
+      });
+    </script>
+  </body>
+  </html>
+  ```
+- **Best Practices**:
+  - Use ARIA attributes (`aria-label`, `aria-expanded`) for accessibility.
+  - Apply Tailwind’s mobile-first utilities (`w-full`, `max-w-3xl`, `sm:p-4`).
+  - Lazy load scripts with `defer` or `async`.
+  - Minify CSS/JS using `esbuild`.
+
+## Task 2: Frontend Performance
+- **Objective**: Optimize frontend performance with lazy loading, asset optimization, caching, and responsive images.
+- **Components**:
+  - Lazy loading: Use `loading="lazy"` for images, `IntersectionObserver` for components.
+  - Asset optimization: Minify CSS/JS with `esbuild`, bundle with `vite`.
+  - Caching: Set `Cache-Control: max-age=31536000` for static assets, use CDN (Cloudflare).
+  - Responsive images: Use `srcset` and `sizes` for images.
+- **Prompt**:
+  ```
+  Task: Generate performance-optimized frontend code.
+  Input: Component: {component}, Features: Lazy loading, Asset optimization, Caching, Responsive images
+  Instructions:
+  1. Create a component (e.g., Flowbite table, ApexCharts chart) with lazy loading (`IntersectionObserver`).
+  2. Use minified CSS/JS CDNs (Tailwind, Flowbite, ApexCharts).
+  3. Add caching headers in HTML meta or server config.
+  4. Include responsive images with srcset/sizes.
+  5. Return HTML with scripts.
+  Example Output:
+  <div class="lazy-load" data-component="table">
+    <table class="min-w-full divide-y divide-gray-200 hidden">
+      <thead><tr><th class="px-6 py-3">Invoice Number</th><th class="px-6 py-3">Amount</th></tr></thead>
+      <tbody><tr><td class="px-6 py-4">INV001</td><td class="px-6 py-4">12000</td></tr></tbody>
+    </table>
+  </div>
+  <img src="low-res.jpg" srcset="high-res.jpg 2x, med-res.jpg 1.5x" sizes="(max-width: 600px) 100vw, 50vw" loading="lazy" alt="Financial Chart">
+  <meta http-equiv="Cache-Control" content="max-age=31536000">
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.querySelector('table').classList.remove('hidden');
+          observer.unobserve(entry.target);
+        }
+      });
+    });
+    document.querySelectorAll('.lazy-load').forEach(el => observer.observe(el));
+  </script>
+  ```
+- **Implementation**:
+  ```html
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="max-age=31536000">
+    <title>Optimized Table</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@1.6.5/dist/flowbite.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-gray-100">
+    <div class="lazy-load max-w-4xl mx-auto p-4" data-component="table">
+      <table class="min-w-full divide-y divide-gray-200 hidden">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" scope="col">Invoice Number</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" scope="col">Amount</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white">
+          <tr>
+            <td class="px-6 py-4">INV001</td>
+            <td class="px-6 py-4">12000 RSD</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <img src="/images/chart-low.jpg" srcset="/images/chart-high.jpg 2x, /images/chart-med.jpg 1.5x" sizes="(max-width: 600px) 100vw, 50vw" loading="lazy" alt="Financial summary chart" class="mx-auto mt-4">
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@1.6.5/dist/flowbite.min.js" defer></script>
+    <script>
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.querySelector('table').classList.remove('hidden');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { rootMargin: '100px' });
+      document.querySelectorAll('.lazy-load').forEach(el => observer.observe(el));
+    </script>
+  </body>
+  </html>
+  ```
+  ```bash
+  # Minify with esbuild
+  esbuild styles.css --minify --outfile=styles.min.css
+  esbuild script.js --minify --outfile=script.min.js
+  ```
+- **Best Practices**:
+  - Use `defer` for scripts to avoid render-blocking.
+  - Set `rootMargin` in `IntersectionObserver` for smooth lazy loading.
+  - Use CDN for minified assets (e.g., Tailwind, Flowbite).
+  - Configure server for caching: `Cache-Control: max-age=31536000` for static assets.
+
+## Task 3: UI Components
+- **Objective**: Design modular, responsive UI components (tables, cards, mega menu, charts) with a consistent design language.
+- **Components**:
+  - Flowbite: Tables, timelines, carousels.
+  - DaisyUI: Cards, calendars.
+  - Pagedone/TailGrids: Calendars, blocks.
+  - Preline: Accordions, tabs.
+  - ApexCharts: Bar, line, pie charts.
+- **Prompt**:
+  ```
+  Task: Generate HTML for UI components with Tailwind and specified libraries.
+  Input: Component: {component}, Library: {Flowbite, DaisyUI, Pagedone, TailGrids, Preline, ApexCharts}
+  Instructions:
+  1. Create a responsive component with Tailwind utilities (mobile-first, 2xl/3xl breakpoints).
+  2. Use library-specific classes for styling.
+  3. Ensure WCAG 2.1 compliance (ARIA, keyboard navigation).
+  4. Support mega menu with full-width dropdowns.
+  5. Return HTML with scripts.
+  Example Output (Mega Menu, Flowbite):
+  <nav class="bg-gray-800 text-white p-4">
+    <div class="flowbite-mega-menu relative">
+      <button class="flowbite-mega-menu-toggle p-2" aria-expanded="false">Menu</button>
+      <div class="mega-menu-content hidden w-full bg-gray-700 p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div><a href="/invoices" class="block p-2">Invoices</a></div>
+        <div><a href="/ledger" class="block p-2">Ledger</a></div>
+        <div><a href="/reports" class="block p-2">Reports</a></div>
+      </div>
+    </div>
+  </nav>
+  <script>
+    document.querySelector('.flowbite-mega-menu-toggle').addEventListener('click', () => {
+      const content = document.querySelector('.mega-menu-content');
+      content.classList.toggle('hidden');
+      content.previousElementSibling.setAttribute('aria-expanded', content.classList.contains('hidden') ? 'false' : 'true');
+    });
+  </script>
+  ```
+- **Implementation**:
+  ```html
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Components</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@1.6.5/dist/flowbite.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.51.5/dist/full.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/apexcharts@3.35.3/dist/apexcharts.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-gray-100">
+    <!-- Mega Menu (Flowbite) -->
+    <nav class="bg-gray-800 text-white p-4">
+      <div class="flowbite-mega-menu relative max-w-7xl mx-auto">
+        <button class="flowbite-mega-menu-toggle p-2 bg-blue-600 rounded-md hover:bg-blue-700" aria-expanded="false" aria-label="Toggle menu">Menu</button>
+        <div class="mega-menu-content hidden w-full bg-gray-700 p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 absolute left-0 z-10">
+          <div><a href="/invoices" class="block p-2 hover:bg-gray-600">Invoices</a></div>
+          <div><a href="/ledger" class="block p-2 hover:bg-gray-600">General Ledger</a></div>
+          <div><a href="/reports" class="block p-2 hover:bg-gray-600">Reports</a></div>
+        </div>
+      </div>
+    </nav>
+    <!-- Card (DaisyUI) -->
+    <div class="daisy-card max-w-sm mx-auto mt-6 p-6 bg-white rounded-lg shadow-lg">
+      <h2 class="text-xl font-bold">Financial Summary</h2>
+      <p class="mt-2">Total Revenue: 15000 RSD</p>
+      <button class="mt-4 daisy-btn daisy-btn-primary" aria-label="View details">Details</button>
+    </div>
+    <!-- Chart (ApexCharts) -->
+    <div class="max-w-4xl mx-auto mt-6">
+      <div id="sales-chart" class="apexcharts-canvas"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@1.6.5/dist/flowbite.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.35.3/dist/apexcharts.min.js" defer></script>
+    <script>
+      // Mega Menu Toggle
+      document.querySelector('.flowbite-mega-menu-toggle').addEventListener('click', () => {
+        const content = document.querySelector('.mega-menu-content');
+        content.classList.toggle('hidden');
+        content.previousElementSibling.setAttribute('aria-expanded', content.classList.contains('hidden') ? 'false' : 'true');
+      });
+      // ApexCharts
+      new ApexCharts(document.querySelector('#sales-chart'), {
+        series: [{ name: 'Sales', data: [10000, 15000, 12000] }],
+        chart: { type: 'bar', height: 350 },
+        xaxis: { categories: ['Jan', 'Feb', 'Mar'] },
+        colors: ['#3b82f6']
+      }).render();
+    </script>
+  </body>
+  </html>
+  ```
+- **Best Practices**:
+  - Use Tailwind’s grid system for responsive mega menus (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`).
+  - Apply ARIA attributes for menus, cards, and charts.
+  - Use `hover` states for interactivity (e.g., `hover:bg-gray-600`).
+  - Lazy load ApexCharts scripts with `defer`.
+
+## Task 4: Template System
+- **Objective**: Create a consistent, responsive template system for all routes, ensuring modular layouts and reusable components.
+- **Components**:
+  - Flowbite sidebar for navigation.
+  - Pagedone header with mega menu.
+  - TailGrids footer with links.
+  - DaisyUI content blocks for main content.
+- **Prompt**:
+  ```
+  Task: Generate HTML for a template system.
+  Input: Route: {route}, Libraries: Flowbite, Pagedone, TailGrids, DaisyUI
+  Instructions:
+  1. Create a layout with Flowbite sidebar, Pagedone header (with mega menu), TailGrids footer, and DaisyUI content block.
+  2. Ensure mobile-first design with 2xl/3xl breakpoints.
+  3. Use Tailwind utilities for responsiveness and consistency.
+  4. Include lazy loading for content blocks.
+  5. Return HTML with scripts.
+  Example Output:
+  <div class="flex min-h-screen">
+    <aside Asc sidebar (Flowbite) -->
+    <aside class="flowbite-sidebar w-64 bg-gray-800 text-white p-4 hidden md:block">
+      <nav><a href="/dashboard" class="block p-2">Dashboard</a></nav>
+    </aside>
+    <!-- Header (Pagedone) -->
+    <header class="pagedone-header bg-gray-800 text-white p-4">
+      <div class="mega-menu">...</div>
+    </header>
+    <!-- Main Content (DaisyUI) -->
+    <main class="flex-1 p-6">
+      <div class="daisy-card lazy-load hidden">...</div>
+    </main>
+    <!-- Footer (TailGrids) -->
+    <footer class="tailgrids-footer bg-gray-900 text-white p-4">...</footer>
+  </div>
+  ```
+- **Implementation**:
+  ```html
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="max-age=31536000">
+    <title>AI Valido Template</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@1.6.5/dist/flowbite.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@2.51.5/dist/full.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailgrids@1.0.0/dist/tailgrids.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-gray-100">
+    <div class="flex min-h-screen">
+      <!-- Sidebar (Flowbite) -->
+      <aside class="flowbite-sidebar w-64 bg-gray-800 text-white p-4 hidden md:block">
+        <nav class="space-y-2">
+          <a href="/dashboard" class="block p-2 hover:bg-gray-700 rounded-md" aria-label="Dashboard">Dashboard</a>
+          <a href="/invoices" class="block p-2 hover:bg-gray-700 rounded-md" aria-label="Invoices">Invoices</a>
+          <a href="/tickets" class="block p-2 hover:bg-gray-700 rounded-md" aria-label="Tickets">Tickets</a>
+        </nav>
+      </aside>
+      <div class="flex-1 flex flex-col">
+        <!-- Header (Pagedone) -->
+        <header class="pagedone-header bg-gray-800 text-white p-4">
+          <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">AI Valido</h1>
+            <div class="flowbite-mega-menu relative">
+              <button class="flowbite-mega-menu-toggle p-2 bg-blue-600 rounded-md hover:bg-blue-700" aria-expanded="false" aria-label="Toggle menu">Menu</button>
+              <div class="mega-menu-content hidden w-full bg-gray-700 p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 absolute left-0 z-10">
+                <div><a href="/invoices" class="block p-2 hover:bg-gray-600">Invoices</a></div>
+                <div><a href="/ledger" class="block p-2 hover:bg-gray-600">General Ledger</a></div>
+                <div><a href="/reports" class="block p-2 hover:bg-gray-600">Reports</a></div>
+              </div>
+            </div>
+          </div>
+        </header>
+        <!-- Main Content (DaisyUI) -->
+        <main class="flex-1 p-6">
+          <div class="daisy-card lazy-load max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg hidden">
+            <h2 class="text-xl font-bold">Dashboard</h2>
+            <p class="mt-2">Welcome to AI Valido Online. View your financial data below.</p>
+            <div id="sales-chart" class="mt-4"></div>
+          </div>
+        </main>
+        <!-- Footer (TailGrids) -->
+        <footer class="tailgrids-footer bg-gray-900 text-white p-4">
+          <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div><a href="/about" class="block p-2 hover:text-gray-300">About</a></div>
+            <div><a href="/contact" class="block p-2 hover:text-gray-300">Contact</a></div>
+            <div><a href="/privacy" class="block p-2 hover:text-gray-300">Privacy Policy</a></div>
+          </div>
+        </footer>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@1.6.5/dist/flowbite.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.35.3/dist/apexcharts.min.js" defer></script>
+    <script>
+      // Mega Menu Toggle
+      document.querySelector('.flowbite-mega-menu-toggle').addEventListener('click', () => {
+        const content = document.querySelector('.mega-menu-content');
+        content.classList.toggle('hidden');
+        content.previousElementSibling.setAttribute('aria-expanded', content.classList.contains('hidden') ? 'false' : 'true');
+      });
+      // Lazy Loading
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.remove('hidden');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { rootMargin: '100px' });
+      document.querySelectorAll('.lazy-load').forEach(el => observer.observe(el));
+      // ApexCharts
+      new ApexCharts(document.querySelector('#sales-chart'), {
+        series: [{ name: 'Sales', data: [10000, 15000, 12000] }],
+        chart: { type: 'bar', height: 350 },
+        xaxis: { categories: ['Jan', 'Feb', 'Mar'] },
+        colors: ['#3b82f6']
+      }).render();
+    </script>
+  </body>
+  </html>
+  ```
+- **Best Practices**:
+  - Use a single layout file with `<slot>` or dynamic includes for content.
+  - Apply Tailwind’s `min-h-screen` for full-height layouts.
+  - Lazy load main content with `IntersectionObserver`.
+  - Use `aria-label` for navigation links and `hover` states for interactivity.
+
+## Environment Setup
+- **Install Dependencies**:
+  ```bash
+  npm install tailwindcss@2.2.19 flowbite@1.6.5 daisyui@2.51.5 tailgrids@1.0.0 preline@1.0.0 apexcharts@3.35.3 esbuild
+  ```
+- **Build Tailwind CSS**:
+  ```bash
+  npx tailwindcss -i ./src/input.css -o ./dist/output.min.css --minify
+  ```
+- **Minify JS**:
+  ```bash
+  esbuild ./src/script.js --minify --outfile=./dist/script.min.js
+  ```
+
+## Integration with Flask
+- **Template Route**:
+  ```python
+  from flask import Flask, render_template
+  app = Flask(__name__)
+  @app.route('/<path:route>')
+  @require_token
+  def render_page(route):
+      return render_template('base.html', content=f'{route}.html')
+  ```
+- **base.html**:
+  ```html
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="max-age=31536000">
+    <link href="/static/output.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@1.6.5/dist/flowbite.min.css" rel="stylesheet">
+  </head>
+  <body>
+    {% include 'sidebar.html' %}
+    {% include 'header.html' %}
+    {% include content %}
+    {% include 'footer.html' %}
+    <script src="/static/script.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@1.6.5/dist/flowbite.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.35.3/dist/apexcharts.min.js" defer></script>
+  </body>
+  </html>
+  ```
+
+## Testing and Validation
+- **Test Cases**:
+  - Chat Interface: Test model selection, file upload, query input, and accordion toggle on mobile/desktop.
+  - Performance: Verify lazy loading, image rendering, and caching headers (use Chrome DevTools).
+  - UI Components: Test table, card, mega menu, and chart rendering across sm/lg/2xl breakpoints.
+  - Template System: Test route rendering (`/dashboard`, `/invoices`) with consistent layout.
+- **Validation**:
+  - Run `axe-core` for WCAG 2.1 compliance.
+  - Check bundle size (<500KB for CSS/JS).
+  - Test image `srcset` on 320px, 768px, 1536px, and 2560px screens.
+  - Verify `Cache-Control` headers in browser.
+
+## Future Iterations
+- **Iteration 4 (Days 7-8)**: Add high-contrast mode, keyboard shortcuts for chat.
+- **Iteration 5 (Days 9-10)**: Implement CDN caching with Cloudflare, optimize image compression.
+- **Iteration 6 (Days 11-12)**: Add animations (e.g., Flowbite transitions) and test 3xl breakpoint.
+
+## Notes
+- Use CDN-hosted libraries for faster delivery, minify local assets.
+- Test with 100-200ms network latency to ensure lazy loading works.
+- Cache static assets for 1 year, dynamic content for 1 hour.
+- Ensure all components support dark mode (`data-theme="dark"` in DaisyUI).

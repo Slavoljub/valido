@@ -1,0 +1,34 @@
+﻿ValidoAI Project Analysis Report
+=================================
+Generated: 08/24/2025 06:38:03
+Project Path: C:\MAMP\htdocs\ai.valido.online\scripts
+
+PROJECT STATISTICS
+==================
+Total Files: 43
+Duplicate Groups: 0
+File Types: 3
+Empty Files: 0
+
+FILE TYPES BREAKDOWN
+===================
+  .py: 41 files
+  .example: 1 files
+  .ps1: 1 files
+
+LARGEST FILES
+=============
+  path_audit_and_fix.py: 0.02 MB
+  system_operations.py: 0.02 MB
+  add_comprehensive_data.py: 0.02 MB
+  performance_optimizer.py: 0.02 MB
+  add_real_business_data.py: 0.02 MB
+  comprehensive_route_tester.py: 0.01 MB
+  ai_operations.py: 0.01 MB
+  create_remaining_tables.py: 0.01 MB
+  test_asset_loading.py: 0.01 MB
+  fix_ssl_configuration.py: 0.01 MB
+
+DUPLICATE ANALYSIS
+=================
+Problematic Duplicates: 0

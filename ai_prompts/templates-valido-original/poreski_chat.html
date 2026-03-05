@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ValidoAI - Poreski Propisi</title>
+
+  <!-- Učitaj Bootstrap i stilove -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* Potpuno svetli footer */
+/* Postavljanje footera na dno stranice */
+html, body {
+  height: 100%; /* Obezbeđuje da stranica koristi celu visinu */
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1; /* Glavni sadržaj zauzima sav dostupan prostor */
+}
+
+footer {
+  background-color: #ffffff; /* Bela pozadina */
+  color: #222222; /* Tamno sivi tekst */
+  padding: 20px 0;
+  text-align: center;
+  font-size: 0.9rem;
+  border-top: 3px solid #0d6efd; /* Plava linija */
+  margin-top: auto; /* Gura footer na dno */
+}
+</style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="{{ url_for('static', filename='img/valido.svg') }}" alt="ValidoAI Logo" height="30">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link text-white" href="/">Početna</a></li>
+                    <li class="nav-item"><a class="nav-link active text-white" href="/funkcionalnosti">Funkcionalnosti</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="#" data-bs-toggle="modal" data-bs-target="#prijavaModal">
+                            Prijavi me
+                        </a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link text-white" href="/kontakt">Kontakt</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+  <!-- Opis i Chat -->
+  <div class="container mt-5">
+    <div class="description text-center">
+      <h1 class="text-primary">
+        <i class="bi bi-bank me-2"></i> Pretraži Poreske Propise
+      </h1>
+      <p class="text-secondary">
+        Naš sistem koristi veštačku inteligenciju kako bi vam omogućio  
+        najnovije informacije o poreskim zakonima. Postavite pitanje i dobijte precizan odgovor.
+      </p>
+      <div class="text-center mt-3">
+        <!-- ovde može kasnije ići dugme ili animacija -->
+      </div>
+    </div>
+
+    <!-- Najčešća pitanja -->
+    <div class="container mt-4 text-center">
+      <h5 class="text-primary">Najčešća pitanja</h5>
+      <div class="question-list d-flex flex-wrap justify-content-center">
+        <button class="btn btn-outline-primary m-2 common-question">Koji su propisi o porezu na dohodak?</button>
+        <button class="btn btn-outline-primary m-2 common-question">Kako funkcioniše PDV u Srbiji?</button>
+        <button class="btn btn-outline-primary m-2 common-question">Koji su poreski propisi za preduzetnike?</button>
+        <button class="btn btn-outline-primary m-2 common-question">Kako se plaća porez na imovinu?</button>
+      </div>
+    </div>
+
+    <!-- AI Chat Box -->
+    <div class="card chat-card shadow-lg border-0 mt-4">
+      <div class="card-header text-white bg-primary">
+      </div>
+      <div class="card-body">
+        <form id="chat-form">
+          <input type="text" id="chat-input" name="message" class="form-control chat-input" placeholder="Unesite vaše pitanje o porezima..." required>
+          <button type="submit" class="btn btn-primary mt-3 w-100">🔍 Pošalji Pitanje</button>
+        </form>
+      </div>
+      <div class="card shadow-sm border-0 mt-4">
+        <div class="card-body text-center">
+          <h5 class="fw-bold text-primary mb-3">
+            <i class="bi bi-lightbulb-fill me-2"></i> Poreski Savet Dana
+          </h5>
+          <p class="text-muted" id="tax-tip">
+            Generišemo savet...
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- AI Odgovor -->
+    <div class="card white-box mt-4 border-0 shadow-sm">
+      <div id="chat-response" class="card-body fade-in text-start text-dark" style="white-space: pre-wrap;"></div>
+    </div>
+  </div>
+  <!-- ✅ FOOTER -->
+  <footer class="text-center text-white p-4 border-top border-primary" style="background-color: #0c68ef;">
+    <div class="mb-3 d-flex justify-content-center flex-wrap gap-4 small">
+      <div class="d-flex flex-column align-items-center">
+        <i class="bi bi-graph-up text-white fs-5"></i>
+        <span class="mt-1">Simulacija</span>
+      </div>
+      <div class="d-flex flex-column align-items-center">
+        <i class="bi bi-file-earmark-text text-white fs-5"></i>
+        <span class="mt-1">Dokumenti</span>
+      </div>
+      <div class="d-flex flex-column align-items-center">
+        <i class="bi bi-chat-dots text-white fs-5"></i>
+        <span class="mt-1">AI komentari</span>
+      </div>
+      <div class="d-flex flex-column align-items-center">
+        <i class="bi bi-sliders text-white fs-5"></i>
+        <span class="mt-1">Propisi</span>
+      </div>
+    </div>
+    <p class="mb-0">&copy; 2025 ValidoAI. Sva prava zadržana.</p>
+  </footer>
+
+  <div class="position-fixed bottom-0 end-0 m-3 px-3 py-2 bg-danger text-white rounded-3 shadow-lg small fw-semibold"
+     style="opacity: 0.95; z-index: 1030; letter-spacing: 0.5px;"
+     data-bs-toggle="tooltip"
+     title="Ova sekcija koristi veštačku inteligenciju za uvod, savete i preporuke.">
+    <i class="bi bi-robot me-2"></i> AI MODE: aktivan
+</div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+  // 👉 Poreski savet dana
+      const taxTips = [
+        "📊 Ako ste preduzetnik, proverite poreske olakšice na opremu i IT ulaganja!",
+        "💰 Porez na imovinu zavisi od lokacije i kvadrature – proverite važeće stope u vašoj opštini.",
+        "📅 PDV prijava se podnosi do 15. u mesecu – izbegnite kazne redovnim podnošenjem!",
+        "🛠️ Knjigovođe i poreski savetnici mogu vam pomoći da optimizujete poreze uz zakonske olakšice.",
+        "🔎 Nemojte zaboraviti da prijavite sve izvore prihoda – poreska inspekcija može proveriti u bilo kom trenutku!"
+        ];
+
+      const taxTip = document.getElementById("tax-tip");
+      if (taxTip) {
+        taxTip.textContent = taxTips[Math.floor(Math.random() * taxTips.length)];
+      }
+
+  // 👉 Dugme za najnoviju poresku informaciju
+      const updatesBtn = document.getElementById("latest-tax-updates");
+      if (updatesBtn) {
+        updatesBtn.addEventListener("click", function () {
+          alert("Najnovija poreska promena: Novi limiti za paušalne preduzetnike u 2025. godini! Proverite detalje na zvaničnom sajtu Poreske uprave.");
+        });
+      }
+
+  // 👉 Česta pitanja
+      const questionButtons = document.querySelectorAll(".common-question");
+      const chatInput = document.getElementById("chat-input");
+
+      if (chatInput && questionButtons.length) {
+        questionButtons.forEach(button => {
+          button.addEventListener("click", function () {
+            chatInput.value = this.textContent;
+          });
+        });
+      }
+
+  // 👉 AI Chat
+      const chatForm = document.getElementById("chat-form");
+      const chatResponse = document.getElementById("chat-response");
+
+      if (chatForm && chatInput && chatResponse) {
+        chatForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+          sendMessage();
+        });
+      }
+
+  // 🔁 Slanje poruke
+      function sendMessage() {
+        const userInput = chatInput.value.trim();
+        if (!userInput) {
+          chatResponse.innerHTML = "⚠️ Molimo unesite pitanje.";
+          chatResponse.className = 'alert alert-warning';
+          return;
+        }
+
+        initiateWaitingMessage(chatResponse);
+
+        fetch('/api/poreski_chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userInput })
+        })
+        .then(response => response.json())
+        .then(data => {
+          clearWaitingMessage(chatResponse);
+
+          if (!data.response) {
+            chatResponse.className = 'alert alert-warning';
+            chatResponse.innerHTML = "⚠ Server nije vratio validan odgovor.";
+            return;
+          }
+
+          chatResponse.className = 'alert alert-success';
+          typeWriter(data.response, chatResponse);
+          chatInput.value = "";
+        })
+        .catch(error => {
+          clearWaitingMessage(chatResponse);
+          chatResponse.className = 'alert alert-danger';
+          chatResponse.innerHTML = "❌ Greška u komunikaciji sa serverom.";
+          console.error("Došlo je do greške:", error);
+        });
+      }
+
+  // ⌛ Loading poruka
+      function initiateWaitingMessage(element) {
+        element.innerHTML = "Molimo Vas sačekajte...";
+        element.className = 'alert alert-info typing';
+      }
+
+  // ✅ Očisti klasu
+      function clearWaitingMessage(element) {
+        element.classList.remove("typing");
+      }
+
+  // ✍️ Typing efekat
+      function typeWriter(text, element) {
+        let i = 0;
+        element.innerHTML = "";
+        function typing() {
+          if (i < text.length) {
+            element.innerHTML += text.charAt(i);
+            i++;
+            setTimeout(typing, 50);
+          }
+        }
+        typing();
+      }
+    });
+
+  </script>
+</body>
+</html>

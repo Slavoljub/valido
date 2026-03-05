@@ -1,0 +1,138 @@
+{% extends "layouts/dashboard-layout.html" %}
+
+{% block title %}Dashboard Layout Example - ValidoAI{% endblock %}
+
+{% block description %}Example page demonstrating the dashboard layout with charts and analytics{% endblock %}
+
+{% block page_title %}Dashboard Layout Example{% endblock %}
+
+{% block page_subtitle %}This page demonstrates the dashboard layout optimized for data visualization and analytics{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Introduction Section -->
+    <div class="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+        <h2 class="text-lg font-semibold text-neutral-900 mb-4">Dashboard Layout Features</h2>
+        <p class="text-neutral-600 mb-4">
+            This page uses the dashboard layout which is specifically designed for:
+        </p>
+        <ul class="list-disc list-inside space-y-2 text-neutral-600">
+            <li>Data visualization and analytics dashboards</li>
+            <li>Chart and graph presentations</li>
+            <li>Key performance indicators (KPIs)</li>
+            <li>Real-time data monitoring</li>
+            <li>Financial and business intelligence</li>
+            <li>Responsive chart layouts</li>
+        </ul>
+    </div>
+
+    <!-- Sample Dashboard Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <!-- KPI Card 1 -->
+        <div class="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-neutral-600">Total Revenue</p>
+                    <p class="text-2xl font-bold text-neutral-900">$125,000</p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4">
+                <span class="text-sm text-green-600 font-medium">+12.5%</span>
+                <span class="text-sm text-neutral-500">from last month</span>
+            </div>
+        </div>
+
+        <!-- KPI Card 2 -->
+        <div class="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-neutral-600">Active Users</p>
+                    <p class="text-2xl font-bold text-neutral-900">1,234</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-users text-blue-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4">
+                <span class="text-sm text-green-600 font-medium">+8.2%</span>
+                <span class="text-sm text-neutral-500">from last week</span>
+            </div>
+        </div>
+
+        <!-- KPI Card 3 -->
+        <div class="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-neutral-600">Conversion Rate</p>
+                    <p class="text-2xl font-bold text-neutral-900">3.24%</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                </div>
+            </div>
+            <div class="mt-4">
+                <span class="text-sm text-red-600 font-medium">-2.1%</span>
+                <span class="text-sm text-neutral-500">from last month</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+        <h2 class="text-lg font-semibold text-neutral-900 mb-4">Sample Chart Area</h2>
+        <p class="text-neutral-600 mb-4">
+            This area would typically contain interactive charts and graphs using Chart.js or similar libraries.
+        </p>
+        
+        <div class="bg-neutral-50 rounded-lg p-8 text-center">
+            <i class="fas fa-chart-bar text-4xl text-neutral-400 mb-4"></i>
+            <p class="text-neutral-500">Chart.js integration would display here</p>
+            <p class="text-sm text-neutral-400 mt-2">Revenue trends, user analytics, etc.</p>
+        </div>
+    </div>
+
+    <!-- Data Table Section -->
+    <div class="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+        <h2 class="text-lg font-semibold text-neutral-900 mb-4">Recent Activity</h2>
+        <p class="text-neutral-600 mb-4">
+            Dashboard layouts often include data tables for detailed information.
+        </p>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-neutral-200">
+                <thead class="bg-neutral-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">User</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Action</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Date</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-neutral-200">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-900">John Doe</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">Payment Received</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">$1,200</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">2024-01-15</td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-900">Jane Smith</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">Invoice Sent</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">$850</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">2024-01-14</td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-900">Bob Johnson</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">Refund Processed</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">-$200</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">2024-01-13</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

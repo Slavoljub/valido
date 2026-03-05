@@ -1,0 +1,313 @@
+<!-- Download Progress Integration Example -->
+<!-- This shows how to integrate the download progress modal into your pages -->
+
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('downloadProgressApp', () => ({
+        // Modal state
+        downloadProgressModalOpen: false,
+
+        // Download data
+        downloads: [],
+        overallProgress: 0,
+        downloadStats: {
+            activeDownloads: 0,
+            completedDownloads: 0,
+            failedDownloads: 0
+        },
+
+        // UI state
+        canCloseDownloadModal: true,
+        pollingInterval: null,
+
+        // Initialize
+        init() {
+            // Load download progress script
+            this.loadDownloadProgressScript();
+
+            // Set up periodic refresh of download status
+            this.startStatusPolling();
+        },
+
+        // Load the download progress JavaScript
+        async loadDownloadProgressScript() {
+            if (!window.downloadProgressManager) {
+                const script = document.createElement('script');
+                script.src = '/static/js/download-progress.js';
+                script.onload = () => {
+                    console.log('Download progress manager loaded');
+                    this.setupProgressCallbacks();
+                };
+                document.head.appendChild(script);
+            } else {
+                this.setupProgressCallbacks();
+            }
+        },
+
+        // Set up progress callbacks
+        setupProgressCallbacks() {
+            if (window.downloadProgressManager) {
+                window.downloadProgressManager.addProgressCallback((modelId, status) => {
+                    this.updateDownloadProgress(modelId, status);
+                });
+            }
+        },
+
+        // Start polling for download status
+        startStatusPolling() {
+            this.pollingInterval = setInterval(async () => {
+                await this.refreshDownloadStatus();
+            }, 2000); // Poll every 2 seconds
+        },
+
+        // Stop polling
+        stopStatusPolling() {
+            if (this.pollingInterval) {
+                clearInterval(this.pollingInterval);
+                this.pollingInterval = null;
+            }
+        },
+
+        // Refresh download status from server
+        async refreshDownloadStatus() {
+            try {
+                const response = await fetch('/api/download/models/progress');
+                if (response.ok) {
+                    const data = await response.json();
+                    this.downloads = data.downloads || [];
+                    this.overallProgress = data.overall_progress || 0;
+
+                    // Update stats
+                    this.downloadStats.activeDownloads = data.active_downloads || 0;
+                    this.downloadStats.completedDownloads = data.completed_downloads || 0;
+                    this.downloadStats.failedDownloads = data.failed_downloads || 0;
+
+                    // Update modal close permission
+                    this.canCloseDownloadModal = this.downloadStats.activeDownloads === 0;
+                }
+            } catch (error) {
+                console.error('Error refreshing download status:', error);
+            }
+        },
+
+        // Update download progress
+        updateDownloadProgress(modelId, status) {
+            const index = this.downloads.findIndex(d => d.model_name === modelId);
+            if (index >= 0) {
+                this.downloads[index] = status;
+            } else {
+                this.downloads.push(status);
+            }
+
+            // Recalculate overall progress
+            if (this.downloads.length > 0) {
+                this.overallProgress = this.downloads.reduce((sum, d) => sum + d.progress, 0) / this.downloads.length;
+            }
+
+            // Update stats
+            this.downloadStats.activeDownloads = this.downloads.filter(d => d.status === 'downloading').length;
+            this.downloadStats.completedDownloads = this.downloads.filter(d => d.status === 'completed').length;
+            this.downloadStats.failedDownloads = this.downloads.filter(d => d.status === 'failed').length;
+
+            // Update modal close permission
+            this.canCloseDownloadModal = this.downloadStats.activeDownloads === 0;
+        },
+
+        // Modal controls
+        openDownloadProgressModal() {
+            this.downloadProgressModalOpen = true;
+            this.refreshDownloadStatus(); // Refresh immediately when opening
+        },
+
+        closeDownloadProgressModal() {
+            if (this.canCloseDownloadModal) {
+                this.downloadProgressModalOpen = false;
+            }
+        },
+
+        // Download controls
+        async startDownload(modelId, modelName) {
+            try {
+                if (window.downloadProgressManager) {
+                    await window.downloadProgressManager.startDownload(modelId, modelName);
+                } else {
+                    // Fallback to direct API call
+                    const response = await fetch(`/api/download/models/${modelId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        this.showToast(`Started downloading ${modelName}`, 'success');
+                        this.openDownloadProgressModal();
+                    }
+                }
+            } catch (error) {
+                console.error('Error starting download:', error);
+                this.showToast(`Failed to start download: ${error.message}`, 'error');
+            }
+        },
+
+        async cancelDownload(modelName) {
+            try {
+                if (window.downloadProgressManager) {
+                    await window.downloadProgressManager.cancelDownload(modelName);
+                } else {
+                    // Fallback to direct API call
+                    const response = await fetch(`/api/download/models/${modelName}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        this.showToast('Download cancelled', 'info');
+                    }
+                }
+            } catch (error) {
+                console.error('Error cancelling download:', error);
+                this.showToast(`Failed to cancel download: ${error.message}`, 'error');
+            }
+        },
+
+        async startBatchDownload(modelIds) {
+            try {
+                if (window.downloadProgressManager) {
+                    await window.downloadProgressManager.startBatchDownload(modelIds);
+                } else {
+                    // Fallback to direct API call
+                    const response = await fetch('/api/download/models/batch', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ model_ids: modelIds })
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        this.showToast(`Started ${result.download_ids.length} downloads`, 'success');
+                        this.openDownloadProgressModal();
+                    }
+                }
+            } catch (error) {
+                console.error('Error starting batch download:', error);
+                this.showToast(`Failed to start downloads: ${error.message}`, 'error');
+            }
+        },
+
+        clearCompletedDownloads() {
+            // Remove completed and failed downloads from the list
+            this.downloads = this.downloads.filter(d =>
+                d.status !== 'completed' && d.status !== 'failed'
+            );
+
+            // Update stats
+            this.downloadStats.completedDownloads = 0;
+            this.downloadStats.failedDownloads = 0;
+        },
+
+        // Toast notifications
+        showToast(message, type = 'info', duration = 5000) {
+            // You can integrate with your existing toast system here
+            // For now, use browser alert or create a simple notification
+            console.log(`[${type.toUpperCase()}] ${message}`);
+
+            // If you have a toast system, call it here
+            if (typeof showToast === 'function') {
+                showToast(message, type, duration);
+            } else {
+                // Simple browser notification
+                alert(message);
+            }
+        },
+
+        // Utility functions
+        formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        },
+
+        formatTime(seconds) {
+            if (seconds < 60) return `${Math.round(seconds)}s`;
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.round(seconds % 60);
+            return `${minutes}m ${remainingSeconds}s`;
+        },
+
+        // Cleanup
+        destroy() {
+            this.stopStatusPolling();
+            if (window.downloadProgressManager) {
+                window.downloadProgressManager.cleanup();
+            }
+        }
+    }));
+});
+</script>
+
+<!-- Example usage in your page -->
+<div x-data="downloadProgressApp()">
+    <!-- Example download buttons -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="bg-white p-4 rounded-lg shadow-sm border">
+            <h3 class="font-medium text-gray-900 mb-2">Llama 2 7B</h3>
+            <p class="text-sm text-gray-600 mb-3">Fast and efficient for most tasks</p>
+            <button
+                @click="startDownload('llama2-7b', 'Llama 2 7B')"
+                class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            >
+                <i class="fas fa-download mr-2"></i>
+                Download
+            </button>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow-sm border">
+            <h3 class="font-medium text-gray-900 mb-2">Mistral 7B</h3>
+            <p class="text-sm text-gray-600 mb-3">Excellent reasoning capabilities</p>
+            <button
+                @click="startDownload('mistral-7b', 'Mistral 7B')"
+                class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            >
+                <i class="fas fa-download mr-2"></i>
+                Download
+            </button>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow-sm border">
+            <h3 class="font-medium text-gray-900 mb-2">GPT-3.5 Turbo</h3>
+            <p class="text-sm text-gray-600 mb-3">Balanced performance and speed</p>
+            <button
+                @click="startDownload('gpt-3.5-turbo', 'GPT-3.5 Turbo')"
+                class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            >
+                <i class="fas fa-download mr-2"></i>
+                Download
+            </button>
+        </div>
+    </div>
+
+    <!-- Batch download button -->
+    <div class="mt-6">
+        <button
+            @click="startBatchDownload(['llama2-7b', 'mistral-7b', 'gpt-3.5-turbo'])"
+            class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700"
+        >
+            <i class="fas fa-download mr-2"></i>
+            Download All Models
+        </button>
+
+        <!-- Show download progress button -->
+        <button
+            x-show="downloads.length > 0"
+            @click="openDownloadProgressModal()"
+            class="ml-4 bg-gray-600 text-white px-6 py-3 rounded-md hover:bg-gray-700"
+        >
+            <i class="fas fa-tasks mr-2"></i>
+            Show Downloads ({{ downloads.length }})
+        </button>
+    </div>
+
+    <!-- Include the download progress modal -->
+    {% include 'modals/download-progress-modal.html' %}
+</div>

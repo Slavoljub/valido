@@ -1,0 +1,937 @@
+# Docker Compose configuration for ValidoAI
+# Version: 3.8 (obsolete but kept for compatibility)
+
+name: py_ai_valido
+
+services:
+  # ============================================================================
+  # MAIN APPLICATION
+  # ============================================================================
+
+  py_ai_valido:
+    image: python:3.12-slim
+    container_name: py_ai_valido_container
+    ports:
+      - "5000:5000"   # HTTP
+      - "5001:5001"   # HTTPS
+    environment:
+      - FLASK_ENV=production
+      - SERVER_TYPE=hypercorn
+      - HOST=0.0.0.0
+      - PORT=5000
+      - HTTPS_PORT=5001
+      - WORKERS=1
+      - DEBUG_MODE=false
+      - SSL_ENABLED=true
+      - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
+      - DATABASE_URL=postgresql://valido:valido123!@postgresql:5432/ai_valido_online
+      - REDIS_URL=redis://redis:6379
+      - SSL_CERT_PATH=/app/certs/cert.pem
+      - SSL_KEY_PATH=/app/certs/key.pem
+    volumes:
+      - ../data:/app/data
+      - ../uploads:/app/uploads
+      - ../logs:/app/logs
+      - ../cache:/app/cache
+      - ../certs:/app/certs:ro
+      - ../database:/app/database:ro
+      - ./data:/shared
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - validoai_network
+    profiles:
+      - app
+      - manual
+
+  # ============================================================================
+  # SQL DATABASES
+  # ============================================================================
+
+  postgresql:
+    image: postgres:17-alpine
+    container_name: postgresql_ai_valido
+    environment:
+      POSTGRES_DB: ai_valido_online
+      POSTGRES_USER: valido
+      POSTGRES_PASSWORD: valido123!
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+      - ./configuration_scripts_docker/postgres_extensions_install.sh:/docker-entrypoint-initdb.d/01-extensions.sh
+      - ./configuration_scripts_docker/postgres_performance_optimize.sh:/docker-entrypoint-initdb.d/02-optimize.sh
+      - ./configuration_scripts_docker/postgres_init.sh:/docker-entrypoint-initdb.d/00-init.sh
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U valido"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    command: >
+      postgres
+      -c 'shared_preload_libraries=pg_stat_statements,pg_buffercache,pg_trgm'
+      -c 'max_connections=200'
+      -c 'work_mem=256MB'
+      -c 'shared_buffers=2GB'
+      -c 'effective_cache_size=6GB'
+      -c 'maintenance_work_mem=512MB'
+      -c 'checkpoint_completion_target=0.9'
+      -c 'wal_buffers=16MB'
+      -c 'default_statistics_target=100'
+      -c 'random_page_cost=1.1'
+      -c 'effective_io_concurrency=200'
+      -c 'work_mem=4MB'
+      -c 'min_wal_size=1GB'
+      -c 'max_wal_size=4GB'
+      -c 'max_worker_processes=8'
+      -c 'max_parallel_workers_per_gather=4'
+      -c 'max_parallel_workers=8'
+      -c 'max_parallel_maintenance_workers=4'
+    profiles:
+      - databases
+
+  mysql:
+    image: mysql:8.4
+    container_name: mysql_ai_valido
+    environment:
+      MYSQL_ROOT_PASSWORD: valido123!
+      MYSQL_DATABASE: ai_valido_online
+      MYSQL_USER: valido
+      MYSQL_PASSWORD: valido123!
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ../configuration_scripts/mysql_optimize.sh:/docker-entrypoint-initdb.d/01-optimize.sh
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mssql_ai_valido
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: valido123!
+      MSSQL_PID: Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P valido123! -Q 'SELECT 1'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  # ============================================================================
+  # NOSQL DATABASES
+  # ============================================================================
+
+  mongodb:
+    image: mongo:8.0
+    container_name: mongodb_ai_valido
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: valido
+      MONGO_INITDB_ROOT_PASSWORD: valido123!
+      MONGO_INITDB_DATABASE: ai_valido_online
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ../configuration_scripts/mongodb_init.js:/docker-entrypoint-initdb.d/01-init.js
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  redis:
+    image: redis/redis-stack:latest
+    container_name: redis_ai_valido
+    command: redis-server --appendonly yes --maxmemory 4gb --maxmemory-policy allkeys-lru --loadmodule /opt/redis-stack/lib/redisearch.so
+    ports:
+      - "6379:6379"
+      - "8001:8001"  # RedisInsight
+    volumes:
+      - redis_data:/data
+      - ./configuration_scripts_docker/redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  cassandra:
+    image: cassandra:4.1
+    container_name: cassandra_ai_valido
+    environment:
+      CASSANDRA_CLUSTER_NAME: ValidoAICluster
+      CASSANDRA_DC: datacenter1
+      CASSANDRA_RACK: rack1
+      CASSANDRA_USER: valido
+      CASSANDRA_PASSWORD: valido123!
+    ports:
+      - "9042:9042"
+      - "7000:7000"
+      - "7001:7001"
+      - "9160:9160"
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "cqlsh", "-u", "valido", "-p", "valido123!", "-e", "SELECT 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    profiles:
+      - databases
+
+  couchdb:
+    image: couchdb:3.4
+    container_name: couchdb_ai_valido
+    environment:
+      COUCHDB_USER: valido
+      COUCHDB_PASSWORD: valido123!
+      COUCHDB_SINGLE_NODE: true
+    ports:
+      - "5984:5984"
+    volumes:
+      - couchdb_data:/opt/couchdb/data
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5984/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  couchbase:
+    image: couchbase/server:7.7
+    container_name: couchbase_ai_valido
+    environment:
+      COUCHBASE_ADMINISTRATOR_USERNAME: valido
+      COUCHBASE_ADMINISTRATOR_PASSWORD: valido123!
+    ports:
+      - "8091-8096:8091-8096"
+      - "11210:11210"
+    volumes:
+      - couchbase_data:/opt/couchbase/var
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8091/pools"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    profiles:
+      - databases
+
+  # ============================================================================
+  # TIME-SERIES DATABASES
+  # ============================================================================
+
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb_ai_valido
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: valido
+      DOCKER_INFLUXDB_INIT_PASSWORD: valido123!
+      DOCKER_INFLUXDB_INIT_ORG: validoai
+      DOCKER_INFLUXDB_INIT_BUCKET: ai_valido_online
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: valido123!
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8
+    container_name: clickhouse_ai_valido
+    environment:
+      CLICKHOUSE_DB: ai_valido_online
+      CLICKHOUSE_USER: valido
+      CLICKHOUSE_PASSWORD: valido123!
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8123/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  # ============================================================================
+  # GRAPH DATABASES
+  # ============================================================================
+
+  neo4j:
+    image: neo4j:5.18
+    container_name: neo4j_ai_valido
+    environment:
+      NEO4J_AUTH: valido/valido123!
+      NEO4J_PLUGINS: '["apoc", "graph-data-science", "neo4j-streams", "n10s", "apoc-extended"]'
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+      - neo4j_data:/logs
+      - neo4j_data:/import
+      - neo4j_data:/plugins
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:7474/browser/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  arangodb:
+    image: arangodb:3.13
+    container_name: arangodb_ai_valido
+    environment:
+      ARANGO_ROOT_PASSWORD: valido123!
+    ports:
+      - "8529:8529"
+    volumes:
+      - arangodb_data:/var/lib/arangodb3
+      - arangodb_data:/var/lib/arangodb3-apps
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8529/_api/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  orientdb:
+    image: orientdb:3.3
+    container_name: orientdb_ai_valido
+    environment:
+      ORIENTDB_ROOT_PASSWORD: valido123!
+    ports:
+      - "2424:2424"
+      - "2480:2480"
+    volumes:
+      - orientdb_data:/orientdb/databases
+      - orientdb_data:/orientdb/backup
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2480/server"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  # ============================================================================
+  # SEARCH ENGINES
+  # ============================================================================
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: validoai_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  # ============================================================================
+  # VECTOR DATABASES
+  # ============================================================================
+
+  weaviate:
+    image: semitechnologies/weaviate:1.24.0
+    container_name: validoai_weaviate
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
+      DEFAULT_VECTORIZER_MODULE: 'none'
+      ENABLE_MODULES: 'text2vec-openai,text2vec-cohere,text2vec-huggingface,ref2vec-centroid,generative-openai,qna-openai,text2vec-transformers,text2vec-contextionary,text2vec-jinaai,text2vec-palm,text2vec-aws,text2vec-azure,text2vec-gcp,text2vec-ollama,text2vec-ollama-aws,text2vec-ollama-azure,text2vec-ollama-gcp,text2vec-ollama-openai,text2vec-ollama-cohere,text2vec-ollama-huggingface,text2vec-ollama-transformers,text2vec-ollama-contextionary,text2vec-ollama-jinaai,text2vec-ollama-palm,text2vec-ollama-aws,text2vec-ollama-azure,text2vec-ollama-gcp'
+      CLUSTER_HOSTNAME: 'node1'
+    ports:
+      - "8080:8080"
+    volumes:
+      - weaviate_data:/var/lib/weaviate
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/.well-known/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: validoai_qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: validoai_chromadb
+    environment:
+      CHROMA_SERVER_HOST: 0.0.0.0
+      CHROMA_SERVER_HTTP_PORT: 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - chromadb_data:/chroma/chroma
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  milvus:
+    image: milvusdb/milvus:v2.4.0
+    container_name: validoai_milvus
+    environment:
+      ETCD_USE_EMBED: 'true'
+      ETCD_DATA_DIR: '/var/lib/milvus/etcd'
+      ETCD_CONFIG_PATH: '/milvus/configs/etcd.yaml'
+      MINIO_ADDRESS: 'localhost:9000'
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    volumes:
+      - milvus_data:/var/lib/milvus
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  # ============================================================================
+  # CLOUD DATABASES (EMULATORS)
+  # ============================================================================
+
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    container_name: validoai_dynamodb
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    ports:
+      - "8000:8000"
+    volumes:
+      - dynamodb_data:/home/dynamodblocal/data
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/shell"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  cosmosdb-emulator:
+    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest
+    container_name: validoai_cosmosdb
+    environment:
+      AZURE_COSMOS_EMULATOR_PARTITION_COUNT: 10
+      AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE: true
+    ports:
+      - "8081:8081"
+      - "10251:10251"
+      - "10252:10252"
+      - "10253:10253"
+      - "10254:10254"
+    volumes:
+      - cosmosdb_data:/data
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://localhost:8081/_explorer/emulator.pem"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  firestore-emulator:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:latest
+    container_name: validoai_firestore
+    command: gcloud emulators firestore start --host-port=0.0.0.0:8080
+    ports:
+      - "8080:8080"
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - databases
+
+  # ============================================================================
+  # CONTINUOUS INTEGRATION (CI)
+  # ============================================================================
+
+  jenkins:
+    image: jenkins/jenkins:latest
+    container_name: jenkins_ai_valido
+    environment:
+      - JENKINS_OPTS=--httpPort=8080
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
+    ports:
+      - "8085:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../:/workspace:ro
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - ci
+      - development
+
+  # ============================================================================
+  # MONITORING & MANAGEMENT
+  # ============================================================================
+
+  adminer:
+    image: adminer:latest
+    container_name: validoai_adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    profiles:
+      - management
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: validoai_phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: valido
+      PMA_PASSWORD: valido123!
+    ports:
+      - "8081:80"
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    profiles:
+      - management
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: validoai_mongo_express
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: valido
+      ME_CONFIG_MONGODB_ADMINPASSWORD: valido123!
+      ME_CONFIG_MONGODB_URL: mongodb://valido:valido123!@mongodb:27017/
+    ports:
+      - "8082:8081"
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    profiles:
+      - management
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: validoai_redis_commander
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    ports:
+      - "8083:8081"
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    depends_on:
+      - redis
+    profiles:
+      - management
+
+  elasticvue:
+    image: cars10/elasticvue:latest
+    container_name: validoai_elasticvue
+    ports:
+      - "8084:8080"
+    networks:
+      - validoai_network
+    restart: unless-stopped
+    depends_on:
+      - elasticsearch
+    profiles:
+      - management
+      - databases
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: validoai_pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-valido@validoai.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-valido123!}
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    restart: unless-stopped
+    networks:
+      - validoai_network
+    profiles:
+      - management
+    depends_on:
+      - postgresql
+
+  # ============================================================================
+  # MONITORING SERVICES
+  # ============================================================================
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus_ai_valido
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./configuration_scripts_docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - validoai_network
+    profiles:
+      - monitoring
+      - development
+      - management
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana_ai_valido
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=valido123!
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./configuration_scripts_docker/grafana/provisioning:/etc/grafana/provisioning:ro
+    restart: unless-stopped
+    networks:
+      - validoai_network
+    profiles:
+      - monitoring
+      - development
+      - management
+
+  # ============================================================================
+  # REVERSE PROXY
+  # ============================================================================
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_ai_valido
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../certs:/etc/ssl/certs:ro
+      - ../certs:/etc/ssl/private:ro
+    restart: unless-stopped
+    networks:
+      - validoai_network
+    profiles:
+      - nginx
+      - development
+      - reverse-proxy
+
+# ============================================================================
+# VOLUMES
+# ============================================================================
+
+volumes:
+  # Individual volumes for each database type
+  postgresql_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/postgresql
+  mssql_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/mssql
+  mysql_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/mysql
+  redis_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/redis
+  mongodb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/mongodb
+  cassandra_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/cassandra
+  couchdb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/couchdb
+  couchbase_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/couchbase
+  influxdb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/influxdb
+  clickhouse_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/clickhouse
+  neo4j_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/neo4j
+  arangodb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/arangodb
+  orientdb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/orientdb
+  elasticsearch_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/elasticsearch
+  weaviate_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/weaviate
+  qdrant_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/qdrant
+  chromadb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/chromadb
+  milvus_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/milvus
+  dynamodb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/dynamodb
+  cosmosdb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/cosmosdb
+  pgadmin_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/pgadmin
+  
+  # Jenkins data volume
+  jenkins_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./jenkins
+
+  # Monitoring data volumes
+  prometheus_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/prometheus
+  grafana_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./database/grafana
+
+# ============================================================================
+# NETWORKS
+# ============================================================================
+
+networks:
+  validoai_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1

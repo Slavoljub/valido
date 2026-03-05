@@ -1,0 +1,217 @@
+<!-- Toast Notification System with Tailwind CSS & Theme Support -->
+<div x-data="toastStore()" class="fixed inset-0 flex flex-col items-end justify-start z-50 p-4 pointer-events-none">
+    <div class="w-full flex flex-col items-end space-y-2">
+        <template x-for="toast in toasts" :key="toast.id">
+            <div class="toast-item max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1"
+                 :class="{
+                     'ring-gray-200 bg-white': $store.theme.currentTheme === 'valido-white',
+                     'ring-gray-700 bg-gray-800 text-gray-100': $store.theme.currentTheme === 'valido-dark',
+                     'ring-purple-500 bg-gray-900 text-gray-100': $store.theme.currentTheme === 'dracula',
+                     'ring-gray-700 bg-gray-800 text-gray-100': $store.theme.currentTheme === 'material-dark'
+                 }"
+                 x-show="toast.show"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 transform translate-y-2"
+                 x-transition:enter-end="opacity-100 transform translate-y-0"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 transform translate-y-0"
+                 x-transition:leave-end="opacity-0 transform translate-y-2">
+
+                <div class="p-4">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-lg"
+                               :class="{
+                                   'fa-info-circle text-blue-500': toast.type === 'info',
+                                   'fa-check-circle text-green-500': toast.type === 'success',
+                                   'fa-exclamation-triangle text-yellow-500': toast.type === 'warning',
+                                   'fa-times-circle text-red-500': toast.type === 'error'
+                               }"></i>
+                        </div>
+                        <div class="ml-3 w-0 flex-1 pt-0.5">
+                            <p class="text-sm font-medium"
+                               :class="{
+                                   'text-gray-900': $store.theme.currentTheme === 'valido-white',
+                                   'text-gray-100': $store.theme.currentTheme === 'valido-dark',
+                                   'text-gray-100': $store.theme.currentTheme === 'dracula',
+                                   'text-gray-100': $store.theme.currentTheme === 'material-dark'
+                               }"
+                               x-text="toast.title">
+                            </p>
+                            <p class="mt-1 text-sm"
+                               :class="{
+                                   'text-gray-500': $store.theme.currentTheme === 'valido-white',
+                                   'text-gray-400': $store.theme.currentTheme === 'valido-dark',
+                                   'text-gray-400': $store.theme.currentTheme === 'dracula',
+                                   'text-gray-400': $store.theme.currentTheme === 'material-dark'
+                               }"
+                               x-text="toast.message">
+                            </p>
+                            <div class="mt-3 flex space-x-7">
+                                <button @click="dismissToast(toast.id)"
+                                        class="text-sm font-medium transition-colors"
+                                        :class="{
+                                            'text-blue-600 hover:text-blue-500': toast.type === 'info' && $store.theme.currentTheme === 'valido-white',
+                                            'text-blue-400 hover:text-blue-300': toast.type === 'info' && ($store.theme.currentTheme === 'valido-dark' || $store.theme.currentTheme === 'dracula'),
+                                            'text-green-600 hover:text-green-500': toast.type === 'success' && $store.theme.currentTheme === 'valido-white',
+                                            'text-green-400 hover:text-green-300': toast.type === 'success' && ($store.theme.currentTheme === 'valido-dark' || $store.theme.currentTheme === 'dracula'),
+                                            'text-yellow-600 hover:text-yellow-500': toast.type === 'warning' && $store.theme.currentTheme === 'valido-white',
+                                            'text-yellow-400 hover:text-yellow-300': toast.type === 'warning' && ($store.theme.currentTheme === 'valido-dark' || $store.theme.currentTheme === 'dracula'),
+                                            'text-red-600 hover:text-red-500': toast.type === 'error' && $store.theme.currentTheme === 'valido-white',
+                                            'text-red-400 hover:text-red-300': toast.type === 'error' && ($store.theme.currentTheme === 'valido-dark' || $store.theme.currentTheme === 'dracula')
+                                        }">
+                                    Dismiss
+                                </button>
+                                <template x-if="toast.action">
+                                    <button @click="executeAction(toast.id)"
+                                            class="text-sm font-medium transition-colors"
+                                            :class="{
+                                                'text-blue-600 hover:text-blue-500': $store.theme.currentTheme === 'valido-white',
+                                                'text-blue-400 hover:text-blue-300': $store.theme.currentTheme === 'valido-dark' || $store.theme.currentTheme === 'dracula'
+                                            }"
+                                            x-text="toast.action.text">
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="ml-4 flex-shrink-0 flex">
+                            <button @click="dismissToast(toast.id)"
+                                    class="inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                                    :class="{
+                                        'focus:ring-blue-500': $store.theme.currentTheme === 'valido-white',
+                                        'focus:ring-blue-500': $store.theme.currentTheme === 'valido-dark',
+                                        'focus:ring-purple-500': $store.theme.currentTheme === 'dracula',
+                                        'focus:ring-blue-500': $store.theme.currentTheme === 'material-dark'
+                                    }">
+                                <span class="sr-only">Close</span>
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress bar for auto-dismiss -->
+                <div class="bg-gray-200 rounded-b-lg overflow-hidden"
+                     :class="{
+                         'bg-gray-200': $store.theme.currentTheme === 'valido-white',
+                         'bg-gray-700': $store.theme.currentTheme === 'valido-dark',
+                         'bg-gray-700': $store.theme.currentTheme === 'dracula',
+                         'bg-gray-700': $store.theme.currentTheme === 'material-dark'
+                     }"
+                     x-show="toast.autoClose && toast.duration">
+                    <div class="h-1 transition-all ease-linear"
+                         :class="{
+                             'bg-blue-500': toast.type === 'info',
+                             'bg-green-500': toast.type === 'success',
+                             'bg-yellow-500': toast.type === 'warning',
+                             'bg-red-500': toast.type === 'error'
+                         }"
+                         :style="`width: ${(toast.timeLeft / toast.duration) * 100}%`">
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
+
+<script>
+function toastStore() {
+    return {
+        toasts: [],
+        nextId: 1,
+
+        show(message, type = 'info', title = '', duration = 5000, action = null) {
+            const id = this.nextId++;
+            const toast = {
+                id,
+                message,
+                type,
+                title: title || this.getDefaultTitle(type),
+                duration,
+                autoClose: duration > 0,
+                action,
+                show: true,
+                timeLeft: duration
+            };
+
+            this.toasts.push(toast);
+
+            if (toast.autoClose) {
+                const interval = setInterval(() => {
+                    toast.timeLeft -= 100;
+                    if (toast.timeLeft <= 0) {
+                        clearInterval(interval);
+                        this.dismissToast(id);
+                    }
+                }, 100);
+            }
+
+            return id;
+        },
+
+        dismissToast(id) {
+            const toast = this.toasts.find(t => t.id === id);
+            if (toast) {
+                toast.show = false;
+                setTimeout(() => {
+                    const index = this.toasts.findIndex(t => t.id === id);
+                    if (index > -1) {
+                        this.toasts.splice(index, 1);
+                    }
+                }, 300); // Wait for animation to complete
+            }
+        },
+
+        executeAction(id) {
+            const toast = this.toasts.find(t => t.id === id);
+            if (toast && toast.action && toast.action.handler) {
+                toast.action.handler();
+                this.dismissToast(id);
+            }
+        },
+
+        clearAll() {
+            this.toasts.forEach(toast => this.dismissToast(toast.id));
+        },
+
+        getDefaultTitle(type) {
+            const titles = {
+                'info': 'Information',
+                'success': 'Success',
+                'warning': 'Warning',
+                'error': 'Error'
+            };
+            return titles[type] || 'Notification';
+        }
+    };
+}
+
+// Global toast functions for easy access
+function showToast(type, message, title = '', duration = 5000, action = null) {
+    if (window.toastStore) {
+        return window.toastStore.show(message, type, title, duration, action);
+    }
+    // Fallback for when Alpine isn't loaded yet
+    console.log(`${type.toUpperCase()}: ${message}`);
+    return null;
+}
+
+function dismissToast(id) {
+    if (window.toastStore) {
+        window.toastStore.dismissToast(id);
+    }
+}
+
+function clearAllToasts() {
+    if (window.toastStore) {
+        window.toastStore.clearAll();
+    }
+}
+
+// Make functions globally available
+window.showToast = showToast;
+window.dismissToast = dismissToast;
+window.clearAllToasts = clearAllToasts;
+</script>

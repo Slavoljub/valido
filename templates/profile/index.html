@@ -1,0 +1,43 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Profile - ValidoAI{% endblock %}
+
+{% block page_title %}User Profile{% endblock %}
+
+{% block page_subtitle %}Manage your account settings and preferences{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+    <div class="text-center">
+        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-primary-100 mb-4">
+            <i class="fas fa-user text-primary-600 text-xl"></i>
+        </div>
+        <h3 class="text-lg font-medium text-neutral-900 mb-2">User Profile</h3>
+        <p class="text-neutral-600 mb-6">
+            This page is currently under development. Profile management functionality will be implemented soon.
+        </p>
+
+        <div class="bg-neutral-50 rounded-lg p-4 mb-6">
+            <h4 class="font-medium text-neutral-900 mb-2">Coming Soon Features:</h4>
+            <ul class="text-sm text-neutral-600 space-y-1">
+                <li>• Personal information management</li>
+                <li>• Password change functionality</li>
+                <li>• Profile picture upload</li>
+                <li>• Notification preferences</li>
+                <li>• Account security settings</li>
+            </ul>
+        </div>
+
+        <div class="flex justify-center space-x-4">
+            <a href="{{ url_for('main.home_index') }}" class="inline-flex items-center px-4 py-2 border border-neutral-300 rounded-md shadow-sm text-sm font-medium text-neutral-700 bg-white hover:bg-neutral-50">
+                <i class="fas fa-home mr-2"></i>
+                Back to Dashboard
+            </a>
+            <a href="{{ url_for('main.settings') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700">
+                <i class="fas fa-cog mr-2"></i>
+                Settings
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,1525 @@
+{% extends "layouts/base.html" %}
+
+{% block head %}
+{{ super() }}
+
+<!-- Predictive Analytics SEO -->
+{% if seo_manager %}
+{{ seo_manager.generate_meta_tags('predictive-analytics') }}
+{{ seo_manager.generate_tracking_scripts('predictive-analytics') }}
+{% endif %}
+
+<!-- Chart.js for advanced visualizations -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
+<!-- Predictive Analytics-specific CSS -->
+<style>
+/* Predictive Analytics Container */
+.predictive-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 2rem;
+    min-height: calc(100vh - 200px);
+}
+
+/* Header Section */
+.predictive-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: white;
+}
+
+.predictive-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0 0 1rem 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.predictive-subtitle {
+    font-size: 1.1rem;
+    font-weight: 400;
+    margin: 0 0 1.5rem 0;
+    opacity: 0.9;
+}
+
+.header-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.metric-card {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.metric-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    margin-bottom: 0.5rem;
+}
+
+.metric-trend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Forecast Cards */
+.forecast-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.forecast-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #3b82f6;
+}
+
+.forecast-card.revenue { border-left-color: #10b981; }
+.forecast-card.customers { border-left-color: #3b82f6; }
+.forecast-card.inventory { border-left-color: #8b5cf6; }
+.forecast-card.anomalies { border-left-color: #ef4444; }
+
+.forecast-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.forecast-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.forecast-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.forecast-icon.revenue { background: linear-gradient(135deg, #10b981, #059669); }
+.forecast-icon.customers { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.forecast-icon.inventory { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.forecast-icon.anomalies { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+.forecast-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.forecast-button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background: white;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.forecast-button:hover {
+    background: #f8fafc;
+    color: #1e293b;
+}
+
+.forecast-button.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+/* Forecast Content */
+.forecast-content {
+    margin-bottom: 1.5rem;
+}
+
+.forecast-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.metric-item {
+    text-align: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+}
+
+.metric-number {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.metric-name {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+.forecast-chart {
+    position: relative;
+    height: 300px;
+    margin-top: 1.5rem;
+}
+
+/* Insights Section */
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.insights-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.insights-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.insights-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.75rem;
+}
+
+.insights-icon.trends { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.insights-icon.anomalies { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.insights-icon.recommendations { background: linear-gradient(135deg, #10b981, #059669); }
+
+.insights-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.insights-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.insight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+    border-left: 3px solid;
+}
+
+.insight-item.positive { border-left-color: #10b981; }
+.insight-item.warning { border-left-color: #f59e0b; }
+.insight-item.negative { border-left-color: #ef4444; }
+.insight-item.neutral { border-left-color: #64748b; }
+
+.insight-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.625rem;
+    margin-top: 0.125rem;
+}
+
+.insight-content {
+    flex: 1;
+}
+
+.insight-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1e293b;
+    margin: 0 0 0.25rem 0;
+}
+
+.insight-meta {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Scenario Analysis */
+.scenario-section {
+    margin-bottom: 2rem;
+}
+
+.scenario-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.scenario-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.scenario-controls {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.scenario-select {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background: white;
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.scenario-scenarios {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.scenario-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid;
+}
+
+.scenario-card.optimistic { border-left-color: #10b981; }
+.scenario-card.pessimistic { border-left-color: #ef4444; }
+.scenario-card.baseline { border-left-color: #3b82f6; }
+
+.scenario-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 1rem 0;
+}
+
+.scenario-probability {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: #f8fafc;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 1rem;
+}
+
+.scenario-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.scenario-metric {
+    text-align: center;
+}
+
+.scenario-value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.scenario-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+/* Real-time Status */
+.predictive-status {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    z-index: 1000;
+}
+
+.status-indicators {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    animation: pulse 2s infinite;
+}
+
+.status-dot.inactive { background: #ef4444; animation: none; }
+.status-dot.warning { background: #f59e0b; }
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Loading States */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    z-index: 10;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Confidence Indicators */
+.confidence-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #059669;
+}
+
+.confidence-indicator.high { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); color: #059669; }
+.confidence-indicator.medium { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); color: #d97706; }
+.confidence-indicator.low { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #dc2626; }
+
+/* Mobile Responsiveness */
+@media (max-width: 1024px) {
+    .predictive-container {
+        padding: 1rem;
+    }
+
+    .predictive-header {
+        padding: 1.5rem;
+    }
+
+    .predictive-title {
+        font-size: 2rem;
+    }
+
+    .forecast-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .insights-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .header-metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .forecast-metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .scenario-scenarios {
+        grid-template-columns: 1fr;
+    }
+
+    .predictive-status {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+        position: fixed;
+    }
+
+    .status-indicators {
+        flex-direction: row;
+        justify-content: space-around;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .forecast-card,
+    .insights-card,
+    .scenario-card {
+        background: rgba(30, 41, 59, 0.95);
+        border-color: rgba(71, 85, 105, 0.3);
+    }
+
+    .forecast-title,
+    .insights-title,
+    .scenario-name {
+        color: #f8fafc;
+    }
+
+    .metric-item {
+        background: rgba(51, 65, 85, 0.5);
+        border-color: rgba(71, 85, 105, 0.3);
+    }
+
+    .metric-number {
+        color: #f8fafc;
+    }
+
+    .insight-text {
+        color: #f8fafc;
+    }
+
+    .insight-meta {
+        color: #94a3b8;
+    }
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+    .forecast-card,
+    .insights-card,
+    .scenario-card {
+        border-width: 2px;
+    }
+
+    .insight-item {
+        border-width: 4px;
+    }
+
+    .metric-item {
+        border-width: 2px;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .status-dot {
+        animation: none;
+    }
+
+    .loading-spinner {
+        animation: none;
+    }
+
+    .forecast-button,
+    .scenario-select {
+        transition: none;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="predictive-container" x-data="predictiveAnalyticsDashboard()">
+    <!-- Header Section -->
+    <div class="predictive-header">
+        <h1 class="predictive-title">
+            <i class="fas fa-brain mr-4"></i>
+            Predictive Analytics Dashboard
+        </h1>
+        <p class="predictive-subtitle">
+            Advanced forecasting and business intelligence powered by machine learning
+        </p>
+
+        <!-- Header Metrics -->
+        <div class="header-metrics">
+            <div class="metric-card">
+                <div class="metric-value" x-text="headerMetrics.accuracy + '%'">92%</div>
+                <div class="metric-label">Prediction Accuracy</div>
+                <div class="metric-trend positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+2.1%</span>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" x-text="headerMetrics.forecastsActive">4</div>
+                <div class="metric-label">Active Forecasts</div>
+                <div class="metric-trend neutral">
+                    <i class="fas fa-minus"></i>
+                    <span>Stable</span>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" x-text="headerMetrics.anomaliesDetected">2</div>
+                <div class="metric-label">Anomalies Detected</div>
+                <div class="metric-trend warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Review</span>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" x-text="headerMetrics.confidenceScore">87%</div>
+                <div class="metric-label">Confidence Score</div>
+                <div class="metric-trend positive">
+                    <i class="fas fa-thumbs-up"></i>
+                    <span>High</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Forecast -->
+    <div class="forecast-grid">
+        <div class="forecast-card revenue">
+            <div class="forecast-header">
+                <h3 class="forecast-title">
+                    <div class="forecast-icon revenue">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    Revenue Forecast
+                </h3>
+                <div class="forecast-controls">
+                    <button class="forecast-button active" @click="setRevenuePeriod('30d')">30D</button>
+                    <button class="forecast-button" @click="setRevenuePeriod('90d')">90D</button>
+                    <button class="forecast-button" @click="setRevenuePeriod('6m')">6M</button>
+                </div>
+            </div>
+
+            <div class="forecast-content">
+                <div class="forecast-metrics">
+                    <div class="metric-item">
+                        <div class="metric-number" x-text="formatCurrency(revenueForecast.current)">$45,231</div>
+                        <div class="metric-name">Current</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-number" x-text="formatCurrency(revenueForecast.forecast30d)">$47,892</div>
+                        <div class="metric-name">30-Day Forecast</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-number" x-text="revenueForecast.growthRate + '%'" x-bind:class="getTrendClass(revenueForecast.growthRate)">+12.3%</div>
+                        <div class="metric-name">Growth Rate</div>
+                    </div>
+                    <div class="metric-item">
+                        <span class="confidence-indicator" x-bind:class="getConfidenceClass(revenueForecast.confidence)">High</span>
+                        <div class="metric-name">Confidence</div>
+                    </div>
+                </div>
+
+                <div class="forecast-chart">
+                    <canvas id="revenueForecastChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Insights -->
+        <div class="forecast-card customers">
+            <div class="forecast-header">
+                <h3 class="forecast-title">
+                    <div class="forecast-icon customers">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    Customer Insights
+                </h3>
+                <div class="forecast-controls">
+                    <button class="forecast-button active" @click="setCustomerView('predictions')">Predictions</button>
+                    <button class="forecast-button" @click="setCustomerView('segments')">Segments</button>
+                    <button class="forecast-button" @click="setCustomerView('lifetime')">LTV</button>
+                </div>
+            </div>
+
+            <div class="forecast-content">
+                <div class="forecast-metrics">
+                    <div class="metric-item">
+                        <div class="metric-number" x-text="customerInsights.totalCustomers">2,350</div>
+                        <div class="metric-name">Total Customers</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-number" x-text="customerInsights.churnRisk + '%'" x-bind:class="getRiskClass(customerInsights.churnRisk)">22%</div>
+                        <div class="metric-name">Churn Risk</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-number" x-text="formatCurrency(customerInsights.avgLtv)">$1,500</div>
+                        <div class="metric-name">Avg LTV</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-number" x-text="customerInsights.purchaseProb + '%'" x-bind:class="getProbabilityClass(customerInsights.purchaseProb)">68%</div>
+                        <div class="metric-name">Purchase Prob</div>
+                    </div>
+                </div>
+
+                <div class="forecast-chart">
+                    <canvas id="customerInsightsChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Optimization -->
+        <div class="forecast-card inventory">
+            <div class="forecast-header">
+                <h3 class="forecast-title">
+                    <div class="forecast-icon inventory">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    Inventory Optimization
+                </h3>
+                <div class="forecast-controls">
+                    <button class="forecast-button active" @click="setInventoryView('demand')">Demand</button>
+                    <button class="forecast-button" @click="setInventoryView('stockout')">Stockout</button>
+                    <button class="forecast-button" @click="setInventoryView('optimization')">Optimize</button>
+                </div>
+            </div>
+
+            <div class="forecast-content">
+                <div class="forecast-metrics">
+                    <div class="metric-item">
+                        <div class="metric-number" x-text="inventoryOptimization.demandForecast">150</div>
+                        <div class="metric-name">Demand Forecast</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-number" x-text="inventoryOptimization.stockoutRisk + '%'" x-bind:class="getRiskClass(inventoryOptimization.stockoutRisk)">15%</div>
+                        <div class="metric-name">Stockout Risk</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-number" x-text="inventoryOptimization.optimalStock">120</div>
+                        <div class="metric-name">Optimal Stock</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-number" x-text="formatCurrency(inventoryOptimization.costSavings)">$2,500</div>
+                        <div class="metric-name">Potential Savings</div>
+                    </div>
+                </div>
+
+                <div class="forecast-chart">
+                    <canvas id="inventoryOptimizationChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Anomaly Detection -->
+        <div class="forecast-card anomalies">
+            <div class="forecast-header">
+                <h3 class="forecast-title">
+                    <div class="forecast-icon anomalies">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    Anomaly Detection
+                </h3>
+                <div class="forecast-controls">
+                    <button class="forecast-button active" @click="setAnomalyView('revenue')">Revenue</button>
+                    <button class="forecast-button" @click="setAnomalyView('customers')">Customers</button>
+                    <button class="forecast-button" @click="setAnomalyView('operations')">Operations</button>
+                </div>
+            </div>
+
+            <div class="forecast-content">
+                <div class="forecast-metrics">
+                    <div class="metric-item">
+                        <div class="metric-number" x-text="anomalyDetection.totalAnomalies">5</div>
+                        <div class="metric-name">Total Anomalies</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-number" x-text="anomalyDetection.highSeverity">2</div>
+                        <div class="metric-name">High Severity</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-number" x-text="anomalyDetection.mediumSeverity">2</div>
+                        <div class="metric-name">Medium Severity</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-number" x-text="anomalyDetection.impactScore">0.75</div>
+                        <div class="metric-name">Impact Score</div>
+                    </div>
+                </div>
+
+                <div class="forecast-chart">
+                    <canvas id="anomalyDetectionChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Business Insights -->
+    <div class="insights-grid">
+        <div class="insights-card">
+            <div class="insights-header">
+                <div class="insights-icon trends">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="insights-title">Trend Analysis</h3>
+            </div>
+
+            <div class="insights-list" x-show="trendInsights.length > 0">
+                <template x-for="insight in trendInsights" :key="insight.id">
+                    <div class="insight-item" :class="insight.type">
+                        <div class="insight-icon" :class="insight.type">
+                            <i :class="getInsightIcon(insight.type)"></i>
+                        </div>
+                        <div class="insight-content">
+                            <p class="insight-text" x-text="insight.text"></p>
+                            <p class="insight-meta" x-text="formatTimestamp(insight.timestamp)"></p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <div class="insights-card">
+            <div class="insights-header">
+                <div class="insights-icon recommendations">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <h3 class="insights-title">AI Recommendations</h3>
+            </div>
+
+            <div class="insights-list" x-show="recommendations.length > 0">
+                <template x-for="recommendation in recommendations" :key="recommendation.id">
+                    <div class="insight-item" :class="recommendation.priority">
+                        <div class="insight-icon" :class="recommendation.priority">
+                            <i :class="getRecommendationIcon(recommendation.priority)"></i>
+                        </div>
+                        <div class="insight-content">
+                            <p class="insight-text" x-text="recommendation.text"></p>
+                            <p class="insight-meta" x-text="recommendation.category"></p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <div class="insights-card">
+            <div class="insights-header">
+                <div class="insights-icon anomalies">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <h3 class="insights-title">Risk Assessment</h3>
+            </div>
+
+            <div class="insights-list" x-show="riskAssessments.length > 0">
+                <template x-for="risk in riskAssessments" :key="risk.id">
+                    <div class="insight-item" :class="risk.level">
+                        <div class="insight-icon" :class="risk.level">
+                            <i :class="getRiskIcon(risk.level)"></i>
+                        </div>
+                        <div class="insight-content">
+                            <p class="insight-text" x-text="risk.description"></p>
+                            <p class="insight-meta" x-text="risk.probability + ' probability - ' + risk.impact"></p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scenario Analysis -->
+    <div class="scenario-section">
+        <div class="scenario-header">
+            <h2 class="scenario-title">
+                <i class="fas fa-branching mr-3"></i>
+                Scenario Analysis
+            </h2>
+            <div class="scenario-controls">
+                <select class="scenario-select" x-model="selectedScenario">
+                    <option value="all">All Scenarios</option>
+                    <option value="optimistic">Optimistic</option>
+                    <option value="baseline">Baseline</option>
+                    <option value="pessimistic">Pessimistic</option>
+                </select>
+                <button class="forecast-button" @click="runScenarioAnalysis()">
+                    <i class="fas fa-play mr-2"></i>
+                    Run Analysis
+                </button>
+            </div>
+        </div>
+
+        <div class="scenario-scenarios">
+            <template x-for="scenario in scenarios" :key="scenario.id">
+                <div class="scenario-card" :class="scenario.type" x-show="shouldShowScenario(scenario)">
+                    <h4 class="scenario-name" x-text="scenario.name"></h4>
+                    <span class="scenario-probability" x-text="scenario.probability + '% probability'"></span>
+
+                    <div class="scenario-metrics">
+                        <div class="scenario-metric">
+                            <div class="scenario-value" x-text="formatCurrency(scenario.revenue)"></div>
+                            <div class="scenario-label">Revenue</div>
+                        </div>
+                        <div class="scenario-metric">
+                            <div class="scenario-value" x-text="scenario.customers"></div>
+                            <div class="scenario-label">Customers</div>
+                        </div>
+                        <div class="scenario-metric">
+                            <div class="scenario-value" x-text="formatCurrency(scenario.profit)"></div>
+                            <div class="scenario-label">Profit</div>
+                        </div>
+                        <div class="scenario-metric">
+                            <div class="scenario-value" x-text="scenario.growth + '%'" x-bind:class="getGrowthClass(scenario.growth)"></div>
+                            <div class="scenario-label">Growth</div>
+                        </div>
+                    </div>
+
+                    <div class="scenario-description">
+                        <p x-text="scenario.description"></p>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Real-time Status -->
+    <div class="predictive-status">
+        <div class="status-indicators">
+            <div class="status-item">
+                <div class="status-dot" :class="getEngineStatusClass()"></div>
+                <span>Prediction Engine</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot" :class="getAccuracyStatusClass()"></div>
+                <span>Model Accuracy</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot" :class="getAnomalyStatusClass()"></div>
+                <span>Anomaly Detection</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot" :class="getForecastStatusClass()"></div>
+                <span>Forecast Updates</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js and Predictive Analytics JavaScript -->
+<script>
+function predictiveAnalyticsDashboard() {
+    return {
+        // Data
+        revenueForecast: {
+            current: 45231,
+            forecast30d: 47892,
+            growthRate: 12.3,
+            confidence: 0.85
+        },
+        customerInsights: {
+            totalCustomers: 2350,
+            churnRisk: 22,
+            avgLtv: 1500,
+            purchaseProb: 68
+        },
+        inventoryOptimization: {
+            demandForecast: 150,
+            stockoutRisk: 15,
+            optimalStock: 120,
+            costSavings: 2500
+        },
+        anomalyDetection: {
+            totalAnomalies: 5,
+            highSeverity: 2,
+            mediumSeverity: 2,
+            lowSeverity: 1,
+            impactScore: 0.75
+        },
+        trendInsights: [],
+        recommendations: [],
+        riskAssessments: [],
+        scenarios: [],
+        selectedScenario: 'all',
+        headerMetrics: {
+            accuracy: 92,
+            forecastsActive: 4,
+            anomaliesDetected: 2,
+            confidenceScore: 87
+        },
+
+        // Charts
+        charts: {},
+
+        // Initialize
+        async init() {
+            console.log('🚀 Initializing Predictive Analytics Dashboard...');
+
+            await this.loadAnalyticsData();
+            this.initializeCharts();
+            this.setupWebSocketConnection();
+            this.startRealTimeUpdates();
+
+            console.log('✅ Predictive Analytics Dashboard initialized');
+        },
+
+        // Data Loading
+        async loadAnalyticsData() {
+            try {
+                const response = await fetch('/api/predictive/data');
+                if (response.ok) {
+                    const data = await response.json();
+                    this.updateAnalyticsData(data);
+                } else {
+                    console.error('Failed to load analytics data');
+                    this.loadMockData();
+                }
+            } catch (error) {
+                console.error('Error loading analytics data:', error);
+                this.loadMockData();
+            }
+        },
+
+        updateAnalyticsData(data) {
+            // Update all analytics data from API
+            if (data.revenue_forecast) {
+                this.updateRevenueForecast(data.revenue_forecast);
+            }
+            if (data.customer_insights) {
+                this.updateCustomerInsights(data.customer_insights);
+            }
+            if (data.inventory_optimization) {
+                this.updateInventoryOptimization(data.inventory_optimization);
+            }
+            if (data.anomaly_report) {
+                this.updateAnomalyDetection(data.anomaly_report);
+            }
+            if (data.trend_analysis) {
+                this.updateTrendInsights(data.trend_analysis);
+            }
+            if (data.business_recommendations) {
+                this.updateRecommendations(data.business_recommendations);
+            }
+        },
+
+        loadMockData() {
+            // Mock data for demonstration
+            this.trendInsights = [
+                {
+                    id: 1,
+                    type: 'positive',
+                    text: 'Revenue growth has accelerated by 3.2% this month',
+                    timestamp: new Date().toISOString()
+                },
+                {
+                    id: 2,
+                    type: 'warning',
+                    text: 'Customer acquisition cost increased by 15%',
+                    timestamp: new Date().toISOString()
+                },
+                {
+                    id: 3,
+                    type: 'neutral',
+                    text: 'Seasonal patterns detected in Q4 sales data',
+                    timestamp: new Date().toISOString()
+                }
+            ];
+
+            this.recommendations = [
+                {
+                    id: 1,
+                    priority: 'high',
+                    text: 'Increase marketing spend in high-converting channels by 20%',
+                    category: 'Marketing Optimization'
+                },
+                {
+                    id: 2,
+                    priority: 'medium',
+                    text: 'Implement customer retention program for high-risk segments',
+                    category: 'Customer Success'
+                },
+                {
+                    id: 3,
+                    priority: 'low',
+                    text: 'Consider expanding product line based on demand forecasts',
+                    category: 'Product Strategy'
+                }
+            ];
+
+            this.riskAssessments = [
+                {
+                    id: 1,
+                    level: 'warning',
+                    description: 'Supply chain disruption risk increased by 25%',
+                    probability: '35%',
+                    impact: 'Medium'
+                },
+                {
+                    id: 2,
+                    level: 'positive',
+                    description: 'Market expansion opportunity identified',
+                    probability: '75%',
+                    impact: 'High'
+                }
+            ];
+
+            this.scenarios = [
+                {
+                    id: 1,
+                    type: 'optimistic',
+                    name: 'Best Case Scenario',
+                    probability: 25,
+                    revenue: 65000,
+                    customers: 2800,
+                    profit: 15000,
+                    growth: 18.5,
+                    description: 'Aggressive growth with new market penetration and product launches'
+                },
+                {
+                    id: 2,
+                    type: 'baseline',
+                    name: 'Expected Scenario',
+                    probability: 50,
+                    revenue: 52000,
+                    customers: 2450,
+                    profit: 8500,
+                    growth: 8.2,
+                    description: 'Moderate growth following current trends and market conditions'
+                },
+                {
+                    id: 3,
+                    type: 'pessimistic',
+                    name: 'Worst Case Scenario',
+                    probability: 25,
+                    revenue: 38000,
+                    customers: 2100,
+                    profit: 3200,
+                    growth: -2.1,
+                    description: 'Conservative outlook with potential market challenges'
+                }
+            ];
+        },
+
+        updateRevenueForecast(data) {
+            this.revenueForecast = {
+                current: data.current || this.revenueForecast.current,
+                forecast30d: data.forecast_30d || this.revenueForecast.forecast30d,
+                growthRate: data.growth_rate || this.revenueForecast.growthRate,
+                confidence: data.confidence || this.revenueForecast.confidence
+            };
+        },
+
+        updateCustomerInsights(data) {
+            this.customerInsights = {
+                totalCustomers: data.total_customers || this.customerInsights.totalCustomers,
+                churnRisk: data.churn_risk || this.customerInsights.churnRisk,
+                avgLtv: data.avg_ltv || this.customerInsights.avgLtv,
+                purchaseProb: data.purchase_probability || this.customerInsights.purchaseProb
+            };
+        },
+
+        updateInventoryOptimization(data) {
+            this.inventoryOptimization = {
+                demandForecast: data.demand_forecast || this.inventoryOptimization.demandForecast,
+                stockoutRisk: data.stockout_risk || this.inventoryOptimization.stockoutRisk,
+                optimalStock: data.optimal_stock || this.inventoryOptimization.optimalStock,
+                costSavings: data.cost_savings || this.inventoryOptimization.costSavings
+            };
+        },
+
+        updateAnomalyDetection(data) {
+            this.anomalyDetection = {
+                totalAnomalies: data.total_anomalies || this.anomalyDetection.totalAnomalies,
+                highSeverity: data.high_severity || this.anomalyDetection.highSeverity,
+                mediumSeverity: data.medium_severity || this.anomalyDetection.mediumSeverity,
+                lowSeverity: data.low_severity || this.anomalyDetection.lowSeverity,
+                impactScore: data.impact_score || this.anomalyDetection.impactScore
+            };
+        },
+
+        updateTrendInsights(data) {
+            if (data.insights) {
+                this.trendInsights = data.insights.map((insight, index) => ({
+                    id: index + 1,
+                    type: insight.type || 'neutral',
+                    text: insight.text,
+                    timestamp: insight.timestamp || new Date().toISOString()
+                }));
+            }
+        },
+
+        updateRecommendations(data) {
+            if (data.recommendations) {
+                this.recommendations = data.recommendations.map((rec, index) => ({
+                    id: index + 1,
+                    priority: rec.priority || 'medium',
+                    text: rec.text,
+                    category: rec.category || 'General'
+                }));
+            }
+        },
+
+        // Chart Management
+        initializeCharts() {
+            this.initializeRevenueChart();
+            this.initializeCustomerChart();
+            this.initializeInventoryChart();
+            this.initializeAnomalyChart();
+        },
+
+        initializeRevenueChart() {
+            const ctx = document.getElementById('revenueForecastChart').getContext('2d');
+            this.charts.revenue = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Actual Revenue',
+                        data: [42000, 45000, 43000, 47000, 46000, 48000, 50000, 52000, 51000, 53000, 55000, 57000],
+                        borderColor: 'rgb(34, 197, 94)',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        fill: false,
+                        tension: 0.4
+                    }, {
+                        label: 'Forecast',
+                        data: [57000, 59000, 61000, 63000, 65000],
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        },
+
+        initializeCustomerChart() {
+            const ctx = document.getElementById('customerInsightsChart').getContext('2d');
+            this.charts.customer = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['High Risk', 'Medium Risk', 'Low Risk'],
+                    datasets: [{
+                        data: [22, 35, 43],
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(16, 185, 129, 0.8)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        },
+
+        initializeInventoryChart() {
+            const ctx = document.getElementById('inventoryOptimizationChart').getContext('2d');
+            this.charts.inventory = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Product A', 'Product B', 'Product C', 'Product D', 'Product E'],
+                    datasets: [{
+                        label: 'Current Stock',
+                        data: [95, 110, 65, 85, 75],
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Optimal Stock',
+                        data: [120, 85, 75, 90, 80],
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                        borderColor: 'rgb(16, 185, 129)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        },
+
+        initializeAnomalyChart() {
+            const ctx = document.getElementById('anomalyDetectionChart').getContext('2d');
+            this.charts.anomaly = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Anomaly Score',
+                        data: [0.1, 0.15, 0.08, 0.35, 0.12, 0.25],
+                        borderColor: 'rgb(239, 68, 68)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Threshold',
+                        data: [0.25, 0.25, 0.25, 0.25, 0.25, 0.25],
+                        borderColor: 'rgb(245, 158, 11)',
+                        borderDash: [5, 5],
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 0.5
+                        }
+                    }
+                }
+            });
+        },
+
+        // WebSocket Integration
+        setupWebSocketConnection() {
+            if (window.chatSocket) {
+                window.chatSocket.on('predictive_update', (data) => {
+                    this.updateAnalyticsData(data);
+                    this.updateCharts();
+                });
+            }
+        },
+
+        // Real-time Updates
+        startRealTimeUpdates() {
+            setInterval(() => {
+                this.loadAnalyticsData();
+            }, 300000); // Update every 5 minutes
+        },
+
+        updateCharts() {
+            // Update charts with new data
+            if (this.charts.revenue) {
+                // Add new data point
+                const newValue = Math.random() * 10000 + 45000;
+                this.charts.revenue.data.datasets[0].data.push(newValue);
+                this.charts.revenue.data.labels.push(new Date().toLocaleDateString());
+                this.charts.revenue.update();
+            }
+        },
+
+        // Utility Methods
+        formatCurrency(value) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        },
+
+        getTrendClass(value) {
+            if (value > 0) return 'positive';
+            if (value < 0) return 'negative';
+            return 'neutral';
+        },
+
+        getRiskClass(value) {
+            if (value > 20) return 'negative';
+            if (value > 10) return 'warning';
+            return 'positive';
+        },
+
+        getProbabilityClass(value) {
+            if (value > 70) return 'positive';
+            if (value > 50) return 'warning';
+            return 'negative';
+        },
+
+        getConfidenceClass(confidence) {
+            if (confidence > 0.8) return 'high';
+            if (confidence > 0.6) return 'medium';
+            return 'low';
+        },
+
+        getGrowthClass(value) {
+            if (value > 10) return 'positive';
+            if (value < 0) return 'negative';
+            return 'neutral';
+        },
+
+        getInsightIcon(type) {
+            switch (type) {
+                case 'positive': return 'fas fa-arrow-up';
+                case 'warning': return 'fas fa-exclamation-triangle';
+                case 'negative': return 'fas fa-arrow-down';
+                default: return 'fas fa-info-circle';
+            }
+        },
+
+        getRecommendationIcon(priority) {
+            switch (priority) {
+                case 'high': return 'fas fa-exclamation-circle';
+                case 'medium': return 'fas fa-lightbulb';
+                case 'low': return 'fas fa-info-circle';
+                default: return 'fas fa-info-circle';
+            }
+        },
+
+        getRiskIcon(level) {
+            switch (level) {
+                case 'warning': return 'fas fa-exclamation-triangle';
+                case 'negative': return 'fas fa-exclamation-circle';
+                case 'positive': return 'fas fa-check-circle';
+                default: return 'fas fa-info-circle';
+            }
+        },
+
+        shouldShowScenario(scenario) {
+            return this.selectedScenario === 'all' || scenario.type === this.selectedScenario;
+        },
+
+        formatTimestamp(timestamp) {
+            return new Date(timestamp).toLocaleString();
+        },
+
+        getEngineStatusClass() {
+            return 'active'; // In production, check actual engine status
+        },
+
+        getAccuracyStatusClass() {
+            return this.headerMetrics.accuracy > 90 ? 'active' : 'warning';
+        },
+
+        getAnomalyStatusClass() {
+            return this.anomalyDetection.totalAnomalies > 3 ? 'warning' : 'active';
+        },
+
+        getForecastStatusClass() {
+            return 'active'; // In production, check forecast update status
+        },
+
+        // Control Methods
+        setRevenuePeriod(period) {
+            console.log('Revenue period changed to:', period);
+        },
+
+        setCustomerView(view) {
+            console.log('Customer view changed to:', view);
+        },
+
+        setInventoryView(view) {
+            console.log('Inventory view changed to:', view);
+        },
+
+        setAnomalyView(view) {
+            console.log('Anomaly view changed to:', view);
+        },
+
+        runScenarioAnalysis() {
+            console.log('Running scenario analysis...');
+            // In production, trigger actual scenario analysis
+        }
+    };
+}
+
+// Auto-initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Predictive Analytics Dashboard loaded successfully');
+});
+</script>
+{% endblock %}

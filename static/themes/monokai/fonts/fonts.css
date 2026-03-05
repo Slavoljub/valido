@@ -1,0 +1,12 @@
+/* Monokai Theme - Fonts */
+
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Monaco:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --font-family-sans: 'Monaco', system-ui, -apple-system, sans-serif;
+}
+
+[data-theme="monokai"] {
+    font-family: var(--font-family-sans);
+}

@@ -1,0 +1,440 @@
+<!-- Countries Tab Content -->
+<div class="space-y-6">
+    <!-- Search and Filters -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="form-label">Search</label>
+                <input type="text" id="countriesSearchInput" placeholder="Search countries..." class="form-input"
+                       onkeyup="filterCountries()">
+            </div>
+            <div>
+                <label class="form-label">Region</label>
+                <select id="regionFilter" class="form-input" onchange="filterCountries()">
+                    <option value="">All Regions</option>
+                    <option value="Europe">Europe</option>
+                    <option value="Asia">Asia</option>
+                    <option value="Africa">Africa</option>
+                    <option value="North America">North America</option>
+                    <option value="South America">South America</option>
+                    <option value="Oceania">Oceania</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Currency</label>
+                <select id="currencyFilter" class="form-input" onchange="filterCountries()">
+                    <option value="">All Currencies</option>
+                    <!-- Will be populated by JavaScript -->
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Countries Table -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <h3 class="text-lg font-medium text-gray-900">Countries</h3>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button onclick="openCreateCountryModal()" class="btn-primary">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Country
+                    </button>
+                    <button onclick="refreshCountries()" class="btn-secondary">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Country
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            ISO Code
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Region
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Currency
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Phone Code
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="countriesTableBody" class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center">
+                            <i class="fas fa-spinner fa-spin text-3xl text-gray-400 mb-4"></i>
+                            <p class="text-gray-500">Loading countries...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div id="countriesStatsContainer" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <!-- Stats will be loaded here -->
+    </div>
+</div>
+
+<!-- Create/Edit Country Modal -->
+<div id="countryModal" class="modal-overlay hidden">
+    <div class="modal-container max-w-md">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-medium text-gray-900" id="countryModalTitle">Add New Country</h3>
+            <button onclick="closeCountryModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form id="countryForm" onsubmit="saveCountry(event)">
+            <input type="hidden" id="countryId" name="countries_id">
+
+            <div class="space-y-4">
+                <div>
+                    <label class="form-label required">Country Name</label>
+                    <input type="text" id="countryName" name="countries_name" required class="form-input">
+                </div>
+
+                <div>
+                    <label class="form-label required">ISO Code (2 letters)</label>
+                    <input type="text" id="isoCode" name="iso_code" required class="form-input"
+                           pattern="[A-Z]{2}" maxlength="2" placeholder="RS">
+                </div>
+
+                <div>
+                    <label class="form-label">Region</label>
+                    <select id="countryRegion" name="region" class="form-input">
+                        <option value="">Select Region</option>
+                        <option value="Europe">Europe</option>
+                        <option value="Asia">Asia</option>
+                        <option value="Africa">Africa</option>
+                        <option value="North America">North America</option>
+                        <option value="South America">South America</option>
+                        <option value="Oceania">Oceania</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="form-label">Currency Code</label>
+                    <input type="text" id="currencyCode" name="currency_code" class="form-input"
+                           pattern="[A-Z]{3}" maxlength="3" placeholder="RSD">
+                </div>
+
+                <div>
+                    <label class="form-label">Phone Code</label>
+                    <input type="text" id="phoneCode" name="phone_code" class="form-input"
+                           placeholder="+381" pattern="\+[0-9]+">
+                </div>
+
+                <div>
+                    <label class="form-label">Flag Emoji</label>
+                    <input type="text" id="flagEmoji" name="flag_emoji" class="form-input"
+                           placeholder="🇷🇸" maxlength="10">
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 mt-6">
+                <button type="button" onclick="closeCountryModal()" class="btn-secondary">
+                    Cancel
+                </button>
+                <button type="submit" class="btn-primary">
+                    Save Country
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tab-specific JavaScript -->
+<script>
+function filterCountries() {
+    const searchTerm = document.getElementById('countriesSearchInput').value.toLowerCase();
+    const regionFilter = document.getElementById('regionFilter').value;
+    const currencyFilter = document.getElementById('currencyFilter').value;
+
+    const rows = document.querySelectorAll('#countriesTableBody tr[data-country-id]');
+    rows.forEach(row => {
+        const countryName = row.dataset.countryName?.toLowerCase() || '';
+        const region = row.dataset.region || '';
+        const currency = row.dataset.currency || '';
+
+        const matchesSearch = countryName.includes(searchTerm);
+        const matchesRegion = !regionFilter || region === regionFilter;
+        const matchesCurrency = !currencyFilter || currency === currencyFilter;
+
+        row.style.display = (matchesSearch && matchesRegion && matchesCurrency) ? '' : 'none';
+    });
+}
+
+function refreshCountries() {
+    loadCountries();
+}
+
+async function loadCountries() {
+    try {
+        const response = await fetch('/api/countries');
+        const data = await response.json();
+
+        if (data.success) {
+            renderCountries(data.countries);
+            renderCountriesStats(data.stats);
+            loadCountryFilters(data.countries);
+        } else {
+            showToast('Error', 'Failed to load countries', 'error');
+        }
+    } catch (error) {
+        console.error('Error loading countries:', error);
+        showToast('Error', 'Failed to load countries', 'error');
+    }
+}
+
+function renderCountries(countries) {
+    const tbody = document.getElementById('countriesTableBody');
+
+    if (!countries || countries.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="px-6 py-12 text-center">
+                    <i class="fas fa-globe text-3xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500 mb-4">No countries found</p>
+                    <button onclick="openCreateCountryModal()" class="btn-primary">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add First Country
+                    </button>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = countries.map(country => `
+        <tr data-country-id="${country.countries_id}"
+            data-country-name="${country.countries_name}"
+            data-region="${country.region || ''}"
+            data-currency="${country.currency_code || ''}">
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                    <div class="text-2xl mr-3">${country.flag_emoji || '🏳️'}</div>
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">${country.countries_name}</div>
+                    </div>
+                </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                    ${country.iso_code || 'N/A'}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${country.region || 'N/A'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${country.currency_code || 'N/A'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${country.phone_code || 'N/A'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <div class="flex space-x-2">
+                    <button onclick="viewCountry('${country.countries_id}')"
+                            class="text-blue-600 hover:text-blue-900" title="View">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button onclick="editCountry('${country.countries_id}')"
+                            class="text-green-600 hover:text-green-900" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="deleteCountry('${country.countries_id}')"
+                            class="text-red-600 hover:text-red-900" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderCountriesStats(stats) {
+    const container = document.getElementById('countriesStatsContainer');
+    if (!stats) return;
+
+    container.innerHTML = `
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                        <i class="fas fa-globe text-white text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <div class="text-2xl font-bold text-gray-900">${stats.total || 0}</div>
+                    <div class="text-sm text-gray-500">Total Countries</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                        <i class="fas fa-euro-sign text-white text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <div class="text-2xl font-bold text-gray-900">${stats.uniqueCurrencies || 0}</div>
+                    <div class="text-sm text-gray-500">Unique Currencies</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
+                        <i class="fas fa-map text-white text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <div class="text-2xl font-bold text-gray-900">${stats.uniqueRegions || 0}</div>
+                    <div class="text-sm text-gray-500">Regions</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
+                        <i class="fas fa-flag text-white text-sm"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <div class="text-2xl font-bold text-gray-900">${stats.withFlags || 0}</div>
+                    <div class="text-sm text-gray-500">With Flag Emojis</div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function loadCountryFilters(countries) {
+    // Extract unique currencies for filter
+    const currencies = [...new Set(countries.map(c => c.currency_code).filter(Boolean))];
+    const currencySelect = document.getElementById('currencyFilter');
+    currencySelect.innerHTML = '<option value="">All Currencies</option>' +
+        currencies.map(currency => `<option value="${currency}">${currency}</option>`).join('');
+}
+
+function openCreateCountryModal() {
+    document.getElementById('countryModalTitle').textContent = 'Add New Country';
+    document.getElementById('countryForm').reset();
+    document.getElementById('countryId').value = '';
+    document.getElementById('countryModal').classList.remove('hidden');
+}
+
+function closeCountryModal() {
+    document.getElementById('countryModal').classList.add('hidden');
+}
+
+async function saveCountry(event) {
+    event.preventDefault();
+
+    const formData = new FormData(event.target);
+    const countryData = Object.fromEntries(formData.entries());
+
+    const countryId = countryData.countries_id;
+    const isEdit = !!countryId;
+
+    try {
+        const response = await fetch(`/api/countries${isEdit ? `/${countryId}` : ''}`, {
+            method: isEdit ? 'PUT' : 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(countryData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showToast('Success', `Country ${isEdit ? 'updated' : 'created'} successfully`, 'success');
+            closeCountryModal();
+            loadCountries();
+        } else {
+            showToast('Error', result.message || 'Failed to save country', 'error');
+        }
+    } catch (error) {
+        console.error('Error saving country:', error);
+        showToast('Error', 'Failed to save country', 'error');
+    }
+}
+
+function viewCountry(id) {
+    // Implement view functionality
+    showToast('Info', 'View functionality to be implemented', 'info');
+}
+
+function editCountry(id) {
+    // Load country data and open edit modal
+    fetch(`/api/countries/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const country = data.country;
+                document.getElementById('countryModalTitle').textContent = 'Edit Country';
+                document.getElementById('countryId').value = country.countries_id;
+                document.getElementById('countryName').value = country.countries_name;
+                document.getElementById('isoCode').value = country.iso_code || '';
+                document.getElementById('countryRegion').value = country.region || '';
+                document.getElementById('currencyCode').value = country.currency_code || '';
+                document.getElementById('phoneCode').value = country.phone_code || '';
+                document.getElementById('flagEmoji').value = country.flag_emoji || '';
+                document.getElementById('countryModal').classList.remove('hidden');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading country:', error);
+            showToast('Error', 'Failed to load country data', 'error');
+        });
+}
+
+function deleteCountry(id) {
+    if (confirm('Are you sure you want to delete this country? This action cannot be undone.')) {
+        fetch(`/api/countries/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Success', 'Country deleted successfully', 'success');
+                loadCountries();
+            } else {
+                showToast('Error', data.message || 'Failed to delete country', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting country:', error);
+            showToast('Error', 'Failed to delete country', 'error');
+        });
+    }
+}
+
+// Initialize when tab is activated
+document.addEventListener('countriesTabActivated', function() {
+    loadCountries();
+});
+</script>

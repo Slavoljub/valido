@@ -1,0 +1,10 @@
+{
+  "default_timeout": 300,
+  "user_data_timeout": 600,
+  "query_results_timeout": 1800,
+  "static_data_timeout": 3600,
+  "max_cache_size": 1000,
+  "cache_compression": true,
+  "memory_cache": true,
+  "file_cache": true
+}

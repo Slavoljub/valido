@@ -1,0 +1,138 @@
+# ValidoAI - Advanced Database Platform
+# Robots.txt - Search Engine Optimization
+
+# Default crawling rules
+User-agent: *
+Allow: /
+Allow: /dashboard
+Allow: /admin
+Allow: /settings
+Allow: /companies
+Allow: /users
+Allow: /financial
+Allow: /notifications
+Allow: /reports
+Allow: /docs
+Allow: /help
+
+# Private and sensitive areas - DO NOT CRAWL
+Disallow: /admin/private/
+Disallow: /api/private/
+Disallow: /temp/
+Disallow: /cache/
+Disallow: /logs/
+Disallow: /debug/
+Disallow: /test/
+Disallow: /dev/
+Disallow: /staging/
+Disallow: /backup/
+
+# Temporary files and assets
+Disallow: /*.tmp
+Disallow: /*.temp
+Disallow: /*.bak
+Disallow: /*.backup
+Disallow: /*~
+Disallow: /*.swp
+Disallow: /*.swo
+
+# API endpoints (selective)
+Allow: /api/public/
+Disallow: /api/
+
+# Assets and media (selective crawling)
+Allow: /static/images/
+Allow: /static/css/
+Allow: /static/js/
+Allow: /static/fonts/
+Disallow: /static/temp/
+Disallow: /static/cache/
+
+# Crawl delay for different bots
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://valido.ai/sitemap.xml
+
+# Additional bot-specific rules
+
+# Google Bot
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Bing Bot
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Yahoo Bot
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
+
+# DuckDuckGo Bot
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 1
+
+# Baidu Spider
+User-agent: Baiduspider
+Allow: /
+Crawl-delay: 5
+
+# Yandex Bot
+User-agent: YandexBot
+Allow: /
+Crawl-delay: 2
+
+# Facebook Crawler
+User-agent: facebookexternalhit
+Allow: /
+Allow: /static/images/
+Disallow: /admin/
+Disallow: /api/
+
+# Twitter Bot
+User-agent: Twitterbot
+Allow: /
+Allow: /static/images/
+Disallow: /admin/
+Disallow: /api/
+
+# LinkedIn Bot
+User-agent: LinkedInBot
+Allow: /
+Allow: /static/images/
+Disallow: /admin/
+Disallow: /api/
+
+# WhatsApp Bot
+User-agent: WhatsApp
+Allow: /
+Allow: /static/images/
+Disallow: /admin/
+Disallow: /api/
+
+# Block unwanted bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+# Emergency access (uncomment if needed)
+# User-agent: *
+# Disallow: /
+
+# Contact information for webmasters
+# Contact: admin@valido.ai

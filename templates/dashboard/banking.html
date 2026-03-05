@@ -1,0 +1,296 @@
+{% extends "layouts/dashboard-layout.html" %}
+
+{% block title %}Banking Dashboard - ValidoAI{% endblock %}
+{% block description %}Financial overview and banking dashboard{% endblock %}
+{% block breadcrumb %}Banking Dashboard{% endblock %}
+{% block page_title %}Banking Dashboard{% endblock %}
+{% block page_description %}Manage your finances and track your financial goals{% endblock %}
+
+{% block content %}
+<!-- Financial Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Total Balance -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600">Total Balance</p>
+                <p class="text-2xl font-bold text-gray-900 mt-1">$857,967</p>
+                <p class="text-sm text-green-600 mt-1">
+                    <i class="fas fa-arrow-up mr-1"></i>+2.5% from last month
+                </p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-wallet text-blue-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expenses -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600">Expenses</p>
+                <p class="text-2xl font-bold text-red-600 mt-1">-$7,534</p>
+                <p class="text-sm text-red-600 mt-1">
+                    <i class="fas fa-arrow-up mr-1"></i>+12.3% from last month
+                </p>
+            </div>
+            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-shopping-cart text-red-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Investment Funds -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600">Investment Funds</p>
+                <p class="text-2xl font-bold text-gray-900 mt-1">$65,000</p>
+                <p class="text-sm text-green-600 mt-1">
+                    <i class="fas fa-arrow-up mr-1"></i>+8.1% from last month
+                </p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-building text-green-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Savings -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600">Savings</p>
+                <p class="text-2xl font-bold text-gray-900 mt-1">$20,449</p>
+                <p class="text-sm text-green-600 mt-1">
+                    <i class="fas fa-arrow-up mr-1"></i>+5.2% from last month
+                </p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-piggy-bank text-purple-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="flex items-center justify-end space-x-3 mb-8">
+    <button class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center">
+        <i class="fas fa-plus mr-2"></i>
+        Add money
+    </button>
+    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center">
+        <i class="fas fa-credit-card mr-2"></i>
+        New payment
+    </button>
+</div>
+
+<!-- Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- Revenue and Expenses Chart -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">Revenue and Expenses</h3>
+                <p class="text-sm text-gray-600">You can see the movements of your money here</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button class="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">Today</button>
+                <button class="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg">Weekly</button>
+                <button class="px-3 py-1 text-sm text-gray-600 hover:text-gray-900">Monthly</button>
+            </div>
+        </div>
+        
+        <!-- Chart Tabs -->
+        <div class="flex items-center space-x-6 mb-6">
+            <button class="text-sm text-gray-600 hover:text-gray-900">Expenses</button>
+            <button class="text-sm text-blue-600 border-b-2 border-blue-600 pb-1">Income</button>
+            <button class="text-sm text-gray-600 hover:text-gray-900">Savings</button>
+            <button class="text-sm text-gray-600 hover:text-gray-900">Deposits</button>
+        </div>
+        
+        <!-- Chart Placeholder -->
+        <div class="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+            <div class="text-center">
+                <i class="fas fa-chart-line text-4xl text-gray-400 mb-2"></i>
+                <p class="text-gray-500">Chart will be rendered here</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Savings Goals -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-6">Savings Goals</h3>
+        
+        <div class="space-y-6">
+            <!-- New House Savings -->
+            <div class="border border-gray-200 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="font-medium text-gray-900">New house savings</h4>
+                    <span class="text-sm text-green-600">↑ 7%</span>
+                </div>
+                <p class="text-2xl font-bold text-gray-900 mb-2">$103,256</p>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full" style="width: 75%"></div>
+                </div>
+            </div>
+
+            <!-- Wedding Savings -->
+            <div class="border border-gray-200 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="font-medium text-gray-900">Wedding savings</h4>
+                    <span class="text-sm text-red-600">↓ 5.4%</span>
+                </div>
+                <p class="text-2xl font-bold text-gray-900 mb-2">$32,131</p>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full" style="width: 45%"></div>
+                </div>
+            </div>
+
+            <!-- Vacation Savings -->
+            <div class="border border-gray-200 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="font-medium text-gray-900">Vacation savings</h4>
+                    <span class="text-sm text-green-600">↑ 1.8%</span>
+                </div>
+                <p class="text-2xl font-bold text-gray-900 mb-2">$12,657</p>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full" style="width: 25%"></div>
+                </div>
+            </div>
+
+            <!-- New Car Savings -->
+            <div class="border border-gray-200 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="font-medium text-gray-900">New car savings</h4>
+                    <span class="text-sm text-red-600">↓ 90%</span>
+                </div>
+                <p class="text-2xl font-bold text-gray-900 mb-2">$50,000</p>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full" style="width: 85%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- My Accounts Section -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <h3 class="text-lg font-semibold text-gray-900 mb-6">My Accounts</h3>
+    
+    <div class="border border-gray-200 rounded-lg p-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-dollar-sign text-gray-600 text-xl"></i>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900">Your main account (USD)</h4>
+                    <p class="text-sm text-gray-600">USD395768402049576GFH598</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <button class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                    Transactions
+                </button>
+                <button class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                    Share IBAN
+                </button>
+                <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center">
+                    <i class="fas fa-camera mr-2"></i>
+                    New payment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Transactions -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-8">
+    <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-semibold text-gray-900">Recent Transactions</h3>
+        <a href="/transactions" class="text-blue-600 hover:text-blue-700 text-sm font-medium">View all</a>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead>
+                <tr class="border-b border-gray-200">
+                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Transaction</th>
+                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Date</th>
+                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Amount</th>
+                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="border-b border-gray-100">
+                    <td class="py-3 px-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-arrow-down text-green-600 text-xs"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Salary Payment</p>
+                                <p class="text-sm text-gray-600">From Company Inc.</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 text-sm text-gray-600">Today, 9:30 AM</td>
+                    <td class="py-3 px-4 text-sm font-medium text-green-600">+$3,500.00</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Completed</span>
+                    </td>
+                </tr>
+                <tr class="border-b border-gray-100">
+                    <td class="py-3 px-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-arrow-up text-red-600 text-xs"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Grocery Store</p>
+                                <p class="text-sm text-gray-600">Food & Beverages</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 text-sm text-gray-600">Yesterday, 2:15 PM</td>
+                    <td class="py-3 px-4 text-sm font-medium text-red-600">-$127.50</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Completed</span>
+                    </td>
+                </tr>
+                <tr class="border-b border-gray-100">
+                    <td class="py-3 px-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-arrow-up text-blue-600 text-xs"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Gas Station</p>
+                                <p class="text-sm text-gray-600">Transportation</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 text-sm text-gray-600">2 days ago, 10:45 AM</td>
+                    <td class="py-3 px-4 text-sm font-medium text-red-600">-$45.20</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Completed</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize charts when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Chart.js initialization can be added here
+        console.log('Banking dashboard loaded');
+    });
+</script>
+{% endblock %}

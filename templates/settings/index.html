@@ -1,0 +1,497 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Settings - ValidoAI{% endblock %}
+
+{% block content %}
+<div class="w-full h-screen flex flex-col" x-data="settingsApp()">
+    <!-- Settings Header -->
+    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Settings</h1>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Configure system settings and AI models</p>
+            </div>
+            <div class="flex space-x-2">
+                <button @click="saveAllSettings()" 
+                        class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors duration-200">
+                    Save All
+                </button>
+                <button @click="resetSettings()" 
+                        class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors duration-200">
+                    Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Container -->
+    <div class="flex-1 flex overflow-hidden">
+        <!-- Settings Sidebar -->
+        <div class="w-64 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
+            <nav class="p-4">
+                <div class="space-y-1">
+                    <button @click="activeTab = 'ai-models'" 
+                            :class="activeTab === 'ai-models' ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'"
+                            class="w-full text-left px-3 py-2 rounded-lg transition-colors duration-200">
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>AI Models</span>
+                        </div>
+                    </button>
+                    
+                    <button @click="activeTab = 'environment'" 
+                            :class="activeTab === 'environment' ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'"
+                            class="w-full text-left px-3 py-2 rounded-lg transition-colors duration-200">
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Environment</span>
+                        </div>
+                    </button>
+                    
+                    <button @click="activeTab = 'database'" 
+                            :class="activeTab === 'database' ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'"
+                            class="w-full text-left px-3 py-2 rounded-lg transition-colors duration-200">
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                            </svg>
+                            <span>Database</span>
+                        </div>
+                    </button>
+                    
+                    <button @click="activeTab = 'server'" 
+                            :class="activeTab === 'server' ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'"
+                            class="w-full text-left px-3 py-2 rounded-lg transition-colors duration-200">
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Server</span>
+                        </div>
+                    </button>
+                    
+                    <button @click="activeTab = 'security'" 
+                            :class="activeTab === 'security' ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'"
+                            class="w-full text-left px-3 py-2 rounded-lg transition-colors duration-200">
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Security</span>
+                        </div>
+                    </button>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Settings Content -->
+        <div class="flex-1 overflow-y-auto p-6">
+            <!-- AI Models Tab -->
+            <div x-show="activeTab === 'ai-models'" class="space-y-6">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">AI Model Configuration</h2>
+                    
+                    <!-- Local Models -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
+                        <h3 class="text-md font-medium text-gray-900 dark:text-white mb-4">Local Models</h3>
+                        <div class="space-y-4">
+                            <template x-for="model in localModels" :key="model.name">
+                                <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-3">
+                                            <input type="checkbox" :id="model.name" x-model="model.enabled" 
+                                                   class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                            <label :for="model.name" class="text-sm font-medium text-gray-900 dark:text-white" x-text="model.name"></label>
+                                        </div>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" x-text="model.description"></p>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-1 text-xs rounded-full" 
+                                              :class="model.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                              x-text="model.available ? 'Available' : 'Not Available'"></span>
+                                        <button @click="testModel(model.name)" 
+                                                class="text-primary-600 hover:text-primary-700 text-sm">
+                                            Test
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- External Models -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                        <h3 class="text-md font-medium text-gray-900 dark:text-white mb-4">External Models</h3>
+                        <div class="space-y-4">
+                            <template x-for="model in externalModels" :key="model.name">
+                                <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-3">
+                                            <input type="checkbox" :id="model.name" x-model="model.enabled" 
+                                                   class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                            <label :for="model.name" class="text-sm font-medium text-gray-900 dark:text-white" x-text="model.name"></label>
+                                        </div>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" x-text="model.description"></p>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="text" :placeholder="model.api_key_placeholder" 
+                                               x-model="model.api_key" 
+                                               class="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
+                                        <button @click="testModel(model.name)" 
+                                                class="text-primary-600 hover:text-primary-700 text-sm">
+                                            Test
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Environment Tab -->
+            <div x-show="activeTab === 'environment'" class="space-y-6">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Environment Configuration</h2>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-md font-medium text-gray-900 dark:text-white">.env File Editor</h3>
+                            <div class="flex space-x-2">
+                                <button @click="loadEnvFile()" 
+                                        class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-3 py-1 rounded text-sm hover:bg-gray-300 dark:hover:bg-gray-500">
+                                    Reload
+                                </button>
+                                <button @click="saveEnvFile()" 
+                                        class="bg-primary-600 text-white px-3 py-1 rounded text-sm hover:bg-primary-700">
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <textarea x-model="envContent" 
+                                  class="w-full h-96 p-4 border border-gray-300 dark:border-gray-600 rounded-lg font-mono text-sm dark:bg-gray-700 dark:text-white resize-none"
+                                  placeholder="# Environment variables..."></textarea>
+                        
+                        <div class="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                            <p>• Each line should be in the format: KEY=value</p>
+                            <p>• Comments start with #</p>
+                            <p>• Empty lines are ignored</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Database Tab -->
+            <div x-show="activeTab === 'database'" class="space-y-6">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Database Configuration</h2>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- PostgreSQL -->
+                            <div>
+                                <h3 class="text-md font-medium text-gray-900 dark:text-white mb-3">PostgreSQL</h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Host</label>
+                                        <input type="text" x-model="dbConfig.postgresql.host" 
+                                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Port</label>
+                                        <input type="number" x-model="dbConfig.postgresql.port" 
+                                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Database</label>
+                                        <input type="text" x-model="dbConfig.postgresql.database" 
+                                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username</label>
+                                        <input type="text" x-model="dbConfig.postgresql.username" 
+                                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+                                        <input type="password" x-model="dbConfig.postgresql.password" 
+                                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
+                                    </div>
+                                    <button @click="testDatabaseConnection('postgresql')" 
+                                            class="w-full bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700">
+                                        Test Connection
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- SQLite -->
+                            <div>
+                                <h3 class="text-md font-medium text-gray-900 dark:text-white mb-3">SQLite</h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Database File</label>
+                                        <input type="text" x-model="dbConfig.sqlite.database" 
+                                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
+                                    </div>
+                                    <button @click="testDatabaseConnection('sqlite')" 
+                                            class="w-full bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700">
+                                        Test Connection
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Server Tab -->
+            <div x-show="activeTab === 'server'" class="space-y-6">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Server Configuration</h2>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Host</label>
+                                <input type="text" x-model="serverConfig.host" 
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">HTTP Port</label>
+                                <input type="number" x-model="serverConfig.http_port" 
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">HTTPS Port</label>
+                                <input type="number" x-model="serverConfig.https_port" 
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">SSL Certificate</label>
+                                <input type="text" x-model="serverConfig.ssl_cert_file" 
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">SSL Key</label>
+                                <input type="text" x-model="serverConfig.ssl_key_file" 
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" x-model="serverConfig.use_https" 
+                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <label class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Use HTTPS</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" x-model="serverConfig.debug" 
+                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <label class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Debug Mode</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Tab -->
+            <div x-show="activeTab === 'security'" class="space-y-6">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Security Settings</h2>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Secret Key</label>
+                                <input type="text" x-model="securityConfig.secret_key" 
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Session Timeout (minutes)</label>
+                                <input type="number" x-model="securityConfig.session_timeout" 
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white">
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" x-model="securityConfig.enable_csrf" 
+                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <label class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Enable CSRF Protection</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" x-model="securityConfig.enable_rate_limiting" 
+                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <label class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Enable Rate Limiting</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function settingsApp() {
+    return {
+        activeTab: 'ai-models',
+        localModels: [
+            { name: 'Llama2-7B', description: 'Meta\'s Llama2 7B parameter model', enabled: true, available: false },
+            { name: 'Mistral-7B', description: 'Mistral AI 7B parameter model', enabled: true, available: false },
+            { name: 'Phi-2', description: 'Microsoft Phi-2 2.7B parameter model', enabled: true, available: false }
+        ],
+        externalModels: [
+            { name: 'GPT-3.5', description: 'OpenAI GPT-3.5 Turbo', enabled: false, available: false, api_key: '', api_key_placeholder: 'sk-...' },
+            { name: 'GPT-4', description: 'OpenAI GPT-4', enabled: false, available: false, api_key: '', api_key_placeholder: 'sk-...' },
+            { name: 'Cohere Command', description: 'Cohere Command model', enabled: false, available: false, api_key: '', api_key_placeholder: 'cohere-api-key' }
+        ],
+        envContent: '',
+        dbConfig: {
+            postgresql: { host: 'localhost', port: 5432, database: 'ai_valido_online', username: 'postgres', password: 'postgres' },
+            sqlite: { database: 'data/sqlite/app.db' }
+        },
+        serverConfig: {
+            host: '0.0.0.0',
+            http_port: 5000,
+            https_port: 5001,
+            ssl_cert_file: 'certs/cert.pem',
+            ssl_key_file: 'certs/key.pem',
+            use_https: true,
+            debug: true
+        },
+        securityConfig: {
+            secret_key: '',
+            session_timeout: 30,
+            enable_csrf: true,
+            enable_rate_limiting: true
+        },
+
+        init() {
+            this.loadSettings();
+        },
+
+        async loadSettings() {
+            try {
+                const response = await fetch('/api/settings/load');
+                const data = await response.json();
+                if (data.success) {
+                    // Update settings with loaded data
+                    Object.assign(this, data.settings);
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        },
+
+        async saveAllSettings() {
+            try {
+                const settings = {
+                    localModels: this.localModels,
+                    externalModels: this.externalModels,
+                    dbConfig: this.dbConfig,
+                    serverConfig: this.serverConfig,
+                    securityConfig: this.securityConfig
+                };
+
+                const response = await fetch('/api/settings/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(settings)
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Settings saved successfully!');
+                } else {
+                    alert('Error saving settings: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                alert('Error saving settings');
+            }
+        },
+
+        resetSettings() {
+            if (confirm('Are you sure you want to reset all settings to defaults?')) {
+                this.init();
+            }
+        },
+
+        async testModel(modelName) {
+            try {
+                const response = await fetch('/api/settings/test-model', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model_name: modelName })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert(`Model ${modelName} test successful!`);
+                } else {
+                    alert(`Model ${modelName} test failed: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Error testing model:', error);
+                alert('Error testing model');
+            }
+        },
+
+        async loadEnvFile() {
+            try {
+                const response = await fetch('/api/settings/env/load');
+                const data = await response.json();
+                if (data.success) {
+                    this.envContent = data.content;
+                }
+            } catch (error) {
+                console.error('Error loading .env file:', error);
+            }
+        },
+
+        async saveEnvFile() {
+            try {
+                const response = await fetch('/api/settings/env/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: this.envContent })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('.env file saved successfully!');
+                } else {
+                    alert('Error saving .env file: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error saving .env file:', error);
+                alert('Error saving .env file');
+            }
+        },
+
+        async testDatabaseConnection(dbType) {
+            try {
+                const response = await fetch('/api/settings/test-database', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        db_type: dbType, 
+                        config: this.dbConfig[dbType] 
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert(`${dbType} connection test successful!`);
+                } else {
+                    alert(`${dbType} connection test failed: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Error testing database connection:', error);
+                alert('Error testing database connection');
+            }
+        }
+    }
+}
+</script>
+{% endblock %}

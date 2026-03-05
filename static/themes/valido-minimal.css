@@ -1,0 +1,420 @@
+/**
+ * Valido Minimal Theme - Clean and Minimalist Design
+ * Optimized for productivity and reduced visual noise
+ */
+
+:root {
+  /* Valido Minimal Theme Colors - Clean and Subtle */
+  --valido-primary: #1f2937;
+  --valido-primary-hover: #374151;
+  --valido-primary-light: #f9fafb;
+  --valido-primary-dark: #111827;
+
+  --valido-secondary: #6b7280;
+  --valido-secondary-hover: #9ca3af;
+  --valido-secondary-light: #f3f4f6;
+  --valido-secondary-dark: #4b5563;
+
+  --valido-success: #10b981;
+  --valido-success-hover: #059669;
+  --valido-success-light: #f0fdf4;
+  --valido-success-dark: #065f46;
+
+  --valido-warning: #f59e0b;
+  --valido-warning-hover: #d97706;
+  --valido-warning-light: #fffbeb;
+  --valido-warning-dark: #92400e;
+
+  --valido-danger: #ef4444;
+  --valido-danger-hover: #dc2626;
+  --valido-danger-light: #fef2f2;
+  --valido-danger-dark: #991b1b;
+
+  --valido-info: #3b82f6;
+  --valido-info-hover: #2563eb;
+  --valido-info-light: #eff6ff;
+  --valido-info-dark: #1e40af;
+
+  /* Minimal Background Colors - Clean and Simple */
+  --valido-bg-primary: #ffffff;
+  --valido-bg-secondary: #f9fafb;
+  --valido-bg-tertiary: #f3f4f6;
+  --valido-bg-quaternary: #e5e7eb;
+  --valido-bg-overlay: rgba(255, 255, 255, 0.98);
+
+  /* Minimal Text Colors - High Contrast but Subtle */
+  --valido-text-primary: #111827;
+  --valido-text-secondary: #374151;
+  --valido-text-muted: #6b7280;
+  --valido-text-inverse: #f9fafb;
+  --valido-text-link: #1f2937;
+  --valido-text-link-hover: #374151;
+
+  /* Minimal Border Colors - Very Subtle */
+  --valido-border-light: #f3f4f6;
+  --valido-border: #e5e7eb;
+  --valido-border-medium: #d1d5db;
+  --valido-border-dark: #9ca3af;
+
+  /* Minimal Shadow Colors - Very Subtle */
+  --valido-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  --valido-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  --valido-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --valido-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.06);
+  --valido-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.08);
+
+  /* Clean Spacing - Balanced and Consistent */
+  --valido-radius-sm: 0.125rem;
+  --valido-radius: 0.25rem;
+  --valido-radius-md: 0.375rem;
+  --valido-radius-lg: 0.5rem;
+  --valido-radius-xl: 0.75rem;
+  --valido-radius-full: 0.375rem;
+
+  /* Clean Typography - Minimal but Readable */
+  --valido-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --valido-font-size-xs: 0.75rem;
+  --valido-font-size-sm: 0.875rem;
+  --valido-font-size-base: 1rem;
+  --valido-font-size-lg: 1.125rem;
+  --valido-font-size-xl: 1.25rem;
+  --valido-font-size-2xl: 1.5rem;
+  --valido-font-size-3xl: 1.875rem;
+  --valido-font-size-4xl: 2.25rem;
+
+  /* Clean Layout - Minimal but Functional */
+  --valido-sidebar-width: 14rem;
+  --valido-header-height: 3rem;
+  --valido-content-max-width: 1200px;
+}
+
+/* Valido Minimal Theme Classes */
+.theme-valido-minimal {
+  /* Clean Base Colors */
+  --bg-primary: var(--valido-bg-primary);
+  --bg-secondary: var(--valido-bg-secondary);
+  --bg-tertiary: var(--valido-bg-tertiary);
+  --text-primary: var(--valido-text-primary);
+  --text-secondary: var(--valido-text-secondary);
+  --text-muted: var(--valido-text-muted);
+  --border-color: var(--valido-border);
+
+  /* Minimal Component Specific Colors */
+  --card-bg: var(--valido-bg-primary);
+  --input-bg: var(--valido-bg-primary);
+  --button-primary-bg: var(--valido-primary);
+  --button-primary-hover: var(--valido-primary-hover);
+  --nav-bg: var(--valido-bg-primary);
+  --sidebar-bg: var(--valido-bg-primary);
+  --header-bg: var(--valido-bg-primary);
+  --modal-bg: var(--valido-bg-primary);
+  --dropdown-bg: var(--valido-bg-primary);
+  --tooltip-bg: var(--valido-text-primary);
+  --toast-bg: var(--valido-bg-primary);
+
+  /* Subtle Status Colors */
+  --success: var(--valido-success);
+  --success-bg: var(--valido-success-light);
+  --warning: var(--valido-warning);
+  --warning-bg: var(--valido-warning-light);
+  --danger: var(--valido-danger);
+  --danger-bg: var(--valido-danger-light);
+  --info: var(--valido-info);
+  --info-bg: var(--valido-info-light);
+}
+
+/* Clean Button Styles for Minimal Theme */
+.theme-valido-minimal .btn-primary {
+  @apply bg-gray-900 hover:bg-gray-800 text-white font-medium py-2 px-4 rounded text-sm transition-colors duration-200 border border-transparent;
+}
+
+.theme-valido-minimal .btn-secondary {
+  @apply bg-white hover:bg-gray-50 text-gray-900 font-medium py-2 px-4 rounded text-sm border border-gray-300 transition-colors duration-200;
+}
+
+.theme-valido-minimal .btn-success {
+  @apply bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded text-sm transition-colors duration-200 border border-transparent;
+}
+
+.theme-valido-minimal .btn-warning {
+  @apply bg-amber-600 hover:bg-amber-700 text-white font-medium py-2 px-4 rounded text-sm transition-colors duration-200 border border-transparent;
+}
+
+.theme-valido-minimal .btn-danger {
+  @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded text-sm transition-colors duration-200 border border-transparent;
+}
+
+/* Clean Card Styles for Minimal Theme */
+.theme-valido-minimal .card {
+  @apply bg-white rounded border border-gray-200 p-6 transition-shadow duration-200 hover:shadow-sm;
+}
+
+/* Clean Input Styles for Minimal Theme */
+.theme-valido-minimal .input-field {
+  @apply block w-full rounded border-gray-300 shadow-sm focus:border-gray-900 focus:ring-gray-900 sm:text-sm transition-colors duration-200;
+}
+
+/* Clean Navigation for Minimal Theme */
+.theme-valido-minimal .nav-link {
+  @apply text-gray-600 hover:text-gray-900 px-3 py-2 rounded text-sm font-medium transition-colors duration-200;
+}
+
+.theme-valido-minimal .nav-link.active {
+  @apply text-gray-900 bg-gray-100;
+}
+
+/* Clean Sidebar for Minimal Theme */
+.theme-valido-minimal .sidebar {
+  @apply bg-white border-r border-gray-200 w-56 h-full;
+}
+
+/* Clean Header for Minimal Theme */
+.theme-valido-minimal .header {
+  @apply bg-white border-b border-gray-200 shadow-sm;
+}
+
+/* Clean Modal for Minimal Theme */
+.theme-valido-minimal .modal {
+  @apply bg-white rounded border border-gray-200 shadow-lg;
+}
+
+/* Clean Dropdown for Minimal Theme */
+.theme-valido-minimal .dropdown {
+  @apply bg-white rounded border border-gray-200 shadow-lg;
+}
+
+/* Clean Toast for Minimal Theme */
+.theme-valido-minimal .toast {
+  @apply bg-white rounded border border-gray-200 shadow-lg;
+}
+
+/* Clean Badge Styles for Minimal Theme */
+.theme-valido-minimal .badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium;
+}
+
+.theme-valido-minimal .badge-primary {
+  @apply bg-gray-100 text-gray-800 border border-gray-200;
+}
+
+.theme-valido-minimal .badge-success {
+  @apply bg-emerald-100 text-emerald-800 border border-emerald-200;
+}
+
+.theme-valido-minimal .badge-warning {
+  @apply bg-amber-100 text-amber-800 border border-amber-200;
+}
+
+.theme-valido-minimal .badge-danger {
+  @apply bg-red-100 text-red-800 border border-red-200;
+}
+
+.theme-valido-minimal .badge-info {
+  @apply bg-blue-100 text-blue-800 border border-blue-200;
+}
+
+/* Clean Alert Styles for Minimal Theme */
+.theme-valido-minimal .alert {
+  @apply rounded p-4 border text-sm;
+}
+
+.theme-valido-minimal .alert-success {
+  @apply bg-emerald-50 border-emerald-200 text-emerald-800;
+}
+
+.theme-valido-minimal .alert-warning {
+  @apply bg-amber-50 border-amber-200 text-amber-800;
+}
+
+.theme-valido-minimal .alert-danger {
+  @apply bg-red-50 border-red-200 text-red-800;
+}
+
+.theme-valido-minimal .alert-info {
+  @apply bg-blue-50 border-blue-200 text-blue-800;
+}
+
+/* Clean Table Styles for Minimal Theme */
+.theme-valido-minimal .table {
+  @apply min-w-full divide-y divide-gray-200;
+}
+
+.theme-valido-minimal .table th {
+  @apply bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+}
+
+.theme-valido-minimal .table td {
+  @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+}
+
+.theme-valido-minimal .table tr:hover {
+  @apply bg-gray-50;
+}
+
+/* Clean Form Styles for Minimal Theme */
+.theme-valido-minimal .form-group {
+  @apply mb-4;
+}
+
+.theme-valido-minimal .form-label {
+  @apply block text-sm font-medium text-gray-700 mb-2;
+}
+
+.theme-valido-minimal .form-input {
+  @apply mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-gray-900 focus:ring-gray-900 sm:text-sm;
+}
+
+.theme-valido-minimal .form-textarea {
+  @apply mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-gray-900 focus:ring-gray-900 sm:text-sm;
+}
+
+.theme-valido-minimal .form-select {
+  @apply mt-1 block w-full rounded border-gray-300 shadow-sm focus:border-gray-900 focus:ring-gray-900 sm:text-sm;
+}
+
+.theme-valido-minimal .form-checkbox {
+  @apply rounded border-gray-300 text-gray-900 focus:ring-gray-900;
+}
+
+.theme-valido-minimal .form-radio {
+  @apply border-gray-300 text-gray-900 focus:ring-gray-900;
+}
+
+/* Clean Loading and Progress Styles */
+.theme-valido-minimal .loading-spinner {
+  @apply animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900;
+}
+
+.theme-valido-minimal .progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-2;
+}
+
+.theme-valido-minimal .progress-fill {
+  @apply bg-gray-900 h-2 rounded-full transition-all duration-300;
+}
+
+/* Clean Typography for Minimal Theme */
+.theme-valido-minimal h1 {
+  @apply text-2xl font-semibold text-gray-900 mb-2;
+}
+
+.theme-valido-minimal h2 {
+  @apply text-xl font-semibold text-gray-900 mb-2;
+}
+
+.theme-valido-minimal h3 {
+  @apply text-lg font-semibold text-gray-900 mb-2;
+}
+
+.theme-valido-minimal p {
+  @apply text-sm text-gray-700 mb-3;
+}
+
+.theme-valido-minimal a {
+  @apply text-gray-900 hover:text-gray-700 underline text-sm;
+}
+
+/* Clean Code Syntax Highlighting */
+.theme-valido-minimal .code-block {
+  @apply bg-gray-100 border border-gray-200 rounded p-4 text-sm;
+}
+
+.theme-valido-minimal .code-block code {
+  @apply text-gray-900 font-mono text-sm;
+}
+
+.theme-valido-minimal .code-keyword {
+  @apply text-blue-700 font-medium;
+}
+
+.theme-valido-minimal .code-string {
+  @apply text-green-700;
+}
+
+.theme-valido-minimal .code-comment {
+  @apply text-gray-600;
+}
+
+.theme-valido-minimal .code-number {
+  @apply text-purple-700;
+}
+
+.theme-valido-minimal .code-function {
+  @apply text-indigo-700;
+}
+
+/* Clean Focus States for Accessibility */
+.theme-valido-minimal .focus\:ring-gray-900:focus {
+  --tw-ring-color: rgb(17 24 39 / var(--tw-ring-opacity, 0.5));
+}
+
+/* High Contrast Mode Support for Minimal Theme */
+@media (prefers-contrast: high) {
+  .theme-valido-minimal {
+    --valido-text-primary: #000000;
+    --valido-text-secondary: #000000;
+    --valido-bg-primary: #ffffff;
+    --valido-bg-secondary: #f8f8f8;
+    --valido-border: #000000;
+  }
+}
+
+/* Reduced Motion Support for Minimal Theme */
+@media (prefers-reduced-motion: reduce) {
+  .theme-valido-minimal * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Clean Responsive Design */
+@media (max-width: 768px) {
+  .theme-valido-minimal .sidebar {
+    @apply fixed inset-y-0 left-0 z-50 w-56 transform -translate-x-full transition-transform duration-300 ease-in-out;
+  }
+
+  .theme-valido-minimal .sidebar.open {
+    @apply translate-x-0;
+  }
+
+  .theme-valido-minimal .main-content {
+    @apply ml-0;
+  }
+}
+
+@media (min-width: 769px) {
+  .theme-valido-minimal .sidebar {
+    @apply relative;
+  }
+
+  .theme-valido-minimal .main-content {
+    @apply ml-56;
+  }
+}
+
+/* Clean Print Styles */
+@media print {
+  .theme-valido-minimal .no-print {
+    display: none !important;
+  }
+
+  .theme-valido-minimal .print-break {
+    page-break-after: always;
+  }
+
+  .theme-valido-minimal * {
+    color: black !important;
+    background: white !important;
+    box-shadow: none !important;
+    border: 1px solid black !important;
+  }
+
+  .theme-valido-minimal .btn-primary,
+  .theme-valido-minimal .btn-secondary,
+  .theme-valido-minimal .btn-success,
+  .theme-valido-minimal .btn-warning,
+  .theme-valido-minimal .btn-danger {
+    display: none !important;
+  }
+}

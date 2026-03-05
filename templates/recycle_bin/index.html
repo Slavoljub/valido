@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en" x-data="recycleBinApp()" :class="$store.theme.currentTheme">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recycle Bin - ValidoAI</title>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        [x-cloak] { display: none !important; }
+
+        /* Theme-aware styles */
+        .theme-light {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --button-primary: #3b82f6;
+            --button-danger: #ef4444;
+            --button-success: #10b981;
+        }
+
+        .theme-dark {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --button-primary: #3b82f6;
+            --button-danger: #dc2626;
+            --button-success: #059669;
+        }
+
+        .bg-theme-primary { background-color: var(--bg-primary); }
+        .bg-theme-secondary { background-color: var(--bg-secondary); }
+        .text-theme-primary { color: var(--text-primary); }
+        .text-theme-secondary { color: var(--text-secondary); }
+        .border-theme { border-color: var(--border-color); }
+        .btn-theme-primary { background-color: var(--button-primary); }
+        .btn-theme-danger { background-color: var(--button-danger); }
+        .btn-theme-success { background-color: var(--button-success); }
+
+        .record-card {
+            transition: all 0.2s ease;
+        }
+
+        .record-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body :class="`bg-theme-secondary text-theme-primary`" class="min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-theme-primary border-b border-theme shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-2xl font-bold text-theme-primary">Recycle Bin</h1>
+                    <span x-show="stats.total_records > 0"
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        <template x-if="stats.total_records">
+                            <span x-text="stats.total_records"></span>
+                        </template>
+                        items
+                    </span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button @click="$store.theme.toggleTheme()"
+                            class="p-2 rounded-lg bg-theme-secondary hover:bg-opacity-80 transition-colors">
+                        <svg x-show="$store.theme.currentTheme === 'theme-light'"
+                             class="w-5 h-5 text-theme-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                        <svg x-show="$store.theme.currentTheme === 'theme-dark'"
+                             class="w-5 h-5 text-theme-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-theme-primary rounded-lg shadow p-6 border border-theme">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm font-medium text-theme-secondary">Total Records</div>
+                        <div class="text-2xl font-bold text-theme-primary" x-text="stats.total_records || 0"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-theme-primary rounded-lg shadow p-6 border border-theme">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm font-medium text-theme-secondary">Restored Today</div>
+                        <div class="text-2xl font-bold text-theme-primary" x-text="stats.restored_today || 0"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-theme-primary rounded-lg shadow p-6 border border-theme">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-red-500 rounded-md flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm font-medium text-theme-secondary">Permanently Deleted</div>
+                        <div class="text-2xl font-bold text-theme-primary" x-text="stats.permanently_deleted || 0"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-theme-primary rounded-lg shadow p-6 border border-theme">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm font-medium text-theme-secondary">Oldest Record</div>
+                        <div class="text-sm font-bold text-theme-primary">
+                            <template x-if="stats.oldest_record">
+                                <span x-text="formatDate(stats.oldest_record)"></span>
+                            </template>
+                            <template x-if="!stats.oldest_record">-</template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="bg-theme-primary rounded-lg shadow mb-6 border border-theme">
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Search -->
+                    <div>
+                        <label class="block text-sm font-medium text-theme-secondary mb-2">Search</label>
+                        <input type="text"
+                               x-model="searchQuery"
+                               @input.debounce.300ms="searchRecords()"
+                               placeholder="Search records..."
+                               class="w-full px-3 py-2 border border-theme rounded-md bg-theme-primary text-theme-primary focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <!-- Table Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-theme-secondary mb-2">Table</label>
+                        <select x-model="selectedTable"
+                                @change="filterByTable()"
+                                class="w-full px-3 py-2 border border-theme rounded-md bg-theme-primary text-theme-primary focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">All Tables</option>
+                            <template x-for="table in availableTables" :key="table">
+                                <option :value="table" x-text="table"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <!-- Bulk Actions -->
+                    <div class="flex items-end space-x-2">
+                        <button @click="bulkRestore()"
+                                :disabled="selectedRecords.length === 0"
+                                class="flex-1 px-4 py-2 btn-theme-success text-white rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            Restore Selected
+                        </button>
+                    </div>
+
+                    <div class="flex items-end space-x-2">
+                        <button @click="bulkDelete()"
+                                :disabled="selectedRecords.length === 0"
+                                class="flex-1 px-4 py-2 btn-theme-danger text-white rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            Delete Selected
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Additional Actions -->
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <button @click="emptyRecycleBin()"
+                            class="px-4 py-2 btn-theme-danger text-white rounded-md hover:opacity-90 transition-colors">
+                        Empty Recycle Bin
+                    </button>
+                    <button @click="cleanupOldRecords()"
+                            class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:opacity-90 transition-colors">
+                        Cleanup Old Records
+                    </button>
+                    <button @click="refreshData()"
+                            class="px-4 py-2 btn-theme-primary text-white rounded-md hover:opacity-90 transition-colors">
+                        Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Records List -->
+        <div class="bg-theme-primary rounded-lg shadow border border-theme">
+            <div class="px-6 py-4 border-b border-theme">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-theme-primary">Deleted Records</h3>
+                    <div class="flex items-center space-x-2">
+                        <button @click="selectAll()"
+                                class="text-sm text-blue-600 hover:text-blue-800">
+                            Select All
+                        </button>
+                        <span class="text-theme-secondary">|</span>
+                        <button @click="clearSelection()"
+                                class="text-sm text-gray-600 hover:text-gray-800">
+                            Clear Selection
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6">
+                <!-- Loading State -->
+                <div x-show="loading" class="text-center py-12">
+                    <div class="inline-flex items-center">
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span class="text-theme-secondary">Loading records...</span>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div x-show="!loading && records.length === 0" class="text-center py-12">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-theme-secondary">No deleted records</h3>
+                    <p class="mt-1 text-sm text-theme-secondary">Records that have been deleted will appear here.</p>
+                </div>
+
+                <!-- Records Grid -->
+                <div x-show="!loading && records.length > 0" class="grid gap-4">
+                    <template x-for="record in records" :key="record.recycle_bin_id">
+                        <div class="record-card bg-theme-secondary border border-theme rounded-lg p-4 fade-in">
+                            <div class="flex items-start space-x-4">
+                                <!-- Checkbox -->
+                                <div class="flex-shrink-0 pt-1">
+                                    <input type="checkbox"
+                                           :value="record.recycle_bin_id"
+                                           x-model="selectedRecords"
+                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-theme rounded">
+                                </div>
+
+                                <!-- Content -->
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-2">
+                                            <h4 class="text-sm font-medium text-theme-primary capitalize">
+                                                <span x-text="formatTableName(record.table_name)"></span>
+                                            </h4>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                                ID: <span x-text="record.record_id"></span>
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <button @click="restoreRecord(record.recycle_bin_id)"
+                                                    class="text-green-600 hover:text-green-800 text-sm">
+                                                Restore
+                                            </button>
+                                            <button @click="permanentDelete(record.recycle_bin_id)"
+                                                    class="text-red-600 hover:text-red-800 text-sm">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-2">
+                                        <div class="text-sm text-theme-secondary">
+                                            <strong>Deleted:</strong>
+                                            <span x-text="formatDateTime(record.deleted_at)"></span>
+                                        </div>
+                                        <template x-if="record.deleted_reason">
+                                            <div class="text-sm text-theme-secondary mt-1">
+                                                <strong>Reason:</strong>
+                                                <span x-text="record.deleted_reason"></span>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <!-- Record Data Preview -->
+                                    <div class="mt-3 bg-theme-primary border border-theme rounded p-3">
+                                        <div class="text-xs font-medium text-theme-secondary mb-2">Record Data:</div>
+                                        <div class="text-xs text-theme-primary font-mono bg-theme-secondary p-2 rounded overflow-x-auto">
+                                            <pre x-text="formatRecordData(record.record_data)"></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Pagination -->
+                <div x-show="!loading && records.length > 0" class="mt-6 flex items-center justify-between">
+                    <div class="text-sm text-theme-secondary">
+                        Showing <span x-text="records.length"></span> records
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button @click="loadMore()"
+                                :disabled="loading"
+                                class="px-4 py-2 btn-theme-primary text-white rounded-md hover:opacity-90 disabled:opacity-50">
+                            Load More
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div x-show="showConfirmModal"
+         x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto"
+         @click="showConfirmModal = false">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="showConfirmModal = false"></div>
+
+            <div class="inline-block align-bottom bg-theme-primary rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-theme-primary px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-theme-primary">
+                                Confirm Action
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-theme-secondary" x-text="confirmModal.message"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-theme-secondary px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button"
+                            @click="executeConfirmAction()"
+                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 btn-theme-danger text-base font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Confirm
+                    </button>
+                    <button type="button"
+                            @click="showConfirmModal = false"
+                            class="mt-3 w-full inline-flex justify-center rounded-md border border-theme shadow-sm px-4 py-2 bg-theme-primary text-base font-medium text-theme-secondary hover:bg-theme-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div x-show="toasts.length > 0"
+         x-cloak
+         class="fixed bottom-4 right-4 z-50 space-y-2">
+        <template x-for="(toast, index) in toasts" :key="index">
+            <div :class="`max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden`">
+                <div class="p-4">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <svg x-show="toast.type === 'success'" class="h-6 w-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <svg x-show="toast.type === 'error'" class="h-6 w-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <svg x-show="toast.type === 'warning'" class="h-6 w-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3 w-0 flex-1 pt-0.5">
+                            <p class="text-sm font-medium text-gray-900" x-text="toast.title"></p>
+                            <p class="mt-1 text-sm text-gray-500" x-text="toast.message"></p>
+                        </div>
+                        <div class="ml-4 flex-shrink-0 flex">
+                            <button @click="removeToast(index)"
+                                    class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <span class="sr-only">Close</span>
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div :class="`bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse`">
+                    <div class="w-full bg-gray-200 rounded-full h-1">
+                        <div :class="`h-1 rounded-full transition-all duration-1000 ${toast.type === 'success' ? 'bg-green-500' : toast.type === 'error' ? 'bg-red-500' : 'bg-yellow-500'}`"
+                             :style="`width: ${(toast.progress / 100) * 100}%`"></div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <script>
+        function recycleBinApp() {
+            return {
+                // Data
+                records: [],
+                stats: {},
+                availableTables: [],
+                selectedRecords: [],
+                searchQuery: '',
+                selectedTable: '',
+                loading: false,
+                showConfirmModal: false,
+                confirmModal: { message: '', action: null },
+                toasts: [],
+
+                // Initialize
+                async init() {
+                    await this.loadStats();
+                    await this.loadAvailableTables();
+                    await this.loadRecords();
+                },
+
+                // Load data
+                async loadStats() {
+                    try {
+                        const response = await fetch('/api/recycle-bin/stats');
+                        const result = await response.json();
+                        if (result.success) {
+                            this.stats = result.data;
+                        }
+                    } catch (error) {
+                        console.error('Error loading stats:', error);
+                    }
+                },
+
+                async loadAvailableTables() {
+                    try {
+                        const response = await fetch('/api/recycle-bin/tables');
+                        const result = await response.json();
+                        if (result.success) {
+                            this.availableTables = result.data;
+                        }
+                    } catch (error) {
+                        console.error('Error loading tables:', error);
+                    }
+                },
+
+                async loadRecords(append = false) {
+                    this.loading = true;
+                    try {
+                        const params = new URLSearchParams({
+                            limit: 20,
+                            offset: append ? this.records.length : 0
+                        });
+
+                        if (this.searchQuery) params.append('search', this.searchQuery);
+                        if (this.selectedTable) params.append('table_name', this.selectedTable);
+
+                        const response = await fetch(`/api/recycle-bin?${params}`);
+                        const result = await response.json();
+
+                        if (result.success) {
+                            if (append) {
+                                this.records = [...this.records, ...result.data];
+                            } else {
+                                this.records = result.data;
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error loading records:', error);
+                        this.showToast('Error', 'Failed to load records', 'error');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                // Actions
+                async searchRecords() {
+                    await this.loadRecords();
+                },
+
+                async filterByTable() {
+                    await this.loadRecords();
+                },
+
+                async restoreRecord(recycleBinId) {
+                    this.showConfirm('Restore this record?', async () => {
+                        try {
+                            const response = await fetch(`/api/recycle-bin/restore/${recycleBinId}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ restored_by: 'user' })
+                            });
+
+                            const result = await response.json();
+                            if (result.success) {
+                                this.showToast('Success', 'Record restored successfully', 'success');
+                                await this.refreshData();
+                            } else {
+                                this.showToast('Error', result.error, 'error');
+                            }
+                        } catch (error) {
+                            this.showToast('Error', 'Failed to restore record', 'error');
+                        }
+                    });
+                },
+
+                async permanentDelete(recycleBinId) {
+                    this.showConfirm('Permanently delete this record? This action cannot be undone.', async () => {
+                        try {
+                            const response = await fetch(`/api/recycle-bin/permanent-delete/${recycleBinId}`, {
+                                method: 'DELETE',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ delete_reason: 'User deleted from recycle bin' })
+                            });
+
+                            const result = await response.json();
+                            if (result.success) {
+                                this.showToast('Success', 'Record permanently deleted', 'success');
+                                await this.refreshData();
+                            } else {
+                                this.showToast('Error', result.error, 'error');
+                            }
+                        } catch (error) {
+                            this.showToast('Error', 'Failed to delete record', 'error');
+                        }
+                    });
+                },
+
+                async bulkRestore() {
+                    if (this.selectedRecords.length === 0) return;
+
+                    this.showConfirm(`Restore ${this.selectedRecords.length} selected records?`, async () => {
+                        try {
+                            const response = await fetch('/api/recycle-bin/bulk-restore', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    recycle_bin_ids: this.selectedRecords,
+                                    restored_by: 'user'
+                                })
+                            });
+
+                            const result = await response.json();
+                            if (result.success) {
+                                this.showToast('Success', `${result.data.successful} records restored successfully`, 'success');
+                                this.selectedRecords = [];
+                                await this.refreshData();
+                            } else {
+                                this.showToast('Error', result.error, 'error');
+                            }
+                        } catch (error) {
+                            this.showToast('Error', 'Failed to restore records', 'error');
+                        }
+                    });
+                },
+
+                async bulkDelete() {
+                    if (this.selectedRecords.length === 0) return;
+
+                    this.showConfirm(`Permanently delete ${this.selectedRecords.length} selected records? This action cannot be undone.`, async () => {
+                        try {
+                            const response = await fetch('/api/recycle-bin/bulk-permanent-delete', {
+                                method: 'DELETE',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    recycle_bin_ids: this.selectedRecords,
+                                    delete_reason: 'Bulk deleted from recycle bin'
+                                })
+                            });
+
+                            const result = await response.json();
+                            if (result.success) {
+                                this.showToast('Success', `${result.data.successful} records permanently deleted`, 'success');
+                                this.selectedRecords = [];
+                                await this.refreshData();
+                            } else {
+                                this.showToast('Error', result.error, 'error');
+                            }
+                        } catch (error) {
+                            this.showToast('Error', 'Failed to delete records', 'error');
+                        }
+                    });
+                },
+
+                async emptyRecycleBin() {
+                    this.showConfirm('Empty the entire recycle bin? This will permanently delete all records. This action cannot be undone.', async () => {
+                        try {
+                            const response = await fetch('/api/recycle-bin/empty', {
+                                method: 'DELETE'
+                            });
+
+                            const result = await response.json();
+                            if (result.success) {
+                                this.showToast('Success', 'Recycle bin emptied successfully', 'success');
+                                await this.refreshData();
+                            } else {
+                                this.showToast('Error', result.error, 'error');
+                            }
+                        } catch (error) {
+                            this.showToast('Error', 'Failed to empty recycle bin', 'error');
+                        }
+                    });
+                },
+
+                async cleanupOldRecords() {
+                    this.showConfirm('Delete records older than 90 days?', async () => {
+                        try {
+                            const response = await fetch('/api/recycle-bin/cleanup', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ days_old: 90 })
+                            });
+
+                            const result = await response.json();
+                            if (result.success) {
+                                this.showToast('Success', `${result.data.deleted_count} old records deleted`, 'success');
+                                await this.refreshData();
+                            } else {
+                                this.showToast('Error', result.error, 'error');
+                            }
+                        } catch (error) {
+                            this.showToast('Error', 'Failed to cleanup old records', 'error');
+                        }
+                    });
+                },
+
+                async refreshData() {
+                    this.selectedRecords = [];
+                    await Promise.all([
+                        this.loadStats(),
+                        this.loadRecords()
+                    ]);
+                },
+
+                loadMore() {
+                    this.loadRecords(true);
+                },
+
+                selectAll() {
+                    this.selectedRecords = this.records.map(r => r.recycle_bin_id);
+                },
+
+                clearSelection() {
+                    this.selectedRecords = [];
+                },
+
+                // Modal and Toast
+                showConfirm(message, action) {
+                    this.confirmModal = { message, action };
+                    this.showConfirmModal = true;
+                },
+
+                executeConfirmAction() {
+                    if (this.confirmModal.action) {
+                        this.confirmModal.action();
+                    }
+                    this.showConfirmModal = false;
+                },
+
+                showToast(title, message, type = 'info') {
+                    const toast = {
+                        title,
+                        message,
+                        type,
+                        progress: 100,
+                        id: Date.now()
+                    };
+
+                    this.toasts.push(toast);
+
+                    // Auto-remove after 5 seconds
+                    setTimeout(() => {
+                        const index = this.toasts.findIndex(t => t.id === toast.id);
+                        if (index > -1) {
+                            this.removeToast(index);
+                        }
+                    }, 5000);
+
+                    // Animate progress bar
+                    const interval = setInterval(() => {
+                        toast.progress -= 2;
+                        if (toast.progress <= 0) {
+                            clearInterval(interval);
+                        }
+                    }, 100);
+                },
+
+                removeToast(index) {
+                    this.toasts.splice(index, 1);
+                },
+
+                // Utility functions
+                formatDate(dateString) {
+                    if (!dateString) return '-';
+                    return new Date(dateString).toLocaleDateString();
+                },
+
+                formatDateTime(dateString) {
+                    if (!dateString) return '-';
+                    return new Date(dateString).toLocaleString();
+                },
+
+                formatTableName(tableName) {
+                    return tableName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                },
+
+                formatRecordData(recordData) {
+                    if (typeof recordData === 'string') {
+                        return recordData;
+                    }
+                    return JSON.stringify(recordData, null, 2);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

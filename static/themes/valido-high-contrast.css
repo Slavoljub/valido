@@ -1,0 +1,424 @@
+/**
+ * Valido High Contrast Theme - Enhanced Accessibility Theme
+ * Designed for users with visual impairments and high contrast needs
+ */
+
+:root {
+  /* Valido High Contrast Theme Colors */
+  --valido-primary: #0000ff;
+  --valido-primary-hover: #000080;
+  --valido-primary-light: #0000ff;
+  --valido-primary-dark: #000080;
+
+  --valido-secondary: #000000;
+  --valido-secondary-hover: #404040;
+  --valido-secondary-light: #000000;
+  --valido-secondary-dark: #404040;
+
+  --valido-success: #008000;
+  --valido-success-hover: #004d00;
+  --valido-success-light: #008000;
+  --valido-success-dark: #004d00;
+
+  --valido-warning: #ffa500;
+  --valido-warning-hover: #ff8c00;
+  --valido-warning-light: #ffa500;
+  --valido-warning-dark: #ff8c00;
+
+  --valido-danger: #ff0000;
+  --valido-danger-hover: #8b0000;
+  --valido-danger-light: #ff0000;
+  --valido-danger-dark: #8b0000;
+
+  --valido-info: #0000ff;
+  --valido-info-hover: #000080;
+  --valido-info-light: #0000ff;
+  --valido-info-dark: #000080;
+
+  /* High Contrast Background Colors */
+  --valido-bg-primary: #ffffff;
+  --valido-bg-secondary: #f8f8f8;
+  --valido-bg-tertiary: #e8e8e8;
+  --valido-bg-quaternary: #d8d8d8;
+  --valido-bg-overlay: rgba(255, 255, 255, 0.95);
+
+  /* High Contrast Text Colors */
+  --valido-text-primary: #000000;
+  --valido-text-secondary: #000000;
+  --valido-text-muted: #404040;
+  --valido-text-inverse: #ffffff;
+  --valido-text-link: #0000ff;
+  --valido-text-link-hover: #000080;
+
+  /* High Contrast Border Colors */
+  --valido-border-light: #d8d8d8;
+  --valido-border: #000000;
+  --valido-border-medium: #404040;
+  --valido-border-dark: #000000;
+
+  /* High Contrast Shadow Colors */
+  --valido-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.8);
+  --valido-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.9), 0 1px 2px 0 rgba(0, 0, 0, 0.8);
+  --valido-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.9), 0 2px 4px -1px rgba(0, 0, 0, 0.8);
+  --valido-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.9), 0 4px 6px -2px rgba(0, 0, 0, 0.8);
+  --valido-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.9), 0 10px 10px -5px rgba(0, 0, 0, 0.8);
+
+  /* Enhanced Spacing for Better Readability */
+  --valido-radius-sm: 0.25rem;
+  --valido-radius: 0.5rem;
+  --valido-radius-md: 0.75rem;
+  --valido-radius-lg: 1rem;
+  --valido-radius-xl: 1.5rem;
+  --valido-radius-full: 9999px;
+
+  /* Enhanced Typography for Accessibility */
+  --valido-font-family: 'Arial', 'Helvetica', sans-serif;
+  --valido-font-size-xs: 1rem;
+  --valido-font-size-sm: 1.125rem;
+  --valido-font-size-base: 1.25rem;
+  --valido-font-size-lg: 1.5rem;
+  --valido-font-size-xl: 1.75rem;
+  --valido-font-size-2xl: 2rem;
+  --valido-font-size-3xl: 2.5rem;
+  --valido-font-size-4xl: 3rem;
+
+  /* Enhanced Layout for Better Navigation */
+  --valido-sidebar-width: 18rem;
+  --valido-header-height: 5rem;
+  --valido-content-max-width: 1200px;
+}
+
+/* Valido High Contrast Theme Classes */
+.theme-valido-high-contrast {
+  /* Enhanced Base Colors for Maximum Contrast */
+  --bg-primary: var(--valido-bg-primary);
+  --bg-secondary: var(--valido-bg-secondary);
+  --bg-tertiary: var(--valido-bg-tertiary);
+  --text-primary: var(--valido-text-primary);
+  --text-secondary: var(--valido-text-secondary);
+  --text-muted: var(--valido-text-muted);
+  --border-color: var(--valido-border);
+
+  /* Enhanced Component Specific Colors */
+  --card-bg: var(--valido-bg-primary);
+  --input-bg: var(--valido-bg-primary);
+  --button-primary-bg: var(--valido-primary);
+  --button-primary-hover: var(--valido-primary-hover);
+  --nav-bg: var(--valido-bg-primary);
+  --sidebar-bg: var(--valido-bg-primary);
+  --header-bg: var(--valido-bg-primary);
+  --modal-bg: var(--valido-bg-primary);
+  --dropdown-bg: var(--valido-bg-primary);
+  --tooltip-bg: var(--valido-text-primary);
+  --toast-bg: var(--valido-bg-primary);
+
+  /* High Contrast Status Colors */
+  --success: var(--valido-success);
+  --success-bg: var(--valido-success-light);
+  --warning: var(--valido-warning);
+  --warning-bg: var(--valido-warning-light);
+  --danger: var(--valido-danger);
+  --danger-bg: var(--valido-danger-light);
+  --info: var(--valido-info);
+  --info-bg: var(--valido-info-light);
+}
+
+/* Enhanced Button Styles for High Contrast */
+.theme-valido-high-contrast .btn-primary {
+  @apply bg-blue-600 hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-lg border-2 border-black shadow-lg transition-all duration-200 text-lg;
+}
+
+.theme-valido-high-contrast .btn-secondary {
+  @apply bg-white hover:bg-gray-100 text-black font-bold py-3 px-6 rounded-lg border-2 border-black shadow-lg transition-all duration-200 text-lg;
+}
+
+.theme-valido-high-contrast .btn-success {
+  @apply bg-green-600 hover:bg-green-800 text-white font-bold py-3 px-6 rounded-lg border-2 border-black shadow-lg transition-all duration-200 text-lg;
+}
+
+.theme-valido-high-contrast .btn-warning {
+  @apply bg-orange-500 hover:bg-orange-700 text-black font-bold py-3 px-6 rounded-lg border-2 border-black shadow-lg transition-all duration-200 text-lg;
+}
+
+.theme-valido-high-contrast .btn-danger {
+  @apply bg-red-600 hover:bg-red-800 text-white font-bold py-3 px-6 rounded-lg border-2 border-black shadow-lg transition-all duration-200 text-lg;
+}
+
+/* Enhanced Card Styles for High Contrast */
+.theme-valido-high-contrast .card {
+  @apply bg-white rounded-lg shadow-xl border-2 border-black p-8 transition-all duration-200 hover:shadow-2xl text-lg;
+}
+
+/* Enhanced Input Styles for High Contrast */
+.theme-valido-high-contrast .input-field {
+  @apply block w-full rounded-lg border-2 border-black bg-white text-black shadow-lg focus:border-blue-600 focus:ring-4 focus:ring-blue-300 sm:text-lg py-3 px-4;
+}
+
+/* Enhanced Navigation for High Contrast */
+.theme-valido-high-contrast .nav-link {
+  @apply text-black hover:text-blue-800 hover:bg-yellow-200 px-4 py-3 rounded-lg text-lg font-bold transition-all duration-200 border border-black;
+}
+
+.theme-valido-high-contrast .nav-link.active {
+  @apply text-black bg-yellow-300 border-2 border-black shadow-lg;
+}
+
+/* Enhanced Sidebar for High Contrast */
+.theme-valido-high-contrast .sidebar {
+  @apply bg-white border-r-4 border-black w-72 h-full shadow-2xl;
+}
+
+/* Enhanced Header for High Contrast */
+.theme-valido-high-contrast .header {
+  @apply bg-white border-b-4 border-black shadow-2xl;
+}
+
+/* Enhanced Modal for High Contrast */
+.theme-valido-high-contrast .modal {
+  @apply bg-white rounded-lg shadow-2xl border-4 border-black;
+}
+
+/* Enhanced Dropdown for High Contrast */
+.theme-valido-high-contrast .dropdown {
+  @apply bg-white rounded-lg shadow-2xl border-2 border-black;
+}
+
+/* Enhanced Toast for High Contrast */
+.theme-valido-high-contrast .toast {
+  @apply bg-white rounded-lg shadow-2xl border-2 border-black;
+}
+
+/* Enhanced Badge Styles for High Contrast */
+.theme-valido-high-contrast .badge {
+  @apply inline-flex items-center px-4 py-2 rounded-lg text-lg font-bold border-2 border-black;
+}
+
+.theme-valido-high-contrast .badge-primary {
+  @apply bg-blue-600 text-white border-black;
+}
+
+.theme-valido-high-contrast .badge-success {
+  @apply bg-green-600 text-white border-black;
+}
+
+.theme-valido-high-contrast .badge-warning {
+  @apply bg-orange-500 text-black border-black;
+}
+
+.theme-valido-high-contrast .badge-danger {
+  @apply bg-red-600 text-white border-black;
+}
+
+.theme-valido-high-contrast .badge-info {
+  @apply bg-blue-600 text-white border-black;
+}
+
+/* Enhanced Alert Styles for High Contrast */
+.theme-valido-high-contrast .alert {
+  @apply rounded-lg p-6 border-4 text-lg font-bold;
+}
+
+.theme-valido-high-contrast .alert-success {
+  @apply bg-green-100 border-black text-black;
+}
+
+.theme-valido-high-contrast .alert-warning {
+  @apply bg-yellow-100 border-black text-black;
+}
+
+.theme-valido-high-contrast .alert-danger {
+  @apply bg-red-100 border-black text-black;
+}
+
+.theme-valido-high-contrast .alert-info {
+  @apply bg-blue-100 border-black text-black;
+}
+
+/* Enhanced Table Styles for High Contrast */
+.theme-valido-high-contrast .table {
+  @apply min-w-full divide-y-4 divide-black;
+}
+
+.theme-valido-high-contrast .table th {
+  @apply bg-gray-100 px-6 py-4 text-left text-lg font-bold text-black uppercase tracking-wider border-2 border-black;
+}
+
+.theme-valido-high-contrast .table td {
+  @apply px-6 py-4 whitespace-nowrap text-lg text-black border-2 border-gray-600;
+}
+
+.theme-valido-high-contrast .table tr:hover {
+  @apply bg-yellow-200 border-2 border-black;
+}
+
+/* Enhanced Form Styles for High Contrast */
+.theme-valido-high-contrast .form-group {
+  @apply mb-6;
+}
+
+.theme-valido-high-contrast .form-label {
+  @apply block text-xl font-bold text-black mb-3;
+}
+
+.theme-valido-high-contrast .form-input {
+  @apply mt-1 block w-full rounded-lg border-2 border-black bg-white text-black shadow-lg focus:border-blue-600 focus:ring-4 focus:ring-blue-300 sm:text-lg py-4 px-4;
+}
+
+.theme-valido-high-contrast .form-textarea {
+  @apply mt-1 block w-full rounded-lg border-2 border-black bg-white text-black shadow-lg focus:border-blue-600 focus:ring-4 focus:ring-blue-300 sm:text-lg py-4 px-4;
+}
+
+.theme-valido-high-contrast .form-select {
+  @apply mt-1 block w-full rounded-lg border-2 border-black bg-white text-black shadow-lg focus:border-blue-600 focus:ring-4 focus:ring-blue-300 sm:text-lg py-4 px-4;
+}
+
+.theme-valido-high-contrast .form-checkbox {
+  @apply rounded border-2 border-black text-blue-600 bg-white focus:ring-4 focus:ring-blue-300 h-6 w-6;
+}
+
+.theme-valido-high-contrast .form-radio {
+  @apply border-2 border-black text-blue-600 bg-white focus:ring-4 focus:ring-blue-300 h-6 w-6;
+}
+
+/* Enhanced Focus Indicators for Accessibility */
+.theme-valido-high-contrast .focus\:ring-blue-500:focus {
+  outline: 4px solid #0000ff;
+  outline-offset: 4px;
+}
+
+.theme-valido-high-contrast button:focus,
+.theme-valido-high-contrast input:focus,
+.theme-valido-high-contrast select:focus,
+.theme-valido-high-contrast textarea:focus {
+  outline: 4px solid #0000ff;
+  outline-offset: 4px;
+}
+
+/* Enhanced Loading and Progress Styles */
+.theme-valido-high-contrast .loading-spinner {
+  @apply animate-spin rounded-full h-8 w-8 border-b-4 border-blue-600;
+}
+
+.theme-valido-high-contrast .progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-4 border-2 border-black;
+}
+
+.theme-valido-high-contrast .progress-fill {
+  @apply bg-blue-600 h-4 rounded-full transition-all duration-300 border border-black;
+}
+
+/* Enhanced Typography for Better Readability */
+.theme-valido-high-contrast {
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+
+.theme-valido-high-contrast h1 {
+  @apply text-4xl font-bold text-black mb-4;
+}
+
+.theme-valido-high-contrast h2 {
+  @apply text-3xl font-bold text-black mb-3;
+}
+
+.theme-valido-high-contrast h3 {
+  @apply text-2xl font-bold text-black mb-2;
+}
+
+.theme-valido-high-contrast p {
+  @apply text-lg text-black mb-4;
+}
+
+.theme-valido-high-contrast a {
+  @apply text-blue-600 hover:text-blue-800 underline font-bold text-lg;
+}
+
+/* Enhanced Code Syntax Highlighting */
+.theme-valido-high-contrast .code-block {
+  @apply bg-black border-4 border-white rounded-lg p-6 text-lg;
+}
+
+.theme-valido-high-contrast .code-block code {
+  @apply text-white font-mono text-lg;
+}
+
+.theme-valido-high-contrast .code-keyword {
+  @apply text-blue-400 font-bold;
+}
+
+.theme-valido-high-contrast .code-string {
+  @apply text-green-400 font-bold;
+}
+
+.theme-valido-high-contrast .code-comment {
+  @apply text-gray-400 font-bold;
+}
+
+.theme-valido-high-contrast .code-number {
+  @apply text-orange-400 font-bold;
+}
+
+.theme-valido-high-contrast .code-function {
+  @apply text-purple-400 font-bold;
+}
+
+/* Enhanced Responsive Design */
+@media (max-width: 768px) {
+  .theme-valido-high-contrast .sidebar {
+    @apply fixed inset-y-0 left-0 z-50 w-80 transform -translate-x-full transition-transform duration-300 ease-in-out;
+  }
+
+  .theme-valido-high-contrast .sidebar.open {
+    @apply translate-x-0;
+  }
+
+  .theme-valido-high-contrast .main-content {
+    @apply ml-0;
+  }
+
+  .theme-valido-high-contrast {
+    font-size: 1.25rem;
+  }
+
+  .theme-valido-high-contrast .btn-primary,
+  .theme-valido-high-contrast .btn-secondary {
+    @apply py-4 px-8 text-xl;
+  }
+}
+
+@media (min-width: 769px) {
+  .theme-valido-high-contrast .sidebar {
+    @apply relative;
+  }
+
+  .theme-valido-high-contrast .main-content {
+    @apply ml-80;
+  }
+}
+
+/* Enhanced Print Styles */
+@media print {
+  .theme-valido-high-contrast .no-print {
+    display: none !important;
+  }
+
+  .theme-valido-high-contrast .print-break {
+    page-break-after: always;
+  }
+
+  .theme-valido-high-contrast * {
+    color: black !important;
+    background: white !important;
+    box-shadow: none !important;
+    border: 2px solid black !important;
+    font-size: 12pt !important;
+  }
+
+  .theme-valido-high-contrast .btn-primary,
+  .theme-valido-high-contrast .btn-secondary,
+  .theme-valido-high-contrast .btn-success,
+  .theme-valido-high-contrast .btn-warning,
+  .theme-valido-high-contrast .btn-danger {
+    display: none !important;
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "enable_query_logging": true,
+  "enable_slow_query_detection": true,
+  "slow_query_threshold": 1.0,
+  "enable_memory_monitoring": true,
+  "memory_threshold": 104857600,
+  "enable_cache_monitoring": true,
+  "log_performance_stats": true,
+  "performance_log_file": "logs/performance.log"
+}

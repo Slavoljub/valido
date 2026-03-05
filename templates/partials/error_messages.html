@@ -1,0 +1,323 @@
+<!-- Error Messages Partial -->
+{% macro render_error_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="error-messages-container" id="errorMessages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        <div class="alert-content">
+                            <div class="alert-icon">
+                                {% if category == 'success' %}
+                                    <i class="fas fa-check-circle"></i>
+                                {% elif category == 'error' %}
+                                    <i class="fas fa-exclamation-circle"></i>
+                                {% elif category == 'warning' %}
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                {% elif category == 'info' %}
+                                    <i class="fas fa-info-circle"></i>
+                                {% else %}
+                                    <i class="fas fa-bell"></i>
+                                {% endif %}
+                            </div>
+                            <div class="alert-message">
+                                {{ message }}
+                            </div>
+                            <button type="button" class="alert-close" onclick="this.parentElement.parentElement.remove()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+{% endmacro %}
+
+{% macro render_page_error() %}
+    {% set page_error = error_display.get_page_error() %}
+    {% if page_error %}
+        <div class="page-error-container" id="pageError">
+            <div class="alert alert-{{ page_error.type }} alert-dismissible fade show" role="alert">
+                <div class="alert-content">
+                    <div class="alert-icon">
+                        {% if page_error.type == 'success' %}
+                            <i class="fas fa-check-circle"></i>
+                        {% elif page_error.type == 'error' %}
+                            <i class="fas fa-exclamation-circle"></i>
+                        {% elif page_error.type == 'warning' %}
+                            <i class="fas fa-exclamation-triangle"></i>
+                        {% elif page_error.type == 'info' %}
+                            <i class="fas fa-info-circle"></i>
+                        {% else %}
+                            <i class="fas fa-bell"></i>
+                        {% endif %}
+                    </div>
+                    <div class="alert-message">
+                        <div class="alert-title">{{ page_error.title }}</div>
+                        <div class="alert-description">{{ page_error.message }}</div>
+                        {% if page_error.details %}
+                            <div class="alert-details">
+                                <details>
+                                    <summary>Error Details</summary>
+                                    <pre>{{ page_error.details | tojson(indent=2) }}</pre>
+                                </details>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <button type="button" class="alert-close" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endmacro %}
+
+<style>
+.error-messages-container,
+.page-error-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 9999;
+    max-width: 400px;
+    width: 100%;
+}
+
+.alert {
+    margin-bottom: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid;
+    padding: 1rem;
+    position: relative;
+    animation: slideInRight 0.3s ease-out;
+}
+
+.alert-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.alert-icon {
+    flex-shrink: 0;
+    font-size: 1.25rem;
+    margin-top: 0.125rem;
+}
+
+.alert-message {
+    flex: 1;
+    min-width: 0;
+}
+
+.alert-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.alert-description {
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.alert-details {
+    margin-top: 0.75rem;
+}
+
+.alert-details details {
+    font-size: 0.75rem;
+}
+
+.alert-details summary {
+    cursor: pointer;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.alert-details pre {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.alert-close {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+}
+
+.alert-close:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* Alert Types */
+.alert-success {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    color: white;
+    border-color: #34d399;
+}
+
+.alert-error {
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    color: white;
+    border-color: #f87171;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+    color: white;
+    border-color: #fbbf24;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    color: white;
+    border-color: #60a5fa;
+}
+
+/* Dark Theme Adjustments */
+[data-theme="valido-dark"] .alert-details pre {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="valido-dark"] .alert-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Animations */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.alert.fade-out {
+    animation: slideOutRight 0.3s ease-in forwards;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+    .error-messages-container,
+    .page-error-container {
+        left: 1rem;
+        right: 1rem;
+        max-width: none;
+    }
+    
+    .alert {
+        padding: 0.75rem;
+    }
+    
+    .alert-content {
+        gap: 0.5rem;
+    }
+    
+    .alert-icon {
+        font-size: 1rem;
+    }
+}
+
+/* Auto-dismiss functionality */
+.alert-auto-dismiss {
+    animation: slideInRight 0.3s ease-out, slideOutRight 0.3s ease-in 4.7s forwards;
+}
+</style>
+
+<script>
+// Auto-dismiss alerts after 5 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.alert:not(.alert-persistent)');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            if (alert.parentElement) {
+                alert.classList.add('fade-out');
+                setTimeout(() => {
+                    if (alert.parentElement) {
+                        alert.parentElement.remove();
+                    }
+                }, 300);
+            }
+        }, 5000);
+    });
+});
+
+// Manual dismiss functionality
+function dismissAlert(alertElement) {
+    alertElement.classList.add('fade-out');
+    setTimeout(() => {
+        if (alertElement.parentElement) {
+            alertElement.parentElement.remove();
+        }
+    }, 300);
+}
+
+// Global function to show custom alerts
+function showAlert(message, type = 'info', title = null, persistent = false) {
+    const container = document.getElementById('errorMessages') || document.body;
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show ${persistent ? 'alert-persistent' : 'alert-auto-dismiss'}`;
+    alertDiv.setAttribute('role', 'alert');
+    
+    const iconMap = {
+        'success': 'fas fa-check-circle',
+        'error': 'fas fa-exclamation-circle',
+        'warning': 'fas fa-exclamation-triangle',
+        'info': 'fas fa-info-circle'
+    };
+    
+    const icon = iconMap[type] || 'fas fa-bell';
+    
+    alertDiv.innerHTML = `
+        <div class="alert-content">
+            <div class="alert-icon">
+                <i class="${icon}"></i>
+            </div>
+            <div class="alert-message">
+                ${title ? `<div class="alert-title">${title}</div>` : ''}
+                <div class="alert-description">${message}</div>
+            </div>
+            <button type="button" class="alert-close" onclick="dismissAlert(this.parentElement.parentElement)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    container.appendChild(alertDiv);
+    
+    // Auto-dismiss if not persistent
+    if (!persistent) {
+        setTimeout(() => {
+            if (alertDiv.parentElement) {
+                dismissAlert(alertDiv);
+            }
+        }, 5000);
+    }
+}
+</script>

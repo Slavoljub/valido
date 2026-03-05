@@ -1,0 +1,327 @@
+{% extends "layouts/base.html" %}
+
+{% block head %}
+{{ super() }}
+
+<!-- Component-specific meta tags -->
+{% if config.get('title') %}
+<title>{{ config.get('title') }} - {{ config.get('site_name', 'ValidoAI') }}</title>
+{% endif %}
+
+{% if config.get('description') %}
+<meta name="description" content="{{ config.get('description') }}">
+{% endif %}
+
+<!-- Component assets -->
+{% if config.get('assets') %}
+{% for asset_name in config.get('assets', []) %}
+{{ asset_manager.render_css_links([asset_name]) | safe }}
+{% endfor %}
+{% endif %}
+
+<!-- Additional head content -->
+{% block component_head %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<!-- Component wrapper -->
+<div class="component-wrapper {{ config.get('wrapper_class', '') }}" id="{{ config.get('id', 'component-wrapper') }}">
+    <!-- Component header -->
+    {% if config.get('show_header', True) %}
+    <div class="component-header {{ config.get('header_class', '') }}">
+        {% block component_header %}
+        {% if config.get('title') %}
+        <h2 class="component-title {{ config.get('title_class', '') }}">
+            {{ config.get('title') }}
+        </h2>
+        {% endif %}
+
+        {% if config.get('subtitle') %}
+        <p class="component-subtitle {{ config.get('subtitle_class', '') }}">
+            {{ config.get('subtitle') }}
+        </p>
+        {% endif %}
+
+        {% if config.get('actions') %}
+        <div class="component-actions {{ config.get('actions_class', '') }}">
+            {% for action in config.get('actions', []) %}
+            <button type="button"
+                    class="btn {{ action.get('class', 'btn-primary') }}"
+                    onclick="{{ action.get('onclick', '') }}"
+                    title="{{ action.get('title', '') }}">
+                {% if action.get('icon') %}
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ action.get('icon') }}"></path>
+                </svg>
+                {% endif %}
+                {{ action.get('text', '') }}
+            </button>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endblock %}
+    </div>
+    {% endif %}
+
+    <!-- Component body -->
+    <div class="component-body {{ config.get('body_class', '') }}">
+        {% block component_content %}{% endblock %}
+    </div>
+
+    <!-- Component footer -->
+    {% if config.get('show_footer', False) %}
+    <div class="component-footer {{ config.get('footer_class', '') }}">
+        {% block component_footer %}{% endblock %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+<!-- Component-specific JavaScript -->
+{% block component_scripts %}{% endblock %}
+
+<!-- Component initialization -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Component initialization
+    {% if config.get('init_function') %}
+    if (typeof {{ config.get('init_function') }} === 'function') {
+        {{ config.get('init_function') }}();
+    }
+    {% endif %}
+
+    // Component event listeners
+    {% if config.get('events') %}
+    {% for event in config.get('events', []) %}
+    {% if event.get('selector') and event.get('type') and event.get('handler') %}
+    document.addEventListener('{{ event.get('type') }}', function(e) {
+        if (e.target.matches('{{ event.get('selector') }}')) {
+            {{ event.get('handler') }}(e);
+        }
+    });
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+
+    console.log('Component initialized:', '{{ config.get('title', 'Unknown Component') }}');
+});
+</script>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+
+<!-- Component-specific styles -->
+<style>
+/* Base component styles */
+.component-wrapper {
+    background-color: var(--valido-bg-primary, #ffffff);
+    border: 1px solid var(--valido-border, #e5e7eb);
+    border-radius: 0.5rem;
+    box-shadow: var(--valido-shadow, 0 1px 3px 0 rgba(0, 0, 0, 0.1));
+    min-height: 200px;
+    transition: all 0.2s ease-in-out;
+}
+
+.component-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--valido-border, #e5e7eb);
+    background-color: var(--valido-bg-secondary, #f8fafc);
+}
+
+.component-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--valido-text-primary, #1e293b);
+    margin-bottom: 0.5rem;
+}
+
+.component-subtitle {
+    font-size: 0.875rem;
+    color: var(--valido-text-secondary, #64748b);
+}
+
+.component-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.component-body {
+    padding: 1.5rem;
+}
+
+.component-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--valido-border, #e5e7eb);
+    background-color: var(--valido-bg-secondary, #f8fafc);
+}
+
+/* Component-specific custom properties */
+.component-wrapper {
+    --component-primary: var(--valido-primary);
+    --component-secondary: var(--valido-secondary);
+    --component-border: var(--valido-border);
+}
+
+/* Component themes */
+.component-wrapper[data-theme="card"] {
+    box-shadow: var(--valido-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+}
+
+.component-wrapper[data-theme="minimal"] {
+    box-shadow: none;
+    border: none;
+    background-color: transparent;
+}
+
+.component-wrapper[data-theme="panel"] {
+    box-shadow: var(--valido-shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .component-header {
+        padding: 1rem;
+    }
+
+    .component-body {
+        padding: 1rem;
+    }
+
+    .component-footer {
+        padding: 1rem;
+    }
+
+    .component-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .component-title {
+        font-size: 1.125rem;
+    }
+}
+
+/* Loading state */
+.component-wrapper.loading {
+    position: relative;
+}
+
+.component-wrapper.loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: inherit;
+}
+
+.component-wrapper.loading::after {
+    content: '';
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid var(--color-primary);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Error state */
+.component-wrapper.error {
+    border-color: var(--valido-danger, #ef4444);
+    background-color: var(--valido-danger-light, #fef2f2);
+}
+
+.component-wrapper.error .component-header {
+    background-color: var(--valido-danger-light, #fef2f2);
+    border-color: var(--valido-danger, #ef4444);
+}
+
+.component-wrapper.error .component-title {
+    color: var(--valido-danger-dark, #dc2626);
+}
+
+/* Success state */
+.component-wrapper.success {
+    border-color: var(--valido-success, #10b981);
+    background-color: var(--valido-success-light, #f0fdf4);
+}
+
+.component-wrapper.success .component-header {
+    background-color: var(--valido-success-light, #f0fdf4);
+    border-color: var(--valido-success, #10b981);
+}
+
+.component-wrapper.success .component-title {
+    color: var(--valido-success-dark, #059669);
+}
+
+/* Animation keyframes */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Component utilities */
+.component-fade-in {
+    animation: componentFadeIn 0.3s ease-in;
+}
+
+@keyframes componentFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.component-slide-up {
+    animation: componentSlideUp 0.3s ease-out;
+}
+
+@keyframes componentSlideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Print styles */
+@media print {
+    .component-wrapper {
+        box-shadow: none;
+        border: 1px solid #9ca3af;
+        break-inside: avoid;
+    }
+
+    .component-header {
+        background-color: #f3f4f6;
+    }
+
+    .component-actions {
+        display: none;
+    }
+}
+</style>
+
+{% block component_styles %}{% endblock %}
+</block>

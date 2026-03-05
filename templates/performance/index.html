@@ -1,0 +1,289 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Performance Monitoring - {{ config.get('site_name', 'ValidoAI') }}{% endblock %}
+
+{% block head %}
+<style>
+    .metric-card {
+        transition: all 0.3s ease;
+    }
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .progress-bar {
+        transition: width 0.3s ease;
+    }
+    .status-good { color: #10b981; }
+    .status-warning { color: #f59e0b; }
+    .status-critical { color: #ef4444; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="p-4 md:p-6 2xl:p-10">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">📊 Performance Monitoring</h1>
+        <p class="text-gray-600 dark:text-gray-400">Real-time system monitoring and performance optimization</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mb-6">
+        <div class="flex flex-wrap gap-4">
+            <button @click="startMonitoring()" 
+                    :disabled="monitoringActive"
+                    class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium rounded-lg text-sm transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+                </svg>
+                Start Monitoring
+            </button>
+            <button @click="stopMonitoring()" 
+                    :disabled="!monitoringActive"
+                    class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-medium rounded-lg text-sm transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM18 10a8 8 0 11-16 0 8 8 0 0116 0zM8 28a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                Stop Monitoring
+            </button>
+            <button @click="refreshData()" 
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
+                </svg>
+                Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="mb-6" x-show="monitoringActive">
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 dark:bg-green-900/20 dark:border-green-800">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="animate-pulse h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-green-800 dark:text-green-200">
+                        Performance monitoring is active
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Metrics Grid -->
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">System Metrics</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- CPU Usage -->
+            <div class="metric-card bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">CPU Usage</h3>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">Real-time</span>
+                </div>
+                <div class="mb-2">
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white" x-text="systemInfo?.cpu?.usage_percent || '0'">0</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">%</div>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                    <div class="bg-blue-600 h-2 rounded-full progress-bar" 
+                         :style="`width: ${(systemInfo?.cpu?.usage_percent || 0)}%`"></div>
+                </div>
+                <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    Cores: <span x-text="systemInfo?.cpu?.count || 'N/A'">N/A</span>
+                </div>
+            </div>
+
+            <!-- Memory Usage -->
+            <div class="metric-card bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Memory Usage</h3>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">Real-time</span>
+                </div>
+                <div class="mb-2">
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white" x-text="systemInfo?.memory?.percent || '0'">0</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">%</div>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                    <div class="bg-green-600 h-2 rounded-full progress-bar" 
+                         :style="`width: ${(systemInfo?.memory?.percent || 0)}%`"></div>
+                </div>
+                <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    <span x-text="formatBytes(systemInfo?.memory?.used || 0)">0 B</span> / 
+                    <span x-text="formatBytes(systemInfo?.memory?.total || 0)">0 B</span>
+                </div>
+            </div>
+
+            <!-- Disk Usage -->
+            <div class="metric-card bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Disk Usage</h3>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">Root</span>
+                </div>
+                <div class="mb-2">
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white" x-text="systemInfo?.disk?.percent?.toFixed(1) || '0'">0</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">%</div>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                    <div class="bg-yellow-600 h-2 rounded-full progress-bar" 
+                         :style="`width: ${(systemInfo?.disk?.percent || 0)}%`"></div>
+                </div>
+                <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    <span x-text="formatBytes(systemInfo?.disk?.used || 0)">0 B</span> / 
+                    <span x-text="formatBytes(systemInfo?.disk?.total || 0)">0 B</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Information -->
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">System Information</h2>
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h4 class="font-medium text-gray-900 dark:text-white mb-2">Platform</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400" x-text="systemInfo?.system?.platform || 'N/A'">N/A</p>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900 dark:text-white mb-2">System</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400" x-text="systemInfo?.system?.system || 'N/A'">N/A</p>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900 dark:text-white mb-2">Release</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400" x-text="systemInfo?.system?.release || 'N/A'">N/A</p>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-900 dark:text-white mb-2">Python Version</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400" x-text="systemInfo?.system?.python_version || 'N/A'">N/A</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Score -->
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Performance Score</h2>
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 p-4">
+            <div class="text-center">
+                <div class="text-4xl font-bold text-gray-900 dark:text-white mb-2" x-text="performanceScore">--</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">out of 100</div>
+                <div class="mt-4">
+                    <div class="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-700">
+                        <div class="bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 h-3 rounded-full progress-bar" 
+                             :style="`width: ${performanceScore}%`"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('performance', () => ({
+        monitoringActive: false,
+        systemInfo: null,
+        performanceScore: 0,
+        
+        init() {
+            this.refreshData();
+            if (this.monitoringActive) {
+                this.startMonitoringInterval();
+            }
+        },
+        
+        async startMonitoring() {
+            try {
+                const response = await fetch('/api/performance/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    this.monitoringActive = true;
+                    this.startMonitoringInterval();
+                }
+            } catch (error) {
+                console.error('Error starting monitoring:', error);
+            }
+        },
+        
+        async stopMonitoring() {
+            try {
+                const response = await fetch('/api/performance/stop', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    this.monitoringActive = false;
+                    this.stopMonitoringInterval();
+                }
+            } catch (error) {
+                console.error('Error stopping monitoring:', error);
+            }
+        },
+        
+        async refreshData() {
+            try {
+                const response = await fetch('/api/performance/system-info');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    this.systemInfo = data;
+                    this.calculatePerformanceScore();
+                }
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+            }
+        },
+        
+        startMonitoringInterval() {
+            this.monitoringInterval = setInterval(() => {
+                this.refreshData();
+            }, 5000); // Refresh every 5 seconds
+        },
+        
+        stopMonitoringInterval() {
+            if (this.monitoringInterval) {
+                clearInterval(this.monitoringInterval);
+                this.monitoringInterval = null;
+            }
+        },
+        
+        calculatePerformanceScore() {
+            if (!this.systemInfo) return;
+            
+            let score = 100;
+            
+            // Deduct points for high resource usage
+            if (this.systemInfo.memory?.percent > 80) score -= 20;
+            if (this.systemInfo.disk?.percent > 90) score -= 20;
+            if (this.systemInfo.cpu?.usage_percent > 80) score -= 20;
+            
+            this.performanceScore = Math.max(0, score);
+        },
+        
+        formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+    }));
+});
+</script>
+{% endblock %}

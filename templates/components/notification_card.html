@@ -1,0 +1,33 @@
+<!-- Reusable Notification Card Component -->
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+            <div class="p-2 {{ icon_bg }} rounded-lg">
+                <i class="{{ icon }} text-{{ icon_color }}-400"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ title or 'Notifications' }}</h3>
+        </div>
+        <div class="px-3 py-1 {{ count_bg }} text-{{ count_color }}-700 dark:text-{{ count_color }}-400 text-sm font-semibold rounded-full">
+            {{ count }} total
+        </div>
+    </div>
+    <div class="space-y-4 max-h-96 overflow-y-auto">
+        {% for notification in notifications %}
+        <div class="flex items-start gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg {{ 'ring-2 ring-blue-500 dark:ring-blue-400' if notification.unread else '' }} transition-all duration-200">
+            <div class="p-2 rounded-full {{ 'bg-yellow-100 dark:bg-yellow-900/30' if notification.type == 'warning' else 'bg-blue-100 dark:bg-blue-900/30' if notification.type == 'info' else 'bg-green-100 dark:bg-green-900/30' }}">
+                <i class="fas fa-{{ 'exclamation-triangle text-yellow-600 dark:text-yellow-400' if notification.type == 'warning' else 'info-circle text-blue-600 dark:text-blue-400' if notification.type == 'info' else 'check-circle text-green-600 dark:text-green-400' }}"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-white">{{ notification.title }}</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{ notification.message }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ notification.time }}</p>
+            </div>
+        </div>
+        {% else %}
+        <div class="flex flex-col items-center justify-center py-8">
+            <i class="fas fa-bell-slash text-gray-400 dark:text-gray-500 text-4xl mb-4"></i>
+            <p class="text-gray-500 dark:text-gray-400 text-center">{{ empty_message or 'No notifications' }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>

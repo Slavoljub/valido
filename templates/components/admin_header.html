@@ -1,0 +1,945 @@
+{% comment %}
+Admin Header Component - Top navigation bar for administration interface
+{% endcomment %}
+
+<!-- Admin Header Component -->
+<header class="admin-header" x-data="adminHeader()">
+    <!-- Top Bar -->
+    <div class="header-top">
+        <div class="header-left">
+            <!-- Mobile Menu Toggle -->
+            <button @click="toggleMobileSidebar()" class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb" aria-label="Breadcrumb">
+                <ol class="breadcrumb-list">
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for('dashboard.index') }}" class="breadcrumb-link">
+                            <i class="fas fa-home"></i>
+                        </a>
+                    </li>
+                    {% for crumb in breadcrumbs %}
+                    <li class="breadcrumb-item">
+                        {% if crumb.url %}
+                        <a href="{{ crumb.url }}" class="breadcrumb-link">{{ crumb.title }}</a>
+                        {% else %}
+                        <span class="breadcrumb-current">{{ crumb.title }}</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ol>
+            </nav>
+        </div>
+
+        <div class="header-right">
+            <!-- Search Bar -->
+            <div class="header-search" x-show="showSearch">
+                <div class="search-input-wrapper">
+                    <input
+                        type="text"
+                        placeholder="Search..."
+                        class="search-input"
+                        x-model="searchQuery"
+                        @keydown.enter="performSearch"
+                        @keydown.escape="hideSearch"
+                    >
+                    <button @click="performSearch" class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button @click="hideSearch" class="search-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Header Actions -->
+            <div class="header-actions">
+                <!-- Search Toggle -->
+                <button @click="toggleSearch()" class="header-btn" title="Search">
+                    <i class="fas fa-search"></i>
+                </button>
+
+                <!-- Notifications -->
+                <div class="notification-dropdown" x-data="{ open: false }">
+                    <button @click="open = !open" class="header-btn notification-btn" title="Notifications" :class="{ 'has-notifications': notificationCount > 0 }">
+                        <i class="fas fa-bell"></i>
+                        <span x-show="notificationCount > 0" class="notification-badge">{{ notificationCount }}</span>
+                    </button>
+
+                    <div x-show="open" @click.away="open = false" class="notification-menu">
+                        <div class="notification-header">
+                            <h4>Notifications</h4>
+                            <button @click="markAllRead" class="mark-read-btn">Mark all read</button>
+                        </div>
+                        <div class="notification-list">
+                            <div x-show="notifications.length === 0" class="no-notifications">
+                                <i class="fas fa-bell-slash"></i>
+                                <p>No new notifications</p>
+                            </div>
+                            <div x-show="notifications.length > 0" class="notification-items">
+                                <template x-for="notification in notifications.slice(0, 5)" :key="notification.id">
+                                    <div class="notification-item" :class="{ 'unread': !notification.read }">
+                                        <div class="notification-icon">
+                                            <i :class="notification.icon"></i>
+                                        </div>
+                                        <div class="notification-content">
+                                            <div class="notification-title" x-text="notification.title"></div>
+                                            <div class="notification-message" x-text="notification.message"></div>
+                                            <div class="notification-time" x-text="notification.time"></div>
+                                        </div>
+                                        <button @click="dismissNotification(notification.id)" class="notification-dismiss">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="notification-footer">
+                            <a href="{{ url_for('notifications.index') }}" class="view-all-link">View all notifications</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Menu -->
+                <div class="user-dropdown" x-data="{ open: false }">
+                    <button @click="open = !open" class="user-menu-btn">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="user-info">
+                            <span class="user-name">Admin User</span>
+                            <span class="user-role">Administrator</span>
+                        </div>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+
+                    <div x-show="open" @click.away="open = false" class="user-menu">
+                        <div class="user-menu-header">
+                            <div class="user-avatar-large">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="user-details">
+                                <div class="user-name-full">Admin User</div>
+                                <div class="user-email">admin@valido.ai</div>
+                            </div>
+                        </div>
+                        <div class="user-menu-items">
+                            <a href="{{ url_for('main.profile_index') }}" class="user-menu-item">
+                                <i class="fas fa-user"></i>
+                                <span>Profile</span>
+                            </a>
+                                                         <a href="{{ url_for('main.settings') }}" class="user-menu-item">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <div class="user-menu-divider"></div>
+                            <button @click="logout" class="user-menu-item logout-btn">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header" x-show="showPageHeader">
+        <div class="page-header-content">
+            <div class="page-title-section">
+                <h1 class="page-title">{{ page_title or "Admin Panel" }}</h1>
+                <p x-show="page_description" class="page-description">{{ page_description }}</p>
+            </div>
+            <div class="page-actions">
+                {% block page_actions %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Admin Header Alpine.js Component -->
+<script>
+function adminHeader() {
+    return {
+        showSearch: false,
+        searchQuery: '',
+        showPageHeader: {{ show_page_header|tojson|default(true) }},
+        notificationCount: 3, // Example count
+        breadcrumbs: {{ breadcrumbs|tojson|default([]) }},
+
+        notifications: [
+            {
+                id: 1,
+                title: 'System Update',
+                message: 'New version 2.1.0 is available',
+                icon: 'fas fa-info-circle',
+                time: '2 hours ago',
+                read: false
+            },
+            {
+                id: 2,
+                title: 'Backup Completed',
+                message: 'Database backup completed successfully',
+                icon: 'fas fa-check-circle',
+                time: '4 hours ago',
+                read: false
+            },
+            {
+                id: 3,
+                title: 'Security Alert',
+                message: 'New login from unknown device',
+                icon: 'fas fa-exclamation-triangle',
+                time: '6 hours ago',
+                read: false
+            }
+        ],
+
+        init() {
+            // Update notification count
+            this.updateNotificationCount();
+        },
+
+        toggleMobileSidebar() {
+            // Emit event to toggle sidebar
+            window.dispatchEvent(new CustomEvent('toggleMobileSidebar'));
+        },
+
+        toggleSearch() {
+            this.showSearch = !this.showSearch;
+            if (this.showSearch) {
+                this.$nextTick(() => {
+                    this.$refs.searchInput?.focus();
+                });
+            }
+        },
+
+        hideSearch() {
+            this.showSearch = false;
+            this.searchQuery = '';
+        },
+
+        performSearch() {
+            if (this.searchQuery.trim()) {
+                window.location.href = `/admin/search?q=${encodeURIComponent(this.searchQuery)}`;
+            }
+        },
+
+        updateNotificationCount() {
+            this.notificationCount = this.notifications.filter(n => !n.read).length;
+        },
+
+        markAllRead() {
+            this.notifications.forEach(n => n.read = true);
+            this.updateNotificationCount();
+        },
+
+        dismissNotification(id) {
+            const index = this.notifications.findIndex(n => n.id === id);
+            if (index > -1) {
+                this.notifications.splice(index, 1);
+                this.updateNotificationCount();
+            }
+        },
+
+        logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '{{ url_for("auth.logout") }}';
+            }
+        }
+    }
+}
+</script>
+
+<!-- Admin Header Styles -->
+<style>
+/* Admin Header Base */
+.admin-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background-color: var(--valido-bg-primary, #ffffff);
+    border-bottom: 1px solid var(--valido-border, #e5e7eb);
+    box-shadow: var(--valido-shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+}
+
+/* Header Top */
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    min-height: 4rem;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Mobile Menu Button */
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    color: var(--valido-text-secondary, #64748b);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mobile-menu-btn:hover {
+    background-color: var(--valido-bg-secondary, #f8fafc);
+    color: var(--valido-text-primary, #1e293b);
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    font-size: 0.875rem;
+}
+
+.breadcrumb-list {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+}
+
+.breadcrumb-item:not(:last-child)::after {
+    content: '/';
+    margin-left: 0.5rem;
+    color: var(--valido-text-muted, #9ca3af);
+}
+
+.breadcrumb-link {
+    color: var(--valido-text-secondary, #64748b);
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.breadcrumb-link:hover {
+    background-color: var(--valido-bg-secondary, #f8fafc);
+    color: var(--valido-text-primary, #1e293b);
+}
+
+.breadcrumb-current {
+    color: var(--valido-text-primary, #1e293b);
+    font-weight: 500;
+}
+
+/* Header Search */
+.header-search {
+    position: relative;
+}
+
+.search-input-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: var(--valido-bg-secondary, #f8fafc);
+    border: 1px solid var(--border-color, #d1d5db);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.search-input-wrapper:focus-within {
+    border-color: var(--valido-primary, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-input {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border: none;
+    background: transparent;
+    font-size: 0.875rem;
+    outline: none;
+}
+
+.search-btn,
+.search-close {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--valido-text-secondary, #64748b);
+    transition: all 0.2s ease;
+}
+
+.search-btn:hover,
+.search-close:hover {
+    color: var(--valido-text-primary, #1e293b);
+}
+
+/* Header Actions */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.header-btn {
+    position: relative;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    color: var(--valido-text-secondary, #64748b);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.header-btn:hover {
+    background-color: var(--valido-bg-secondary, #f8fafc);
+    color: var(--valido-text-primary, #1e293b);
+}
+
+/* Notification Dropdown */
+.notification-dropdown {
+    position: relative;
+}
+
+.notification-btn .notification-badge {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    background-color: var(--valido-danger, #ef4444);
+    color: white;
+    border-radius: 50%;
+    width: 1.25rem;
+    height: 1.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notification-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 360px;
+    background-color: var(--valido-bg-primary, #ffffff);
+    border: 1px solid var(--valido-border, #e5e7eb);
+    border-radius: 0.5rem;
+    box-shadow: var(--valido-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+    z-index: 50;
+    margin-top: 0.5rem;
+}
+
+.notification-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--valido-border, #e5e7eb);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.notification-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--valido-text-primary, #1e293b);
+}
+
+.mark-read-btn {
+    background: none;
+    border: none;
+    color: var(--valido-primary, #3b82f6);
+    font-size: 0.875rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.mark-read-btn:hover {
+    background-color: var(--valido-bg-secondary, #f8fafc);
+}
+
+.notification-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.no-notifications {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--valido-text-secondary, #64748b);
+}
+
+.no-notifications i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.5;
+}
+
+.notification-items {
+    padding: 0.5rem 0;
+}
+
+.notification-item {
+    padding: 1rem;
+    border-bottom: 1px solid var(--valido-border, #f3f4f6);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.notification-item:hover {
+    background-color: var(--valido-bg-secondary, #f8fafc);
+}
+
+.notification-item.unread {
+    background-color: var(--valido-info-light, #eff6ff);
+}
+
+.notification-icon {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-color: var(--valido-primary, #3b82f6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.875rem;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-title {
+    font-weight: 600;
+    color: var(--valido-text-primary, #1e293b);
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.notification-message {
+    color: var(--valido-text-secondary, #64748b);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    margin-bottom: 0.25rem;
+}
+
+.notification-time {
+    color: var(--valido-text-muted, #9ca3af);
+    font-size: 0.75rem;
+}
+
+.notification-dismiss {
+    background: none;
+    border: none;
+    color: var(--valido-text-secondary, #64748b);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.notification-dismiss:hover {
+    background-color: var(--valido-bg-secondary, #f8fafc);
+    color: var(--valido-text-primary, #1e293b);
+}
+
+.notification-footer {
+    padding: 1rem;
+    border-top: 1px solid var(--valido-border, #e5e7eb);
+    text-align: center;
+}
+
+.view-all-link {
+    color: var(--valido-primary, #3b82f6);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.view-all-link:hover {
+    color: var(--valido-primary-dark, #1e40af);
+}
+
+/* User Menu */
+.user-menu-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.user-menu-btn:hover {
+    background-color: var(--valido-bg-secondary, #f8fafc);
+}
+
+.user-avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-color: var(--valido-primary, #3b82f6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.user-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--valido-text-primary, #1e293b);
+    line-height: 1;
+}
+
+.user-role {
+    font-size: 0.75rem;
+    color: var(--valido-text-secondary, #64748b);
+    line-height: 1;
+}
+
+.dropdown-arrow {
+    font-size: 0.75rem;
+    color: var(--valido-text-secondary, #64748b);
+    transition: transform 0.2s ease;
+}
+
+.user-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 280px;
+    background-color: var(--valido-bg-primary, #ffffff);
+    border: 1px solid var(--valido-border, #e5e7eb);
+    border-radius: 0.5rem;
+    box-shadow: var(--valido-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+    z-index: 50;
+    margin-top: 0.5rem;
+}
+
+.user-menu-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--valido-border, #e5e7eb);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-avatar-large {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background-color: var(--valido-primary, #3b82f6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.user-details {
+    flex: 1;
+}
+
+.user-name-full {
+    font-weight: 600;
+    color: var(--valido-text-primary, #1e293b);
+    font-size: 1rem;
+}
+
+.user-email {
+    color: var(--valido-text-secondary, #64748b);
+    font-size: 0.875rem;
+}
+
+.user-menu-items {
+    padding: 0.5rem 0;
+}
+
+.user-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    color: var(--valido-text-secondary, #64748b);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+    background: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+}
+
+.user-menu-item:hover {
+    background-color: var(--valido-bg-secondary, #f8fafc);
+    color: var(--valido-text-primary, #1e293b);
+}
+
+.user-menu-divider {
+    height: 1px;
+    background-color: var(--valido-border, #e5e7eb);
+    margin: 0.5rem 0;
+}
+
+.logout-btn {
+    color: var(--valido-danger, #ef4444);
+}
+
+.logout-btn:hover {
+    background-color: var(--valido-danger-light, #fef2f2);
+    color: var(--valido-danger-dark, #dc2626);
+}
+
+/* Page Header */
+.page-header {
+    border-bottom: 1px solid var(--valido-border, #e5e7eb);
+    background-color: var(--valido-bg-secondary, #f8fafc);
+}
+
+.page-header-content {
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.page-title-section {
+    flex: 1;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--valido-text-primary, #1e293b);
+    margin: 0 0 0.5rem 0;
+}
+
+.page-description {
+    color: var(--valido-text-secondary, #64748b);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.page-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1023px) {
+    .mobile-menu-btn {
+        display: block;
+    }
+
+    .breadcrumb {
+        display: none;
+    }
+
+    .header-search {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: var(--valido-bg-primary, #ffffff);
+        padding: 1rem;
+        border-bottom: 1px solid var(--valido-border, #e5e7eb);
+        z-index: 20;
+    }
+
+    .search-input-wrapper {
+        width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .header-top {
+        padding: 0.75rem 1rem;
+    }
+
+    .page-header-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .page-actions {
+        justify-content: center;
+    }
+
+    .user-menu {
+        width: calc(100vw - 2rem);
+        max-width: 320px;
+    }
+
+    .notification-menu {
+        width: calc(100vw - 2rem);
+        max-width: 360px;
+    }
+}
+
+/* Dark Theme Support */
+.theme-valido-dark .admin-header {
+    background-color: var(--valido-bg-secondary, #1e293b);
+    border-color: var(--valido-border, #475569);
+}
+
+.theme-valido-dark .header-top {
+    background-color: var(--valido-bg-secondary, #1e293b);
+}
+
+.theme-valido-dark .breadcrumb-link {
+    color: var(--valido-text-secondary, #cbd5e1);
+}
+
+.theme-valido-dark .breadcrumb-link:hover {
+    background-color: var(--valido-bg-tertiary, #334155);
+    color: var(--valido-text-primary, #f8fafc);
+}
+
+.theme-valido-dark .breadcrumb-current {
+    color: var(--valido-text-primary, #f8fafc);
+}
+
+.theme-valido-dark .header-search .search-input-wrapper {
+    background-color: var(--valido-bg-tertiary, #334155);
+    border-color: var(--valido-border, #475569);
+}
+
+.theme-valido-dark .header-btn {
+    color: var(--valido-text-secondary, #cbd5e1);
+}
+
+.theme-valido-dark .header-btn:hover {
+    background-color: var(--valido-bg-tertiary, #334155);
+    color: var(--valido-text-primary, #f8fafc);
+}
+
+.theme-valido-dark .user-name {
+    color: var(--valido-text-primary, #f8fafc);
+}
+
+.theme-valido-dark .user-role {
+    color: var(--valido-text-secondary, #cbd5e1);
+}
+
+.theme-valido-dark .page-header {
+    background-color: var(--valido-bg-tertiary, #334155);
+    border-color: var(--valido-border, #475569);
+}
+
+.theme-valido-dark .page-title {
+    color: var(--valido-text-primary, #f8fafc);
+}
+
+.theme-valido-dark .page-description {
+    color: var(--valido-text-secondary, #cbd5e1);
+}
+
+.theme-valido-dark .notification-menu,
+.theme-valido-dark .user-menu {
+    background-color: var(--valido-bg-secondary, #1e293b);
+    border-color: var(--valido-border, #475569);
+}
+
+.theme-valido-dark .notification-header,
+.theme-valido-dark .user-menu-header {
+    border-color: var(--valido-border, #475569);
+}
+
+.theme-valido-dark .notification-item {
+    border-color: var(--valido-border, #475569);
+}
+
+.theme-valido-dark .notification-item:hover {
+    background-color: var(--valido-bg-tertiary, #334155);
+}
+
+.theme-valido-dark .user-menu-item:hover {
+    background-color: var(--valido-bg-tertiary, #334155);
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+    .admin-header {
+        border-width: 2px;
+    }
+
+    .header-btn,
+    .mobile-menu-btn,
+    .user-menu-btn {
+        border: 2px solid currentColor;
+    }
+
+    .search-input-wrapper {
+        border-width: 2px;
+    }
+
+    .notification-menu,
+    .user-menu {
+        border-width: 2px;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .header-btn,
+    .mobile-menu-btn,
+    .user-menu-btn,
+    .search-input-wrapper,
+    .notification-menu,
+    .user-menu {
+        transition: none;
+    }
+
+    .dropdown-arrow {
+        transition: none;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .admin-header {
+        display: none !important;
+    }
+}
+</style>

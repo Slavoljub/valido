@@ -1,0 +1,1027 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Error Management Dashboard - ValidoAI{% endblock %}
+
+{% block description %}Monitor and manage application errors with detailed analytics and resolution tracking.{% endblock %}
+
+{% block content %}
+<div class="error-dashboard" x-data="{ 
+    activeTab: 'overview',
+    selectedError: null,
+    showErrorDetails: false,
+    errorStatistics: null,
+    recentErrors: [],
+    errorTrends: null,
+    loading: false,
+    searchParams: {},
+    exportFormat: 'json',
+    exportLimit: 1000
+}">
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="dashboard-title">🚨 Error Management Dashboard</h1>
+                <p class="dashboard-subtitle">Monitor and resolve application errors</p>
+            </div>
+            <div class="header-right">
+                <button @click="exportErrors()" class="btn btn-secondary">
+                    <i class="fas fa-download"></i> Export Errors
+                </button>
+                <button @click="refreshData()" class="btn btn-primary">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="dashboard-tabs">
+        <button @click="activeTab = 'overview'" 
+                :class="['tab-btn', { 'active': activeTab === 'overview' }]">
+            <i class="fas fa-chart-line"></i> Overview
+        </button>
+        <button @click="activeTab = 'recent'" 
+                :class="['tab-btn', { 'active': activeTab === 'recent' }]">
+            <i class="fas fa-clock"></i> Recent Errors
+        </button>
+        <button @click="activeTab = 'trends'" 
+                :class="['tab-btn', { 'active': activeTab === 'trends' }]">
+            <i class="fas fa-chart-bar"></i> Trends
+        </button>
+        <button @click="activeTab = 'search'" 
+                :class="['tab-btn', { 'active': activeTab === 'search' }]">
+            <i class="fas fa-search"></i> Search
+        </button>
+    </nav>
+
+    <!-- Overview Tab -->
+    <div x-show="activeTab === 'overview'" class="tab-content">
+        <div class="stats-grid">
+            <!-- Error Statistics Cards -->
+            <div class="stat-card" x-show="errorStatistics">
+                <div class="stat-icon error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-value" x-text="errorStatistics.total_errors || 0">0</h3>
+                    <p class="stat-label">Total Errors</p>
+                </div>
+            </div>
+
+            <div class="stat-card" x-show="errorStatistics">
+                <div class="stat-icon warning">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-value" x-text="errorStatistics.recent_errors || 0">0</h3>
+                    <p class="stat-label">Last 24 Hours</p>
+                </div>
+            </div>
+
+            <div class="stat-card" x-show="errorStatistics">
+                <div class="stat-icon success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-value" x-text="getResolvedCount()">0</h3>
+                    <p class="stat-label">Resolved</p>
+                </div>
+            </div>
+
+            <div class="stat-card" x-show="errorStatistics">
+                <div class="stat-icon info">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-value" x-text="getErrorRate()">0%</h3>
+                    <p class="stat-label">Error Rate</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Type Distribution -->
+        <div class="chart-section" x-show="errorStatistics">
+            <h3>Error Types Distribution</h3>
+            <div class="chart-container">
+                <canvas id="errorTypesChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Status Code Distribution -->
+        <div class="chart-section" x-show="errorStatistics">
+            <h3>Status Code Distribution</h3>
+            <div class="chart-container">
+                <canvas id="statusCodesChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Errors Tab -->
+    <div x-show="activeTab === 'recent'" class="tab-content">
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Error ID</th>
+                        <th>Type</th>
+                        <th>Message</th>
+                        <th>Status Code</th>
+                        <th>Path</th>
+                        <th>User</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="error in recentErrors" :key="error.error_uuid">
+                        <tr>
+                            <td>
+                                <span class="error-id" x-text="error.error_uuid.substring(0, 8) + '...'"></span>
+                            </td>
+                            <td>
+                                <span class="error-type" x-text="error.error_type"></span>
+                            </td>
+                            <td>
+                                <span class="error-message" x-text="error.error_message.substring(0, 50) + '...'"></span>
+                            </td>
+                            <td>
+                                <span class="status-code" :class="getStatusCodeClass(error.status_code)" 
+                                      x-text="error.status_code"></span>
+                            </td>
+                            <td>
+                                <span class="request-path" x-text="error.request_path || 'N/A'"></span>
+                            </td>
+                            <td>
+                                <span class="user-id" x-text="error.user_id || 'Anonymous'"></span>
+                            </td>
+                            <td>
+                                <span class="error-date" x-text="formatDate(error.created_at)"></span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button @click="viewErrorDetails(error.error_uuid)" 
+                                            class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button @click="resolveError(error.error_uuid)" 
+                                            class="btn btn-sm btn-success">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Trends Tab -->
+    <div x-show="activeTab === 'trends'" class="tab-content">
+        <div class="trends-controls">
+            <label for="trendDays">Days to analyze:</label>
+            <select id="trendDays" x-model="trendDays" @change="loadErrorTrends()">
+                <option value="7">Last 7 days</option>
+                <option value="30" selected>Last 30 days</option>
+                <option value="90">Last 90 days</option>
+                <option value="365">Last year</option>
+            </select>
+        </div>
+
+        <div class="chart-section" x-show="errorTrends">
+            <h3>Error Trends Over Time</h3>
+            <div class="chart-container">
+                <canvas id="errorTrendsChart" width="600" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Tab -->
+    <div x-show="activeTab === 'search'" class="tab-content">
+        <div class="search-form">
+            <h3>Search Errors</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="searchType">Error Type:</label>
+                    <input type="text" id="searchType" x-model="searchParams.error_type" 
+                           placeholder="e.g., ValidationError">
+                </div>
+                <div class="form-group">
+                    <label for="searchStatusCode">Status Code:</label>
+                    <input type="number" id="searchStatusCode" x-model="searchParams.status_code" 
+                           placeholder="e.g., 500">
+                </div>
+                <div class="form-group">
+                    <label for="searchSeverity">Severity:</label>
+                    <select id="searchSeverity" x-model="searchParams.severity">
+                        <option value="">All</option>
+                        <option value="ERROR">Error</option>
+                        <option value="WARNING">Warning</option>
+                        <option value="INFO">Info</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="searchUserId">User ID:</label>
+                    <input type="number" id="searchUserId" x-model="searchParams.user_id" 
+                           placeholder="e.g., 123">
+                </div>
+            </div>
+            <button @click="searchErrors()" class="btn btn-primary">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+
+        <div class="search-results" x-show="searchResults && searchResults.length > 0">
+            <h4>Search Results (<span x-text="searchResults.length"></span> found)</h4>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Error ID</th>
+                            <th>Type</th>
+                            <th>Message</th>
+                            <th>Status Code</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="error in searchResults" :key="error.error_uuid">
+                            <tr>
+                                <td>
+                                    <span class="error-id" x-text="error.error_uuid.substring(0, 8) + '...'"></span>
+                                </td>
+                                <td>
+                                    <span class="error-type" x-text="error.error_type"></span>
+                                </td>
+                                <td>
+                                    <span class="error-message" x-text="error.error_message.substring(0, 50) + '...'"></span>
+                                </td>
+                                <td>
+                                    <span class="status-code" :class="getStatusCodeClass(error.status_code)" 
+                                          x-text="error.status_code"></span>
+                                </td>
+                                <td>
+                                    <span class="error-date" x-text="formatDate(error.created_at)"></span>
+                                </td>
+                                <td>
+                                    <button @click="viewErrorDetails(error.error_uuid)" 
+                                            class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Details Modal -->
+<div x-show="showErrorDetails" class="modal-overlay" @click="showErrorDetails = false">
+    <div class="modal-content" @click.stop>
+        <div class="modal-header">
+            <h3>Error Details</h3>
+            <button @click="showErrorDetails = false" class="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" x-show="selectedError">
+            <div class="error-details">
+                <div class="detail-group">
+                    <label>Error UUID:</label>
+                    <span x-text="selectedError.error_uuid"></span>
+                </div>
+                <div class="detail-group">
+                    <label>Error Type:</label>
+                    <span x-text="selectedError.error_type"></span>
+                </div>
+                <div class="detail-group">
+                    <label>Error Message:</label>
+                    <span x-text="selectedError.error_message"></span>
+                </div>
+                <div class="detail-group">
+                    <label>Status Code:</label>
+                    <span x-text="selectedError.status_code"></span>
+                </div>
+                <div class="detail-group">
+                    <label>Request Path:</label>
+                    <span x-text="selectedError.request_path || 'N/A'"></span>
+                </div>
+                <div class="detail-group">
+                    <label>Request Method:</label>
+                    <span x-text="selectedError.request_method || 'N/A'"></span>
+                </div>
+                <div class="detail-group">
+                    <label>User ID:</label>
+                    <span x-text="selectedError.user_id || 'Anonymous'"></span>
+                </div>
+                <div class="detail-group">
+                    <label>Created At:</label>
+                    <span x-text="formatDate(selectedError.created_at)"></span>
+                </div>
+                <div class="detail-group" x-show="selectedError.stack_trace">
+                    <label>Stack Trace:</label>
+                    <pre class="stack-trace" x-text="selectedError.stack_trace"></pre>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button @click="resolveError(selectedError.error_uuid)" class="btn btn-success">
+                <i class="fas fa-check"></i> Mark as Resolved
+            </button>
+            <button @click="showErrorDetails = false" class="btn btn-secondary">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div x-show="showExportModal" class="modal-overlay" @click="showExportModal = false">
+    <div class="modal-content" @click.stop>
+        <div class="modal-header">
+            <h3>Export Errors</h3>
+            <button @click="showExportModal = false" class="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="exportFormat">Format:</label>
+                <select id="exportFormat" x-model="exportFormat">
+                    <option value="json">JSON</option>
+                    <option value="csv">CSV</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="exportLimit">Limit:</label>
+                <input type="number" id="exportLimit" x-model="exportLimit" min="1" max="10000">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button @click="performExport()" class="btn btn-primary">
+                <i class="fas fa-download"></i> Export
+            </button>
+            <button @click="showExportModal = false" class="btn btn-secondary">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Error Dashboard Styles -->
+<style>
+.error-dashboard {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    margin-bottom: 2rem;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.dashboard-subtitle {
+    color: var(--text-secondary);
+    margin: 0.5rem 0 0 0;
+}
+
+.dashboard-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.tab-btn {
+    padding: 1rem 1.5rem;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.tab-btn:hover {
+    color: var(--primary-color);
+}
+
+.tab-content {
+    min-height: 400px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.stat-icon.error {
+    background: var(--error-color);
+    color: white;
+}
+
+.stat-icon.warning {
+    background: var(--warning-color);
+    color: white;
+}
+
+.stat-icon.success {
+    background: var(--success-color);
+    color: white;
+}
+
+.stat-icon.info {
+    background: var(--info-color);
+    color: white;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.stat-label {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.chart-section {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.chart-section h3 {
+    margin: 0 0 1rem 0;
+    color: var(--text-primary);
+}
+
+.chart-container {
+    height: 300px;
+    position: relative;
+}
+
+.table-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table th {
+    background: var(--bg-secondary);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.data-table tr:hover {
+    background: var(--bg-hover);
+}
+
+.error-id {
+    font-family: monospace;
+    background: var(--bg-secondary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.error-type {
+    font-weight: 600;
+    color: var(--error-color);
+}
+
+.error-message {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.status-code {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.status-code.error {
+    background: var(--error-color);
+    color: white;
+}
+
+.status-code.warning {
+    background: var(--warning-color);
+    color: white;
+}
+
+.status-code.success {
+    background: var(--success-color);
+    color: white;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-sm {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.trends-controls {
+    margin-bottom: 1.5rem;
+}
+
+.trends-controls label {
+    margin-right: 1rem;
+    font-weight: 600;
+}
+
+.trends-controls select {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+.search-form {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--card-bg);
+    border-radius: 12px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.error-details {
+    display: grid;
+    gap: 1rem;
+}
+
+.detail-group {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+
+.detail-group label {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.detail-group span {
+    color: var(--text-secondary);
+}
+
+.stack-trace {
+    background: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+    .error-dashboard {
+        padding: 1rem;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .dashboard-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .detail-group {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+}
+</style>
+
+<!-- Error Dashboard JavaScript -->
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('errorDashboard', () => ({
+        activeTab: 'overview',
+        selectedError: null,
+        showErrorDetails: false,
+        showExportModal: false,
+        errorStatistics: null,
+        recentErrors: [],
+        errorTrends: null,
+        searchResults: [],
+        loading: false,
+        searchParams: {},
+        exportFormat: 'json',
+        exportLimit: 1000,
+        trendDays: 30,
+
+        init() {
+            this.loadData();
+        },
+
+        async loadData() {
+            this.loading = true;
+            try {
+                await Promise.all([
+                    this.loadErrorStatistics(),
+                    this.loadRecentErrors(),
+                    this.loadErrorTrends()
+                ]);
+            } catch (error) {
+                console.error('Error loading data:', error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async loadErrorStatistics() {
+            try {
+                const response = await fetch('/api/v1/errors/statistics');
+                const data = await response.json();
+                if (data.success) {
+                    this.errorStatistics = data.data;
+                    this.renderCharts();
+                }
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        },
+
+        async loadRecentErrors() {
+            try {
+                const response = await fetch('/api/v1/errors/recent?limit=50');
+                const data = await response.json();
+                if (data.success) {
+                    this.recentErrors = data.data.errors;
+                }
+            } catch (error) {
+                console.error('Error loading recent errors:', error);
+            }
+        },
+
+        async loadErrorTrends() {
+            try {
+                const response = await fetch(`/api/v1/errors/trends?days=${this.trendDays}`);
+                const data = await response.json();
+                if (data.success) {
+                    this.errorTrends = data.data;
+                    this.renderTrendsChart();
+                }
+            } catch (error) {
+                console.error('Error loading trends:', error);
+            }
+        },
+
+        async viewErrorDetails(errorUuid) {
+            try {
+                const response = await fetch(`/api/v1/errors/details/${errorUuid}`);
+                const data = await response.json();
+                if (data.success) {
+                    this.selectedError = data.data;
+                    this.showErrorDetails = true;
+                }
+            } catch (error) {
+                console.error('Error loading error details:', error);
+            }
+        },
+
+        async resolveError(errorUuid) {
+            try {
+                const response = await fetch(`/api/v1/errors/${errorUuid}/resolve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        resolution_notes: 'Resolved via dashboard'
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    this.loadData(); // Refresh data
+                    this.showErrorDetails = false;
+                }
+            } catch (error) {
+                console.error('Error resolving error:', error);
+            }
+        },
+
+        async searchErrors() {
+            try {
+                const response = await fetch('/api/v1/errors/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(this.searchParams)
+                });
+                const data = await response.json();
+                if (data.success) {
+                    this.searchResults = data.data.errors;
+                }
+            } catch (error) {
+                console.error('Error searching errors:', error);
+            }
+        },
+
+        exportErrors() {
+            this.showExportModal = true;
+        },
+
+        async performExport() {
+            try {
+                const response = await fetch(`/api/v1/errors/export?format=${this.exportFormat}&limit=${this.exportLimit}`);
+                const data = await response.json();
+                if (data.success) {
+                    // Create download link
+                    const blob = new Blob([data.data.data], { 
+                        type: this.exportFormat === 'json' ? 'application/json' : 'text/csv' 
+                    });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `errors_export_${new Date().toISOString().split('T')[0]}.${this.exportFormat}`;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                }
+                this.showExportModal = false;
+            } catch (error) {
+                console.error('Error exporting errors:', error);
+            }
+        },
+
+        refreshData() {
+            this.loadData();
+        },
+
+        getStatusCodeClass(statusCode) {
+            if (statusCode >= 500) return 'error';
+            if (statusCode >= 400) return 'warning';
+            return 'success';
+        },
+
+        formatDate(dateString) {
+            return new Date(dateString).toLocaleString();
+        },
+
+        getResolvedCount() {
+            // This would need to be implemented based on your data structure
+            return 0;
+        },
+
+        getErrorRate() {
+            // This would need to be implemented based on your data structure
+            return '0%';
+        },
+
+        renderCharts() {
+            if (!this.errorStatistics) return;
+
+            // Error Types Chart
+            const typesCtx = document.getElementById('errorTypesChart');
+            if (typesCtx && this.errorStatistics.errors_by_type) {
+                new Chart(typesCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: this.errorStatistics.errors_by_type.map(item => item.type),
+                        datasets: [{
+                            data: this.errorStatistics.errors_by_type.map(item => item.count),
+                            backgroundColor: [
+                                '#ef4444', '#f97316', '#eab308', '#22c55e',
+                                '#3b82f6', '#8b5cf6', '#ec4899', '#06b6d4'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // Status Codes Chart
+            const statusCtx = document.getElementById('statusCodesChart');
+            if (statusCtx && this.errorStatistics.errors_by_status) {
+                new Chart(statusCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: this.errorStatistics.errors_by_status.map(item => item.status),
+                        datasets: [{
+                            label: 'Error Count',
+                            data: this.errorStatistics.errors_by_status.map(item => item.count),
+                            backgroundColor: '#ef4444'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        },
+
+        renderTrendsChart() {
+            if (!this.errorTrends) return;
+
+            const trendsCtx = document.getElementById('errorTrendsChart');
+            if (trendsCtx && this.errorTrends.trends) {
+                new Chart(trendsCtx, {
+                    type: 'line',
+                    data: {
+                        labels: this.errorTrends.trends.map(item => item[0]),
+                        datasets: [{
+                            label: 'Errors per Day',
+                            data: this.errorTrends.trends.map(item => item[1]),
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    }));
+});
+</script>
+{% endblock %}

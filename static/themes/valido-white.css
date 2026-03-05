@@ -1,0 +1,398 @@
+/**
+ * Valido White Theme - Professional Light Theme
+ * Using Tailwind CSS classes and custom properties
+ */
+
+:root {
+  /* Valido White Theme Colors */
+  --valido-primary: #2563eb;
+  --valido-primary-hover: #1d4ed8;
+  --valido-primary-light: #dbeafe;
+  --valido-primary-dark: #1e40af;
+
+  --valido-secondary: #64748b;
+  --valido-secondary-hover: #475569;
+  --valido-secondary-light: #f1f5f9;
+  --valido-secondary-dark: #334155;
+
+  --valido-success: #059669;
+  --valido-success-hover: #047857;
+  --valido-success-light: #d1fae5;
+  --valido-success-dark: #065f46;
+
+  --valido-warning: #d97706;
+  --valido-warning-hover: #b45309;
+  --valido-warning-light: #fef3c7;
+  --valido-warning-dark: #92400e;
+
+  --valido-danger: #dc2626;
+  --valido-danger-hover: #b91c1c;
+  --valido-danger-light: #fecaca;
+  --valido-danger-dark: #991b1b;
+
+  --valido-info: #0891b2;
+  --valido-info-hover: #0e7490;
+  --valido-info-light: #cffafe;
+  --valido-info-dark: #0c4a6e;
+
+  /* Background Colors */
+  --valido-bg-primary: #ffffff;
+  --valido-bg-secondary: #f8fafc;
+  --valido-bg-tertiary: #f1f5f9;
+  --valido-bg-quaternary: #e2e8f0;
+  --valido-bg-overlay: rgba(255, 255, 255, 0.95);
+
+  /* Text Colors */
+  --valido-text-primary: #1e293b;
+  --valido-text-secondary: #64748b;
+  --valido-text-muted: #94a3b8;
+  --valido-text-inverse: #ffffff;
+  --valido-text-link: #2563eb;
+  --valido-text-link-hover: #1d4ed8;
+
+  /* Border Colors */
+  --valido-border-light: #f1f5f9;
+  --valido-border: #e2e8f0;
+  --valido-border-medium: #cbd5e1;
+  --valido-border-dark: #94a3b8;
+
+  /* Shadow Colors */
+  --valido-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --valido-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --valido-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --valido-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --valido-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Spacing */
+  --valido-radius-sm: 0.25rem;
+  --valido-radius: 0.375rem;
+  --valido-radius-md: 0.5rem;
+  --valido-radius-lg: 0.75rem;
+  --valido-radius-xl: 1rem;
+  --valido-radius-full: 9999px;
+
+  /* Typography */
+  --valido-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --valido-font-size-xs: 0.75rem;
+  --valido-font-size-sm: 0.875rem;
+  --valido-font-size-base: 1rem;
+  --valido-font-size-lg: 1.125rem;
+  --valido-font-size-xl: 1.25rem;
+  --valido-font-size-2xl: 1.5rem;
+  --valido-font-size-3xl: 1.875rem;
+  --valido-font-size-4xl: 2.25rem;
+
+  /* Layout */
+  --valido-sidebar-width: 16rem;
+  --valido-header-height: 4rem;
+  --valido-content-max-width: 1280px;
+}
+
+/* Valido White Theme Classes */
+.theme-valido-white {
+  /* Base Colors */
+  --bg-primary: var(--valido-bg-primary);
+  --bg-secondary: var(--valido-bg-secondary);
+  --bg-tertiary: var(--valido-bg-tertiary);
+  --text-primary: var(--valido-text-primary);
+  --text-secondary: var(--valido-text-secondary);
+  --text-muted: var(--valido-text-muted);
+  --border-color: var(--valido-border);
+
+  /* Component Specific Colors */
+  --card-bg: var(--valido-bg-primary);
+  --input-bg: var(--valido-bg-primary);
+  --button-primary-bg: var(--valido-primary);
+  --button-primary-hover: var(--valido-primary-hover);
+  --nav-bg: var(--valido-bg-primary);
+  --sidebar-bg: var(--valido-bg-primary);
+  --header-bg: var(--valido-bg-primary);
+  --modal-bg: var(--valido-bg-primary);
+  --dropdown-bg: var(--valido-bg-primary);
+  --tooltip-bg: var(--valido-text-primary);
+  --toast-bg: var(--valido-bg-primary);
+
+  /* Status Colors */
+  --success: var(--valido-success);
+  --success-bg: var(--valido-success-light);
+  --warning: var(--valido-warning);
+  --warning-bg: var(--valido-warning-light);
+  --danger: var(--valido-danger);
+  --danger-bg: var(--valido-danger-light);
+  --info: var(--valido-info);
+  --info-bg: var(--valido-info-light);
+}
+
+/* Valido White Theme Specific Styles */
+.theme-valido-white .btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md shadow-sm transition-colors duration-200;
+}
+
+.theme-valido-white .btn-secondary {
+  @apply bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-md border border-gray-300 shadow-sm transition-colors duration-200;
+}
+
+.theme-valido-white .btn-success {
+  @apply bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md shadow-sm transition-colors duration-200;
+}
+
+.theme-valido-white .btn-warning {
+  @apply bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-4 rounded-md shadow-sm transition-colors duration-200;
+}
+
+.theme-valido-white .btn-danger {
+  @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md shadow-sm transition-colors duration-200;
+}
+
+.theme-valido-white .card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6 transition-shadow duration-200 hover:shadow-md;
+}
+
+.theme-valido-white .input-field {
+  @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm;
+}
+
+.theme-valido-white .nav-link {
+  @apply text-gray-600 hover:text-gray-900 hover:bg-gray-50 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200;
+}
+
+.theme-valido-white .nav-link.active {
+  @apply text-blue-600 bg-blue-50 border border-blue-200;
+}
+
+.theme-valido-white .sidebar {
+  @apply bg-white border-r border-gray-200 w-64 h-full shadow-sm;
+}
+
+.theme-valido-white .header {
+  @apply bg-white border-b border-gray-200 shadow-sm;
+}
+
+.theme-valido-white .modal {
+  @apply bg-white rounded-lg shadow-xl border border-gray-200;
+}
+
+.theme-valido-white .dropdown {
+  @apply bg-white rounded-md shadow-lg border border-gray-200;
+}
+
+.theme-valido-white .toast {
+  @apply bg-white rounded-md shadow-lg border border-gray-200;
+}
+
+.theme-valido-white .badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.theme-valido-white .badge-primary {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.theme-valido-white .badge-success {
+  @apply bg-green-100 text-green-800;
+}
+
+.theme-valido-white .badge-warning {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.theme-valido-white .badge-danger {
+  @apply bg-red-100 text-red-800;
+}
+
+.theme-valido-white .badge-info {
+  @apply bg-cyan-100 text-cyan-800;
+}
+
+.theme-valido-white .alert {
+  @apply rounded-md p-4;
+}
+
+.theme-valido-white .alert-success {
+  @apply bg-green-50 border border-green-200 text-green-800;
+}
+
+.theme-valido-white .alert-warning {
+  @apply bg-yellow-50 border border-yellow-200 text-yellow-800;
+}
+
+.theme-valido-white .alert-danger {
+  @apply bg-red-50 border border-red-200 text-red-800;
+}
+
+.theme-valido-white .alert-info {
+  @apply bg-blue-50 border border-blue-200 text-blue-800;
+}
+
+/* Table Styles for Valido White */
+.theme-valido-white .table {
+  @apply min-w-full divide-y divide-gray-200;
+}
+
+.theme-valido-white .table th {
+  @apply bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+}
+
+.theme-valido-white .table td {
+  @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+}
+
+.theme-valido-white .table tr:hover {
+  @apply bg-gray-50;
+}
+
+/* Form Styles for Valido White */
+.theme-valido-white .form-group {
+  @apply mb-4;
+}
+
+.theme-valido-white .form-label {
+  @apply block text-sm font-medium text-gray-700 mb-2;
+}
+
+.theme-valido-white .form-input {
+  @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm;
+}
+
+.theme-valido-white .form-textarea {
+  @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm;
+}
+
+.theme-valido-white .form-select {
+  @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm;
+}
+
+.theme-valido-white .form-checkbox {
+  @apply rounded border-gray-300 text-blue-600 focus:ring-blue-500;
+}
+
+.theme-valido-white .form-radio {
+  @apply border-gray-300 text-blue-600 focus:ring-blue-500;
+}
+
+/* Navigation Styles for Valido White */
+.theme-valido-white .navbar {
+  @apply bg-white shadow-sm border-b border-gray-200;
+}
+
+.theme-valido-white .navbar-brand {
+  @apply text-xl font-bold text-gray-900;
+}
+
+.theme-valido-white .navbar-nav {
+  @apply flex space-x-8;
+}
+
+.theme-valido-white .navbar-toggler {
+  @apply inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100;
+}
+
+/* Breadcrumb Styles for Valido White */
+.theme-valido-white .breadcrumb {
+  @apply flex items-center space-x-2 text-sm text-gray-500;
+}
+
+.theme-valido-white .breadcrumb-item {
+  @apply hover:text-gray-700 transition-colors duration-200;
+}
+
+.theme-valido-white .breadcrumb-item.active {
+  @apply text-gray-900 font-medium;
+}
+
+/* Pagination Styles for Valido White */
+.theme-valido-white .pagination {
+  @apply flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6;
+}
+
+.theme-valido-white .pagination-info {
+  @apply text-sm text-gray-700;
+}
+
+.theme-valido-white .pagination-controls {
+  @apply flex items-center space-x-2;
+}
+
+.theme-valido-white .pagination-btn {
+  @apply relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50;
+}
+
+.theme-valido-white .pagination-btn.active {
+  @apply bg-blue-50 border-blue-500 text-blue-600;
+}
+
+/* Loading and Progress Styles for Valido White */
+.theme-valido-white .loading-spinner {
+  @apply animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600;
+}
+
+.theme-valido-white .progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-2.5;
+}
+
+.theme-valido-white .progress-fill {
+  @apply bg-blue-600 h-2.5 rounded-full transition-all duration-300;
+}
+
+/* Utility Classes for Valido White */
+.theme-valido-white .text-gradient {
+  @apply bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent;
+}
+
+.theme-valido-white .bg-gradient-primary {
+  @apply bg-gradient-to-r from-blue-600 to-blue-700;
+}
+
+.theme-valido-white .bg-gradient-secondary {
+  @apply bg-gradient-to-r from-gray-600 to-gray-700;
+}
+
+.theme-valido-white .shadow-valido {
+  box-shadow: var(--valido-shadow);
+}
+
+.theme-valido-white .shadow-valido-lg {
+  box-shadow: var(--valido-shadow-lg);
+}
+
+/* Responsive Design for Valido White */
+@media (max-width: 768px) {
+  .theme-valido-white .sidebar {
+    @apply fixed inset-y-0 left-0 z-50 w-64 transform -translate-x-full transition-transform duration-300 ease-in-out;
+  }
+
+  .theme-valido-white .sidebar.open {
+    @apply translate-x-0;
+  }
+
+  .theme-valido-white .main-content {
+    @apply ml-0;
+  }
+}
+
+@media (min-width: 769px) {
+  .theme-valido-white .sidebar {
+    @apply relative;
+  }
+
+  .theme-valido-white .main-content {
+    @apply ml-64;
+  }
+}
+
+/* Print Styles for Valido White */
+@media print {
+  .theme-valido-white .no-print {
+    display: none !important;
+  }
+
+  .theme-valido-white .print-break {
+    page-break-after: always;
+  }
+
+  .theme-valido-white * {
+    color: black !important;
+    background: white !important;
+    box-shadow: none !important;
+  }
+}

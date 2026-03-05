@@ -1,0 +1,429 @@
+{% extends "layouts/base.html"' %}
+
+{% block title %}Market Analysis - ValidoAI{% endblock %}
+
+{% block page_title %}Market Analysis{% endblock %}
+
+{% block page_description %}
+AI-powered analysis of domestic market data with interactive visualizations and predictive insights.
+{% endblock %}
+
+{% block content %}
+<!-- Main Market Analysis Container -->
+<div class="space-y-6">
+    <!-- Analysis Description -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
+        <h1 class="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-4 flex items-center justify-center gap-2">
+            <i class="fas fa-chart-line"></i>
+            Market Analysis
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400 text-lg max-w-2xl mx-auto">
+            ValidoAI enables comprehensive review and analysis of domestic data. Ask questions and get visual representations of market trends and insights!
+        </p>
+    </div>
+
+    <!-- Analysis Interface -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Chat Interface -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="bg-primary-600 text-white px-6 py-4 rounded-t-lg">
+                <h4 class="font-semibold flex items-center gap-2">
+                    <i class="fas fa-comments"></i>
+                    AI Analysis Chat
+                </h4>
+            </div>
+            <div class="p-6 space-y-4">
+                <!-- Input Group -->
+                <div class="flex gap-2">
+                    <input type="text"
+                           x-model="userQuestion"
+                           @keyup.enter="sendAnalysisRequest()"
+                           placeholder="Enter your question..."
+                           class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    <button @click="sendAnalysisRequest()"
+                            :disabled="!userQuestion.trim()"
+                            class="px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors whitespace-nowrap">
+                        <i class="fas fa-paper-plane mr-1"></i>
+                        Analyze
+                    </button>
+                </div>
+
+                <!-- AI Response -->
+                <div x-show="showResponse" x-transition class="min-h-[100px]">
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <div class="prose prose-gray dark:prose-invert max-w-none">
+                            <div class="whitespace-pre-wrap text-gray-700 dark:text-gray-300"
+                                 x-text="aiResponse">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Visualization -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="bg-primary-600 text-white px-6 py-4 rounded-t-lg">
+                <h4 class="font-semibold flex items-center gap-2">
+                    <i class="fas fa-chart-bar"></i>
+                    Revenue Visualization
+                </h4>
+            </div>
+            <div class="p-6">
+                <div class="w-full h-80">
+                    <canvas id="marketChart" class="w-full h-full"></canvas>
+                </div>
+                <p x-show="!chartData || chartData.length === 0" class="text-center text-gray-500 dark:text-gray-400 mt-4">
+                    No chart data available. Ask a question to see visualizations.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prediction Button -->
+    <div class="text-center">
+        <button @click="openPredictionModal()"
+                class="inline-flex items-center px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors shadow-sm">
+            <i class="fas fa-crystal-ball mr-2"></i>
+            Predict Next Period
+        </button>
+    </div>
+</div>
+
+<!-- Prediction Modal -->
+<div x-show="showPredictionModal" x-transition
+     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+     @click="showPredictionModal = false">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+         @click.stop>
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <h3 class="text-2xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <i class="fas fa-chart-line"></i>
+                    AI Revenue Prediction
+                </h3>
+                <button @click="showPredictionModal = false"
+                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        <div class="p-6">
+            <div x-show="isLoadingPredictions" class="text-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+                <p class="mt-2 text-gray-600 dark:text-gray-400">Loading predictions...</p>
+            </div>
+            <div x-show="!isLoadingPredictions">
+                <!-- Predictions List -->
+                <div class="mb-6">
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Revenue Predictions by Location</h4>
+                    <div class="space-y-2">
+                        <div x-for="prediction in predictions" class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                            <div class="font-medium text-gray-900 dark:text-white" x-text="prediction.location"></div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400 mt-1" x-text="prediction.data"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Analysis -->
+                <div>
+                    <h4 class="font-semibold text-primary-600 dark:text-primary-400 mb-3">AI Analysis</h4>
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <div class="prose prose-gray dark:prose-invert max-w-none">
+                            <div class="whitespace-pre-wrap text-gray-700 dark:text-gray-300 text-sm"
+                                 x-text="aiPredictionAnalysis">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="p-6 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex gap-3 justify-center">
+                <button @click="saveAsPDF()"
+                        class="inline-flex items-center px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors">
+                    <i class="fas fa-download mr-2"></i>
+                    Save PDF
+                </button>
+                <button @click="printReport()"
+                        class="inline-flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                    <i class="fas fa-print mr-2"></i>
+                    Print
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Print Modal (hidden by default, shown when printing) -->
+<div id="printModal" class="hidden fixed inset-0 bg-white z-50 p-8" style="display: none;">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Market Analysis Report</h1>
+            <button onclick="closePrintModal()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        <div id="printContent">
+            <!-- Content will be populated by JavaScript -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('marketAnalysis', () => ({
+        isLoading: false,
+        showResponse: false,
+        userQuestion: '',
+        aiResponse: '',
+        chartData: null,
+        chartInstance: null,
+        showPredictionModal: false,
+        isLoadingPredictions: false,
+        predictions: [],
+        aiPredictionAnalysis: '',
+
+        async sendAnalysisRequest() {
+            if (!this.userQuestion.trim()) {
+                alert('Please enter a question!');
+                return;
+            }
+
+            this.isLoading = true;
+            this.showResponse = false;
+            this.aiResponse = 'Please wait, analyzing your request...';
+
+            try {
+                const response = await fetch('/api/market-analysis/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [{ role: "user", content: this.userQuestion }]
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to get analysis');
+
+                const data = await response.json();
+
+                this.showResponse = true;
+                if (data.response) {
+                    this.aiResponse = data.response;
+                    if (data.data) {
+                        this.renderChart(data.data);
+                    }
+                } else {
+                    this.aiResponse = 'Unfortunately, no relevant data could be found.';
+                }
+            } catch (error) {
+                console.error('Error communicating with server:', error);
+                this.aiResponse = 'An error occurred while communicating with the server.';
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        renderChart(data) {
+            // Destroy existing chart
+            if (this.chartInstance) {
+                this.chartInstance.destroy();
+            }
+
+            const ctx = document.getElementById('marketChart');
+            if (!ctx) return;
+
+            const labels = data.map(item => item.location || item['Mesto']);
+            const values = data.map(item => item.revenue || item['Prihodi']);
+
+            this.chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Revenue (RSD)',
+                        data: values,
+                        backgroundColor: [
+                            '#ef4444', '#f97316', '#eab308', '#22c55e',
+                            '#06b6d4', '#8b5cf6', '#ec4899', '#f43f5e'
+                        ],
+                        borderColor: [
+                            '#dc2626', '#ea580c', '#ca8a04', '#16a34a',
+                            '#0891b2', '#7c3aed', '#db2777', '#e11d48'
+                        ],
+                        borderWidth: 1.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 2000 },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { color: '#374151', font: { size: 14 } }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Revenue by Location for Selected Period',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: '#ffffff',
+                            bodyColor: '#374151',
+                            titleColor: '#111827',
+                            borderColor: '#d1d5db',
+                            borderWidth: 1,
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#6b7280' },
+                            grid: { color: '#f3f4f6' }
+                        },
+                        y: {
+                            ticks: { color: '#6b7280' },
+                            grid: { color: '#f3f4f6' }
+                        }
+                    }
+                }
+            });
+        },
+
+        async openPredictionModal() {
+            this.showPredictionModal = true;
+            this.isLoadingPredictions = true;
+
+            try {
+                const response = await fetch('/api/market-analysis/predictions');
+                if (!response.ok) throw new Error('Failed to get predictions');
+
+                const data = await response.json();
+
+                // Process predictions data
+                this.predictions = [];
+                const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+                if (data.predictionsByLocation) {
+                    for (const location in data.predictionsByLocation) {
+                        const locationPredictions = data.predictionsByLocation[location];
+                        const formattedPredictions = locationPredictions.map((p, i) =>
+                            `${months[i % 12]}: ${p.toFixed(2)} RSD`
+                        ).join(", ");
+
+                        this.predictions.push({
+                            location: location,
+                            data: formattedPredictions
+                        });
+                    }
+                } else {
+                    this.predictions.push({
+                        location: 'No Data',
+                        data: 'No predictions available.'
+                    });
+                }
+
+                this.aiPredictionAnalysis = data.aiAnalysis || 'No AI analysis available.';
+
+            } catch (error) {
+                console.error('Error loading predictions:', error);
+                this.predictions = [{
+                    location: 'Error',
+                    data: 'Failed to load prediction data.'
+                }];
+                this.aiPredictionAnalysis = 'Error loading AI analysis.';
+            } finally {
+                this.isLoadingPredictions = false;
+            }
+        },
+
+        saveAsPDF() {
+            // Implementation for PDF generation
+            alert('PDF saved! (PDF generation can be implemented here)');
+        },
+
+        printReport() {
+            // Create print content
+            const printContent = document.getElementById('printContent');
+            const modalContent = document.querySelector('[x-show="showPredictionModal"]');
+
+            // Copy content for printing
+            const contentToPrint = modalContent.cloneNode(true);
+            printContent.innerHTML = contentToPrint.innerHTML;
+
+            // Show print modal
+            document.getElementById('printModal').style.display = 'block';
+
+            // Trigger print dialog
+            setTimeout(() => {
+                window.print();
+                this.closePrintModal();
+            }, 100);
+        },
+
+        closePrintModal() {
+            document.getElementById('printModal').style.display = 'none';
+        },
+
+        typeWriter(text, element, speed = 50) {
+            let i = 0;
+            element.textContent = "";
+
+            function typing() {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+
+                    // Add line breaks for better formatting
+                    if (text.charAt(i) === '.' || text.charAt(i) === ':' || text.charAt(i) === ';') {
+                        element.innerHTML += "<br><br>";
+                    }
+
+                    i++;
+                    setTimeout(typing, speed);
+                }
+            }
+            typing();
+        },
+
+        typeWriterList(items, container, speed = 10) {
+            let i = 0;
+            container.innerHTML = "";
+
+            function typing() {
+                if (i < items.length) {
+                    const item = document.createElement('div');
+                    item.className = 'bg-gray-50 dark:bg-gray-700 rounded p-3 mb-2';
+                    item.textContent = items[i];
+                    container.appendChild(item);
+                    i++;
+                    setTimeout(typing, speed);
+                }
+            }
+            typing();
+        }
+    }));
+});
+
+// Close modal when clicking outside
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        // Close any open modals
+        const modals = document.querySelectorAll('[x-show*="Modal"]');
+        modals.forEach(modal => {
+            if (modal.__x.$data.showModal) {
+                modal.__x.$data.showModal = false;
+            }
+        });
+    }
+});
+
+function closePrintModal() {
+    document.getElementById('printModal').style.display = 'none';
+}
+</script>
+{% endblock %}

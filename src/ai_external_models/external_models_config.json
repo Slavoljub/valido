@@ -1,0 +1,147 @@
+{
+  "models": {
+    "openai-gpt-4": {
+      "name": "OpenAI GPT-4",
+      "model_id": "gpt-4",
+      "provider": "OpenAI",
+      "type": "llm",
+      "description": "OpenAI's GPT-4 model - most capable language model",
+      "api_endpoint": "https://api.openai.com/v1/chat/completions",
+      "max_tokens": 8192,
+      "context_length": 8192,
+      "temperature": 0.7,
+      "cost_per_1k_tokens": 0.03,
+      "is_available": true,
+      "requires_api_key": true,
+      "api_key_env_var": "OPENAI_API_KEY",
+      "rate_limit": {
+        "requests_per_minute": 3500,
+        "tokens_per_minute": 90000
+      }
+    },
+    "openai-gpt-3.5-turbo": {
+      "name": "OpenAI GPT-3.5 Turbo",
+      "model_id": "gpt-3.5-turbo",
+      "provider": "OpenAI",
+      "type": "llm",
+      "description": "OpenAI's GPT-3.5 Turbo model - fast and efficient",
+      "api_endpoint": "https://api.openai.com/v1/chat/completions",
+      "max_tokens": 4096,
+      "context_length": 4096,
+      "temperature": 0.7,
+      "cost_per_1k_tokens": 0.002,
+      "is_available": true,
+      "requires_api_key": true,
+      "api_key_env_var": "OPENAI_API_KEY",
+      "rate_limit": {
+        "requests_per_minute": 3500,
+        "tokens_per_minute": 90000
+      }
+    },
+    "anthropic-claude-3-opus": {
+      "name": "Claude 3 Opus",
+      "model_id": "claude-3-opus-20240229",
+      "provider": "Anthropic",
+      "type": "llm",
+      "description": "Anthropic's Claude 3 Opus - most capable Claude model",
+      "api_endpoint": "https://api.anthropic.com/v1/messages",
+      "max_tokens": 4096,
+      "context_length": 200000,
+      "temperature": 0.7,
+      "cost_per_1k_tokens": 0.015,
+      "is_available": true,
+      "requires_api_key": true,
+      "api_key_env_var": "ANTHROPIC_API_KEY",
+      "rate_limit": {
+        "requests_per_minute": 50,
+        "tokens_per_minute": 150000
+      }
+    },
+    "anthropic-claude-3-sonnet": {
+      "name": "Claude 3 Sonnet",
+      "model_id": "claude-3-sonnet-20240229",
+      "provider": "Anthropic",
+      "type": "llm",
+      "description": "Anthropic's Claude 3 Sonnet - balanced performance",
+      "api_endpoint": "https://api.anthropic.com/v1/messages",
+      "max_tokens": 4096,
+      "context_length": 200000,
+      "temperature": 0.7,
+      "cost_per_1k_tokens": 0.003,
+      "is_available": true,
+      "requires_api_key": true,
+      "api_key_env_var": "ANTHROPIC_API_KEY",
+      "rate_limit": {
+        "requests_per_minute": 50,
+        "tokens_per_minute": 150000
+      }
+    },
+    "google-gemini-pro": {
+      "name": "Google Gemini Pro",
+      "model_id": "gemini-pro",
+      "provider": "Google",
+      "type": "llm",
+      "description": "Google's Gemini Pro model - powerful and versatile",
+      "api_endpoint": "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
+      "max_tokens": 8192,
+      "context_length": 32768,
+      "temperature": 0.7,
+      "cost_per_1k_tokens": 0.0005,
+      "is_available": true,
+      "requires_api_key": true,
+      "api_key_env_var": "GOOGLE_API_KEY",
+      "rate_limit": {
+        "requests_per_minute": 60,
+        "tokens_per_minute": 15000
+      }
+    },
+    "cohere-command": {
+      "name": "Cohere Command",
+      "model_id": "command",
+      "provider": "Cohere",
+      "type": "llm",
+      "description": "Cohere's Command model - excellent for text generation",
+      "api_endpoint": "https://api.cohere.ai/v1/generate",
+      "max_tokens": 2048,
+      "context_length": 2048,
+      "temperature": 0.7,
+      "cost_per_1k_tokens": 0.0015,
+      "is_available": true,
+      "requires_api_key": true,
+      "api_key_env_var": "COHERE_API_KEY",
+      "rate_limit": {
+        "requests_per_minute": 100,
+        "tokens_per_minute": 10000
+      }
+    },
+    "huggingface-meta-llama-2-7b": {
+      "name": "Meta Llama 2 7B",
+      "model_id": "meta-llama/Llama-2-7b-chat-hf",
+      "provider": "HuggingFace",
+      "type": "llm",
+      "description": "Meta's Llama 2 7B model via HuggingFace",
+      "api_endpoint": "https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-chat-hf",
+      "max_tokens": 2048,
+      "context_length": 4096,
+      "temperature": 0.7,
+      "cost_per_1k_tokens": 0.0,
+      "is_available": true,
+      "requires_api_key": true,
+      "api_key_env_var": "HUGGINGFACE_API_KEY",
+      "rate_limit": {
+        "requests_per_minute": 30,
+        "tokens_per_minute": 5000
+      }
+    }
+  },
+  "settings": {
+    "default_provider": "OpenAI",
+    "timeout_seconds": 30,
+    "retry_attempts": 3,
+    "retry_delay_seconds": 1,
+    "cache_responses": true,
+    "cache_ttl_seconds": 3600,
+    "log_requests": true,
+    "log_responses": false
+  }
+}

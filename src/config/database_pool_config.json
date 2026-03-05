@@ -1,0 +1,7 @@
+{
+  "max_connections": 10,
+  "timeout": 30,
+  "check_same_thread": false,
+  "cached_statements": 100,
+  "isolation_level": null
+}

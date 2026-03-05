@@ -1,0 +1,13 @@
+Sample Text Document
+====================
+
+This is a sample text document for testing the batch document processor.
+
+Features:
+- Text extraction
+- Line counting
+- Word analysis
+- Character counting
+
+This document contains multiple paragraphs and demonstrates
+how the processor handles plain text files.

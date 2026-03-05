@@ -1,0 +1,597 @@
+<!-- File Upload Component with Drag and Drop -->
+<div class="file-upload-wrapper" x-data="fileUploadComponent()">
+    <div class="file-upload-container">
+        <!-- Upload Area -->
+        <div class="upload-area"
+             :class="{ 'drag-over': isDragOver, 'disabled': disabled }"
+             @dragover.prevent="handleDragOver"
+             @dragleave.prevent="handleDragLeave"
+             @drop.prevent="handleDrop"
+             @click="triggerFileSelect">
+
+            <!-- Upload Icon and Text -->
+            <div class="upload-content">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt" :class="{ 'animate-bounce': isDragOver }"></i>
+                </div>
+
+                <div class="upload-text">
+                    <h3 class="upload-title" x-text="isDragOver ? 'Drop files here' : 'Drag & drop files here'"></h3>
+                    <p class="upload-subtitle">or <span class="upload-link">browse to choose files</span></p>
+                    <p class="upload-info" x-show="acceptedTypes.length > 0" x-text="`Accepted: ${acceptedTypes.join(', ')}`"></p>
+                    <p class="upload-info" x-show="maxFileSize" x-text="`Max size: ${formatFileSize(maxFileSize)}`"></p>
+                </div>
+            </div>
+
+            <!-- Hidden File Input -->
+            <input type="file"
+                   :id="inputId"
+                   :name="inputName"
+                   :multiple="multiple"
+                   :accept="acceptedTypes.join(',')"
+                   @change="handleFileSelect"
+                   class="file-input"
+                   :disabled="disabled"
+                   ref="fileInput">
+        </div>
+
+        <!-- File List -->
+        <div class="file-list" x-show="files.length > 0">
+            <div class="file-list-header">
+                <h4 class="file-list-title">Selected Files</h4>
+                <button type="button" @click="clearAllFiles" class="clear-all-btn" :disabled="disabled">
+                    <i class="fas fa-trash"></i> Clear All
+                </button>
+            </div>
+
+            <div class="file-items">
+                <template x-for="(file, index) in files" :key="index">
+                    <div class="file-item" :class="{ 'upload-error': file.error, 'upload-success': file.success }">
+                        <!-- File Icon -->
+                        <div class="file-icon">
+                            <i :class="getFileIcon(file.type)"></i>
+                        </div>
+
+                        <!-- File Info -->
+                        <div class="file-info">
+                            <div class="file-name" x-text="file.name"></div>
+                            <div class="file-size" x-text="formatFileSize(file.size)"></div>
+                        </div>
+
+                        <!-- File Status -->
+                        <div class="file-status">
+                            <template x-if="file.uploading">
+                                <div class="upload-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" :style="`width: ${file.progress}%`"></div>
+                                    </div>
+                                    <span class="progress-text" x-text="`${file.progress}%`"></span>
+                                </div>
+                            </template>
+                            <template x-if="file.success">
+                                <i class="fas fa-check-circle text-green-500"></i>
+                            </template>
+                            <template x-if="file.error">
+                                <i class="fas fa-exclamation-triangle text-red-500"></i>
+                            </template>
+                        </div>
+
+                        <!-- File Actions -->
+                        <div class="file-actions">
+                            <button type="button" @click="removeFile(index)" class="remove-file-btn" :disabled="disabled">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Upload Button -->
+        <div class="upload-actions" x-show="files.length > 0 && !autoUpload">
+            <button type="button" @click="uploadFiles" class="upload-btn" :disabled="disabled || uploading">
+                <i class="fas fa-upload" x-show="!uploading"></i>
+                <i class="fas fa-spinner fa-spin" x-show="uploading"></i>
+                <span x-text="uploading ? 'Uploading...' : 'Upload Files'"></span>
+            </button>
+        </div>
+
+        <!-- Error Messages -->
+        <div class="upload-errors" x-show="errors.length > 0">
+            <template x-for="error in errors" :key="error.id">
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span x-text="error.message"></span>
+                    <button type="button" @click="removeError(error.id)" class="error-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>
+
+<script>
+function fileUploadComponent() {
+    return {
+        files: [],
+        errors: [],
+        isDragOver: false,
+        uploading: false,
+        disabled: false,
+        multiple: true,
+        autoUpload: false,
+        maxFileSize: 10 * 1024 * 1024, // 10MB default
+        acceptedTypes: [], // Empty means accept all
+        inputId: 'file-upload-input',
+        inputName: 'files[]',
+        uploadUrl: '/api/upload',
+        errorId: 0,
+
+        init() {
+            this.inputId = this.inputId || 'file-upload-' + Math.random().toString(36).substr(2, 9);
+            this.setupDropZone();
+        },
+
+        setupDropZone() {
+            const dropZone = this.$el.querySelector('.upload-area');
+            if (dropZone) {
+                // Prevent default drag behaviors
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropZone.addEventListener(eventName, this.preventDefaults, false);
+                });
+            }
+        },
+
+        preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        },
+
+        handleDragOver() {
+            if (!this.disabled) {
+                this.isDragOver = true;
+            }
+        },
+
+        handleDragLeave() {
+            this.isDragOver = false;
+        },
+
+        handleDrop(e) {
+            this.isDragOver = false;
+            if (this.disabled) return;
+
+            const files = e.dataTransfer.files;
+            this.addFiles(files);
+        },
+
+        triggerFileSelect() {
+            if (!this.disabled) {
+                this.$refs.fileInput.click();
+            }
+        },
+
+        handleFileSelect(e) {
+            const files = e.target.files;
+            this.addFiles(files);
+        },
+
+        addFiles(fileList) {
+            Array.from(fileList).forEach(file => {
+                if (this.validateFile(file)) {
+                    this.files.push({
+                        file: file,
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        uploading: false,
+                        progress: 0,
+                        success: false,
+                        error: false
+                    });
+                }
+            });
+
+            // Reset input value to allow selecting same file again
+            if (this.$refs.fileInput) {
+                this.$refs.fileInput.value = '';
+            }
+
+            // Auto upload if enabled
+            if (this.autoUpload && this.files.length > 0) {
+                this.uploadFiles();
+            }
+        },
+
+        validateFile(file) {
+            // Check file size
+            if (this.maxFileSize && file.size > this.maxFileSize) {
+                this.addError(`File "${file.name}" is too large. Maximum size is ${this.formatFileSize(this.maxFileSize)}`);
+                return false;
+            }
+
+            // Check file type
+            if (this.acceptedTypes.length > 0) {
+                const fileType = file.type.toLowerCase();
+                const fileName = file.name.toLowerCase();
+                const isAccepted = this.acceptedTypes.some(type => {
+                    if (type.startsWith('.')) {
+                        return fileName.endsWith(type.toLowerCase());
+                    }
+                    return fileType.includes(type.toLowerCase());
+                });
+
+                if (!isAccepted) {
+                    this.addError(`File "${file.name}" is not an accepted file type`);
+                    return false;
+                }
+            }
+
+            return true;
+        },
+
+        removeFile(index) {
+            this.files.splice(index, 1);
+        },
+
+        clearAllFiles() {
+            this.files = [];
+            this.errors = [];
+        },
+
+        async uploadFiles() {
+            if (this.files.length === 0 || this.uploading) return;
+
+            this.uploading = true;
+
+            for (let i = 0; i < this.files.length; i++) {
+                const fileItem = this.files[i];
+                if (fileItem.success || fileItem.uploading) continue;
+
+                await this.uploadFile(fileItem, i);
+            }
+
+            this.uploading = false;
+        },
+
+        async uploadFile(fileItem, index) {
+            fileItem.uploading = true;
+            fileItem.progress = 0;
+
+            try {
+                const formData = new FormData();
+                formData.append('file', fileItem.file);
+
+                // Add additional data
+                if (this.uploadData) {
+                    Object.keys(this.uploadData).forEach(key => {
+                        formData.append(key, this.uploadData[key]);
+                    });
+                }
+
+                const response = await fetch(this.uploadUrl, {
+                    method: 'POST',
+                    body: formData,
+                    onUploadProgress: (progressEvent) => {
+                        if (progressEvent.lengthComputable) {
+                            fileItem.progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                        }
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    fileItem.success = true;
+                    fileItem.error = false;
+                    fileItem.url = result.url; // Store uploaded file URL
+
+                    // Emit success event
+                    this.$el.dispatchEvent(new CustomEvent('fileUploaded', {
+                        detail: { file: fileItem, result }
+                    }));
+                } else {
+                    fileItem.error = true;
+                    fileItem.success = false;
+                    this.addError(result.message || `Failed to upload ${fileItem.name}`);
+                }
+
+            } catch (error) {
+                fileItem.error = true;
+                fileItem.success = false;
+                this.addError(`Failed to upload ${fileItem.name}: ${error.message}`);
+            } finally {
+                fileItem.uploading = false;
+            }
+        },
+
+        addError(message) {
+            const error = {
+                id: ++this.errorId,
+                message: message
+            };
+            this.errors.push(error);
+
+            // Auto remove error after 5 seconds
+            setTimeout(() => {
+                this.removeError(error.id);
+            }, 5000);
+        },
+
+        removeError(errorId) {
+            this.errors = this.errors.filter(error => error.id !== errorId);
+        },
+
+        formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        },
+
+        getFileIcon(mimeType) {
+            const type = mimeType.toLowerCase();
+
+            if (type.startsWith('image/')) return 'fas fa-image';
+            if (type.startsWith('video/')) return 'fas fa-video';
+            if (type.startsWith('audio/')) return 'fas fa-music';
+            if (type.includes('pdf')) return 'fas fa-file-pdf';
+            if (type.includes('word') || type.includes('document')) return 'fas fa-file-word';
+            if (type.includes('excel') || type.includes('spreadsheet')) return 'fas fa-file-excel';
+            if (type.includes('powerpoint') || type.includes('presentation')) return 'fas fa-file-powerpoint';
+            if (type.includes('text')) return 'fas fa-file-alt';
+            if (type.includes('zip') || type.includes('rar')) return 'fas fa-file-archive';
+
+            return 'fas fa-file';
+        },
+
+        // Public API methods
+        setOptions(options) {
+            Object.assign(this, options);
+        },
+
+        getFiles() {
+            return this.files;
+        },
+
+        getUploadedFiles() {
+            return this.files.filter(f => f.success);
+        },
+
+        reset() {
+            this.files = [];
+            this.errors = [];
+            this.isDragOver = false;
+            this.uploading = false;
+        }
+    }
+}
+</script>
+
+<style>
+/* File Upload Component Styles */
+.file-upload-wrapper {
+    @apply w-full;
+}
+
+.file-upload-container {
+    @apply space-y-4;
+}
+
+/* Upload Area Styles */
+.upload-area {
+    @apply relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center transition-all duration-200 cursor-pointer;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+}
+
+.upload-area:hover {
+    @apply border-blue-400 bg-blue-50 dark:bg-blue-900/20;
+}
+
+.upload-area.drag-over {
+    @apply border-blue-500 bg-blue-100 dark:bg-blue-900/30;
+}
+
+.upload-area.disabled {
+    @apply opacity-50 cursor-not-allowed pointer-events-none;
+}
+
+/* Upload Content */
+.upload-content {
+    @apply flex flex-col items-center space-y-4;
+}
+
+.upload-icon i {
+    @apply text-4xl text-gray-400 dark:text-gray-500;
+}
+
+.upload-title {
+    @apply text-lg font-medium text-gray-900 dark:text-gray-100;
+}
+
+.upload-subtitle {
+    @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+.upload-link {
+    @apply text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium;
+}
+
+.upload-info {
+    @apply text-xs text-gray-400 dark:text-gray-500 mt-1;
+}
+
+/* Hidden File Input */
+.file-input {
+    @apply absolute inset-0 w-full h-full opacity-0 cursor-pointer;
+}
+
+/* File List Styles */
+.file-list {
+    @apply border border-gray-200 dark:border-gray-700 rounded-lg p-4;
+}
+
+.file-list-header {
+    @apply flex justify-between items-center mb-4;
+}
+
+.file-list-title {
+    @apply text-sm font-medium text-gray-900 dark:text-gray-100;
+}
+
+.clear-all-btn {
+    @apply text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 disabled:opacity-50;
+}
+
+.file-items {
+    @apply space-y-2;
+}
+
+.file-item {
+    @apply flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg transition-all duration-200;
+}
+
+.file-item.upload-error {
+    @apply bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700;
+}
+
+.file-item.upload-success {
+    @apply bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700;
+}
+
+/* File Item Components */
+.file-icon i {
+    @apply text-lg text-gray-500 dark:text-gray-400;
+}
+
+.file-info {
+    @apply flex-1 min-w-0;
+}
+
+.file-name {
+    @apply text-sm font-medium text-gray-900 dark:text-gray-100 truncate;
+}
+
+.file-size {
+    @apply text-xs text-gray-500 dark:text-gray-400;
+}
+
+.file-status {
+    @apply flex items-center space-x-2;
+}
+
+.file-actions {
+    @apply flex items-center;
+}
+
+.remove-file-btn {
+    @apply text-gray-400 hover:text-red-500 dark:hover:text-red-400 disabled:opacity-50;
+}
+
+/* Upload Progress */
+.upload-progress {
+    @apply flex items-center space-x-2 min-w-[80px];
+}
+
+.progress-bar {
+    @apply flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2;
+}
+
+.progress-fill {
+    @apply bg-blue-500 h-2 rounded-full transition-all duration-300;
+}
+
+.progress-text {
+    @apply text-xs text-gray-500 dark:text-gray-400;
+}
+
+/* Upload Actions */
+.upload-actions {
+    @apply flex justify-center;
+}
+
+.upload-btn {
+    @apply inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+/* Error Messages */
+.upload-errors {
+    @apply space-y-2;
+}
+
+.error-message {
+    @apply flex items-center space-x-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg;
+}
+
+.error-message i {
+    @apply text-red-400;
+}
+
+.error-message span {
+    @apply text-sm text-red-700 dark:text-red-300 flex-1;
+}
+
+.error-close {
+    @apply text-red-400 hover:text-red-600 dark:hover:text-red-300;
+}
+
+/* Animations */
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+.animate-bounce {
+    animation: bounce 1s infinite;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .upload-area {
+        @apply p-6;
+    }
+
+    .file-item {
+        @apply flex-col space-x-0 space-y-2 text-center;
+    }
+
+    .file-actions {
+        @apply self-center;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .upload-area {
+        @apply border-4 border-black;
+    }
+
+    .upload-area:hover {
+        @apply border-blue-700;
+    }
+
+    .file-item {
+        @apply border-2 border-gray-700;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .upload-area i {
+        animation: none;
+    }
+
+    .progress-fill {
+        transition: none;
+    }
+}
+</style>

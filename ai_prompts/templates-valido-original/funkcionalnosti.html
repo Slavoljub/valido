@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ValidoAI - Funkcionalnosti</title>
+
+    <!-- Učitaj Bootstrap i glavni CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        /* Animacija za spajanje ValidoAI teksta */
+        .animation-wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 31vh;
+            position: relative;
+            text-align: center;
+        }
+        .text-left, .text-right {
+            position: absolute;
+            font-size: 4rem;
+            font-weight: bold;
+            color: #0d6efd; /* Plava boja */
+            transition: transform 1s ease-in-out;
+        }
+        .text-left {
+            left: -200px;
+            animation: slideToCenterLeft 2s forwards;
+            letter-spacing: 2px;
+        }
+        .text-right {
+            right: -200px;
+            animation: slideToCenterRight 2s forwards;
+            letter-spacing: -2px;
+
+        }
+        .description-text {
+            font-size: 1.5rem;
+            font-weight: normal;
+            color: #0d6efd; /* Tekst ispod takođe plav */
+            margin-top: 120px;
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 2s forwards 2.5s;
+        }
+
+        /* Funkcionalnosti - Kartice */
+        .functionalities {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .functionality-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            height: 100%; /* Osigurava istu visinu */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Raspoređuje sadržaj unutar kartice */
+        }
+        .functionality-card:hover {
+            transform: scale(1.05);
+            background-color: #e9ecef;
+            box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .functionality-card a {
+            color: #0d6efd;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease-in-out;
+        }
+        .functionality-card a:hover {
+            color: #0056b3;
+        }
+
+        /* Ključne animacije */
+        @keyframes slideToCenterLeft {
+            to {
+                left: calc(50% - 60px);
+                transform: translateX(-50%);
+            }
+        }
+        @keyframes slideToCenterRight {
+            to {
+                right: calc(50% - 60px);
+                transform: translateX(50%);
+            }
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .functionalities {
+            margin-top: -40px; /* Blago podiže grid ka naslovu */
+        }
+        .description-text {
+            text-align: center;
+            margin-left: 45px; /* Pomeranje malo ulevo */
+        }
+        footer {
+            background-color: #ffffff;
+            color: #222222;
+            padding: 20px 0; /* Malo povećavamo padding da spustimo footer */
+            text-align: center;
+            font-size: 0.9rem;
+            border-top: 3px solid #0d6efd;
+            margin-top: auto;
+            width: 100%;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="{{ url_for('static', filename='img/valido.svg') }}" alt="ValidoAI Logo" height="30">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link text-white" href="/">Početna</a></li>
+                    <li class="nav-item"><a class="nav-link active text-white" href="/funkcionalnosti">Funkcionalnosti</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="#" data-bs-toggle="modal" data-bs-target="#prijavaModal">
+                            Prijavi me
+                        </a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link text-white" href="/kontakt">Kontakt</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Animacija -->
+    <div class="animation-wrapper">
+        <div class="text-left">Va</div>
+        <div class="text-right">lidoAI</div>
+        <p class="description-text">Medijator između zakona i vaših potreba!</p>
+    </div>
+    <main>
+        <!-- Divovi za funkcionalnosti -->
+        <div class="container my-5">
+            <div class="row g-4">
+                <div class="col-md-3 d-flex">
+                    <div class="white-box w-100 shadow-sm d-flex flex-column justify-content-between text-center p-4">
+                        <div>
+                          <h4 class="text-primary fw-bold mb-3">
+                            <i class="bi bi-journal-text me-2"></i> Pristup Poreskim Propisima
+                        </h4>
+                        <p class="text-muted">
+                            ValidoAI svakodnevno prati i analizira zvanične izvore kako biste uvek imali najnovije poreske informacije na dohvat ruke.
+                        </p>
+                    </div>
+
+                    <a href="/poreski_chat" class="btn btn-outline-primary mt-3 fw-semibold">Saznaj više</a>
+                </div>
+            </div>
+
+
+            <div class="col-md-3 d-flex">
+                <div class="white-box w-100 shadow-sm d-flex flex-column justify-content-between text-center p-4">
+                    <div>
+                      <h4 class="text-primary fw-bold mb-3">
+                        <i class="bi bi-cash-coin me-2"></i> Mesečna Analiza Zarada
+                    </h4>
+                    <p class="text-muted">
+                        Detaljan pregled neto i bruto zarada sa AI analizom troškova, trendova i potencijalnih odstupanja po zaposlenima.
+                    </p>
+                </div>
+
+                <a href="/analiza-plata" class="btn btn-outline-primary mt-3 fw-semibold">Saznaj više</a>
+            </div>
+        </div>
+
+
+        <div class="col-md-3 d-flex">
+            <div class="white-box w-100 shadow-sm d-flex flex-column justify-content-between text-center p-4">
+                <div>
+                  <h4 class="text-primary fw-bold mb-3">
+                    <i class="bi bi-book-half me-2"></i> AI Sveska
+                </h4>
+                <p class="text-muted">
+                    Vizuelni prikaz svih odliva ka dobavljačima i zaposlenima kroz vremenske serije, uz AI komentare zasnovane na GPT-4 analizi.
+                </p>
+            </div>
+            <a href="/ai_sveska" class="btn btn-outline-primary mt-3 fw-semibold">Saznaj više</a>
+        </div>
+    </div>
+    <div class="col-md-3 d-flex">
+        <div class="white-box w-100 shadow-sm d-flex flex-column justify-content-between text-center p-4">
+            <div>
+              <h4 class="text-primary fw-bold mb-3">
+                <i class="bi bi-receipt-cutoff me-2"></i> Analiza Dobavljača, Kupaca i PDV-a
+            </h4>
+            <p class="text-muted">
+                Automatizovana klasifikacija i uparivanje faktura sa dobavljačima i kupcima – za jasan uvid u tokove i tačan PDV obračun.
+            </p>
+        </div>
+
+        <a href="/analiza_pdv" class="btn btn-outline-primary mt-3 fw-semibold">Saznaj više</a>
+    </div>
+</div>
+
+</div>
+</div>
+</main>
+<!-- ✅ FOOTER -->
+<footer class="text-center text-white p-4 border-top border-primary" style="background-color: #0c68ef;">
+  <div class="mb-3 d-flex justify-content-center flex-wrap gap-4 small">
+    <div class="d-flex flex-column align-items-center">
+      <i class="bi bi-graph-up text-white fs-5"></i>
+      <span class="mt-1">Simulacija</span>
+  </div>
+  <div class="d-flex flex-column align-items-center">
+      <i class="bi bi-file-earmark-text text-white fs-5"></i>
+      <span class="mt-1">Dokumenti</span>
+  </div>
+  <div class="d-flex flex-column align-items-center">
+      <i class="bi bi-chat-dots text-white fs-5"></i>
+      <span class="mt-1">AI komentari</span>
+  </div>
+  <div class="d-flex flex-column align-items-center">
+      <i class="bi bi-sliders text-white fs-5"></i>
+      <span class="mt-1">Propisi</span>
+  </div>
+</div>
+<p class="mb-0">&copy; 2025 ValidoAI. Sva prava zadržana.</p>
+</footer>
+
+<div class="position-fixed bottom-0 end-0 m-3 px-3 py-2 bg-danger text-white rounded-3 shadow-lg small fw-semibold"
+     style="opacity: 0.95; z-index: 1030; letter-spacing: 0.5px;"
+     data-bs-toggle="tooltip"
+     title="Ova sekcija koristi veštačku inteligenciju za uvod, savete i preporuke.">
+    <i class="bi bi-robot me-2"></i> AI MODE: aktivan
+</div>
+</body>
+</html>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const descriptionText = document.querySelector('.description-text');
+        setTimeout(() => {
+            descriptionText.style.opacity = '1';
+        }, 2000);
+    });
+</script>

@@ -1,0 +1,262 @@
+# AI Prompt for AI Valido Online LLM Tasks
+# Date: August 18, 2025, 12:02 AM CEST
+# Designed for fast, iterative implementation with modular tasks for invoice parsing, contextual chat, form generation, UI component generation, and chart generation. Uses local LLMs (DistilBERT, Llama 2, Mistral, Phi-2, Gemma) and TensorFlow for image processing.
+
+## Overview
+This prompt provides structured instructions for AI-driven features in AI Valido Online, ensuring modularity and simplicity for rapid iteration. Each task is designed to be implemented incrementally, with clear inputs, outputs, and model assignments to minimize complexity and enable quick integration with Flask, PostgreSQL, and the UI (Flowbite, DaisyUI, Pagedone, TailGrids, Preline, ApexCharts). Tasks are prioritized for iterative development, with initial focus on lightweight models (Phi-2, Gemma) for faster deployment and later iterations leveraging larger models (Llama 2, Mistral) for enhanced accuracy.
+
+## General Guidelines
+- **Modularity**: Each task is independent, with reusable functions for preprocessing, model inference, and postprocessing.
+- **Lightweight Models**: Start with Phi-2 (2.7B parameters, ~5GB) or Gemma (2B parameters, ~4GB) for rapid prototyping, then scale to Llama 2 (7B, ~13GB) or Mistral (7B, ~14GB) in later iterations.
+- **Preprocessing**: Normalize inputs (text to lowercase, images to 300x300 grayscale) to reduce model load.
+- **Output Format**: JSON for API integration, HTML for UI components.
+- **Environment**: Use `ctransformers` for CPU-based LLMs with 4-bit quantization, TensorFlow for image processing, and `pgvector` for embedding storage.
+- **Iteration Strategy**:
+  - **Iteration 1 (Days 1-3)**: Implement basic functionality with Phi-2/Gemma, mock data, and minimal UI integration.
+  - **Iteration 2 (Days 4-7)**: Add Llama 2/Mistral, integrate with PostgreSQL (`llm_embeddings`), and enhance UI with Flowbite.
+  - **Iteration 3 (Days 8-10)**: Optimize with TensorFlow for images, add DaisyUI/Pagedone components, and refine outputs.
+
+## Task 1: Invoice Parsing
+- **Objective**: Extract fields from scanned invoices (images or SEF XML) for storage in `invoices_receivable` or `invoices_payable`.
+- **Model**: TensorFlow (OCR) + Phi-2 (text extraction).
+- **Input**:
+  - Image (PNG/JPG) or SEF XML string.
+  - Example: Image with text "INV001, 12000 RSD, Due 2025-02-10, PDV 20%" or XML `<invoice><number>INV001</number><amount>12000</amount></invoice>`.
+- **Output**: JSON object with fields: `invoice_number`, `total_amount`, `due_date`, `pdv_rate`, `description`.
+- **Prompt**:
+  ```
+  Task: Extract invoice details from input.
+  Input: {image_path or xml_string}
+  Instructions:
+  1. If input is image, use TensorFlow OCR to convert to text.
+  2. Parse text/XML to extract invoice_number, total_amount, due_date, pdv_rate, description.
+  3. Normalize: lowercase text, convert amounts to DECIMAL(15,2), dates to YYYY-MM-DD.
+  4. Return JSON: {"invoice_number": string, "total_amount": number, "due_date": string, "pdv_rate": number, "description": string}
+  Example Input: "INV001, 12000 RSD, Due 2025-02-10, PDV 20%, Software License"
+  Example Output: {"invoice_number": "INV001", "total_amount": 12000.00, "due_date": "2025-02-10", "pdv_rate": 20.00, "description": "Software License"}
+  ```
+- **Implementation**:
+  ```python
+  import tensorflow as tf
+  from PIL import Image
+  from ctransformers import AutoModelForCausalLM
+  def parse_invoice(input_data, is_image=True):
+      model = AutoModelForCausalLM.from_pretrained('./models/phi-2', model_type='phi', bits=4)
+      if is_image:
+          img = Image.open(input_data).convert('L').resize((300, 300))
+          ocr_model = tf.keras.models.load_model('./models/ocr_model')
+          text = ocr_model.predict(img)
+      else:
+          text = input_data
+      prompt = f"Task: Extract invoice details\nInput: {text}\nInstructions: Parse to JSON with invoice_number, total_amount, due_date, pdv_rate, description"
+      result = model(prompt)
+      return json.loads(result)
+  ```
+- **Iteration Plan**:
+  - **Day 1**: Implement Phi-2 for text parsing, mock XML input.
+  - **Day 4**: Add TensorFlow OCR for images, test with sample invoices.
+  - **Day 8**: Integrate with `invoices_receivable`, validate outputs.
+
+## Task 2: Contextual Chat
+- **Objective**: Provide natural language responses to user queries using financial context from `yearly_business_reports` and `llm_embeddings`.
+- **Model**: Mistral (primary), Phi-2 (initial iteration).
+- **Input**:
+  - User query (string).
+  - Context from database (JSON from `yearly_business_reports`, text from `llm_embeddings`).
+  - Example: Query: "Status of invoice INV001?", Context: `{"net_balance": 5000, "total_ar": 12000}`, `["Sale of software license"]`.
+- **Output**: Natural language response in JSON: `{"response": string}`.
+- **Prompt**:
+  ```
+  Task: Generate a response to a financial query using context.
+  Input: Query: {query}, Context: {financial_data}, Embeddings: {embedding_texts}
+  Instructions:
+  1. Combine query and context into a single prompt.
+  2. Use Mistral to generate a concise, accurate response.
+  3. Return JSON: {"response": string}
+  Example Input: Query: "Status of invoice INV001?", Context: {"net_balance": 5000, "total_ar": 12000}, Embeddings: ["Sale of software license"]
+  Example Output: {"response": "Invoice INV001 is sent, with a total of 12000 RSD, due on 2025-02-10."}
+  ```
+- **Implementation**:
+  ```python
+  from ctransformers import AutoModelForCausalLM
+  def chat_response(query, company_id):
+      model = AutoModelForCausalLM.from_pretrained('./models/mistral', model_type='mistral', bits=4)
+      with db_connection() as conn:
+          financial_context = conn.execute(
+              "SELECT net_balance, total_ar FROM yearly_business_reports WHERE companies_id = %s LIMIT 1",
+              (company_id,)
+          ).fetchone()
+          embeddings = conn.execute(
+              "SELECT context_text FROM llm_embeddings WHERE companies_id = %s LIMIT 5",
+              (company_id,)
+          ).fetchall()
+      prompt = f"Task: Generate response\nQuery: {query}\nContext: {financial_context}\nEmbeddings: {[r['context_text'] for r in embeddings]}"
+      response = model(prompt)
+      return {"response": response}
+  ```
+- **Iteration Plan**:
+  - **Day 2**: Implement Phi-2 with mock context, test basic queries.
+  - **Day 5**: Switch to Mistral, integrate `llm_embeddings` and `yearly_business_reports`.
+  - **Day 9**: Optimize response conciseness, add error handling.
+
+## Task 3: Form Generation
+- **Objective**: Generate JSON form schemas from natural language prompts for dynamic UI forms.
+- **Model**: Phi-2 (lightweight, fast).
+- **Input**: Prompt (string, e.g., "Create an invoice form with fields for number, amount, due date").
+- **Output**: JSON schema compatible with Flowbite forms.
+- **Prompt**:
+  ```
+  Task: Generate a JSON form schema from a prompt.
+  Input: {prompt}
+  Instructions:
+  1. Parse prompt to identify required fields and types (e.g., string, number, date).
+  2. Generate JSON schema with type, properties, and format (use Flowbite-compatible attributes).
+  3. Return JSON: {"type": string, "properties": object, "required": array}
+  Example Input: "Create an invoice form with fields for number, amount, due date"
+  Example Output: {"type": "object", "properties": {"invoice_number": {"type": "string", "class": "flowbite-input"}, "total_amount": {"type": "number", "class": "flowbite-input"}, "due_date": {"type": "string", "format": "date", "class": "flowbite-date"}}, "required": ["invoice_number", "total_amount", "due_date"]}
+  ```
+- **Implementation**:
+  ```python
+  from ctransformers import AutoModelForCausalLM
+  def generate_form(prompt):
+      model = AutoModelForCausalLM.from_pretrained('./models/phi-2', model_type='phi', bits=4)
+      prompt_text = f"Task: Generate JSON form schema\nInput: {prompt}\nInstructions: Return JSON with type, properties, and required fields, use Flowbite classes"
+      schema = model(prompt_text)
+      return json.loads(schema)
+  ```
+- **Iteration Plan**:
+  - **Day 1**: Implement Phi-2 for basic schema generation, test with simple prompts.
+  - **Day 6**: Add validation rules and Flowbite-specific attributes.
+  - **Day 10**: Support complex forms with nested fields.
+
+## Task 4: UI Component Generation
+- **Objective**: Generate HTML for UI components based on user prompts and selected libraries (Flowbite, DaisyUI, Pagedone, TailGrids, Preline).
+- **Model**: Gemma (lightweight, fast).
+- **Input**:
+  - Prompt (string, e.g., "Generate a table for invoices").
+  - Component choice (string: `Flowbite`, `DaisyUI`, `Pagedone`, `TailGrids`, `Preline`).
+- **Output**: HTML code with selected library classes.
+- **Prompt**:
+  ```
+  Task: Generate HTML for a UI component.
+  Input: Prompt: {prompt}, Component: {component}
+  Instructions:
+  1. Parse prompt to determine component type (e.g., table, card, timeline).
+  2. Generate HTML using classes from {component}.
+  3. Return HTML string.
+  Example Input: Prompt: "Generate a table for invoices", Component: Flowbite
+  Example Output: <table class="min-w-full divide-y divide-gray-200"><thead><tr><th class="px-6 py-3">Invoice Number</th><th class="px-6 py-3">Amount</th></tr></thead><tbody><tr><td class="px-6 py-4">INV001</td><td class="px-6 py-4">12000</td></tr></tbody></table>
+  ```
+- **Implementation**:
+  ```python
+  from ctransformers import AutoModelForCausalLM
+  def generate_ui_component(prompt, component):
+      model = AutoModelForCausalLM.from_pretrained('./models/gemma', model_type='gemma', bits=4)
+      prompt_text = f"Task: Generate HTML\nPrompt: {prompt}\nComponent: {component}\nInstructions: Use {component} classes, return HTML"
+      html = model(prompt_text)
+      return {"html": html, "options": ["Flowbite", "DaisyUI", "Pagedone", "TailGrids", "Preline"]}
+  ```
+- **Iteration Plan**:
+  - **Day 2**: Implement Gemma for Flowbite tables and cards.
+  - **Day 5**: Add support for DaisyUI, Pagedone, TailGrids, and Preline components.
+  - **Day 9**: Enhance with dynamic data binding (e.g., invoice data).
+
+## Task 5: Chart Generation
+- **Objective**: Generate chart configurations for financial data visualization using Flowbite-Svelte or ApexCharts.
+- **Model**: Llama 2 (robust for complex outputs).
+- **Input**:
+  - Prompt (string, e.g., "Generate a bar chart for monthly sales").
+  - Component choice (string: `Flowbite-Svelte`, `ApexCharts`).
+  - Data (optional JSON, e.g., `{"months": ["Jan", "Feb"], "sales": [10000, 15000]}`).
+- **Output**: JSON configuration or HTML with chart code.
+- **Prompt**:
+  ```
+  Task: Generate chart configuration or HTML.
+  Input: Prompt: {prompt}, Component: {component}, Data: {data}
+  Instructions:
+  1. Parse prompt to determine chart type (e.g., bar, line, pie).
+  2. Use {component} format (Flowbite-Svelte or ApexCharts).
+  3. If data provided, incorporate it; otherwise, use placeholders.
+  4. Return JSON configuration or HTML with script.
+  Example Input: Prompt: "Generate a bar chart for monthly sales", Component: ApexCharts, Data: {"months": ["Jan", "Feb"], "sales": [10000, 15000]}
+  Example Output: {"series": [{"name": "Sales", "data": [10000, 15000]}], "chart": {"type": "bar"}, "xaxis": {"categories": ["Jan", "Feb"]}}
+  ```
+- **Implementation**:
+  ```python
+  from ctransformers import AutoModelForCausalLM
+  def generate_chart(prompt, component, data=None):
+      model = AutoModelForCausalLM.from_pretrained('./models/llama2', model_type='llama', bits=4)
+      prompt_text = f"Task: Generate chart\nPrompt: {prompt}\nComponent: {component}\nData: {data or 'placeholder'}\nInstructions: Return JSON config or HTML with {component} chart"
+      result = model(prompt_text)
+      return json.loads(result) if component == "ApexCharts" else {"html": result}
+  ```
+- **Iteration Plan**:
+  - **Day 3**: Implement Llama 2 for ApexCharts bar charts with mock data.
+  - **Day 6**: Add Flowbite-Svelte support and line/pie charts.
+  - **Day 10**: Integrate real data from `yearly_business_reports`.
+
+## Environment Setup
+- **Install Dependencies**:
+  ```bash
+  pip install ctransformers transformers torch tensorflow
+  ```
+- **Download Models**:
+  ```python
+  from transformers import AutoModel, AutoTokenizer
+  from ctransformers import AutoModelForCausalLM
+  # DistilBERT
+  tokenizer = AutoTokenizer.from_pretrained('distilbert-base-uncased')
+  model = AutoModel.from_pretrained('distilbert-base-uncased')
+  tokenizer.save_pretrained('./models/distilbert')
+  model.save_pretrained('./models/distilbert')
+  # Phi-2, Gemma, Llama 2, Mistral
+  for model_name in ['phi-2', 'gemma', 'llama-2-7b', 'mistral-7b']:
+      model = AutoModelForCausalLM.from_pretrained(f'meta-ai/{model_name}', model_type=model_name.split('-')[0], bits=4)
+      model.save_pretrained(f'./models/{model_name}')
+  ```
+- **TensorFlow OCR Model**:
+  ```python
+  import tensorflow as tf
+  model = tf.keras.Sequential([...])  # Define OCR model
+  model.save('./models/ocr_model')
+  ```
+
+## Integration with Flask
+- **API Routes**:
+  - `/v1/invoices/parse`: Call `parse_invoice`.
+  - `/v1/chat`: Call `chat_response`.
+  - `/v1/settings/generate-form`: Call `generate_form`.
+  - `/v1/settings/generate-ui`: Call `generate_ui_component`.
+  - `/v1/settings/generate-chart`: Call `generate_chart`.
+- **Example**:
+  ```python
+  @app.route('/v1/invoices/parse', methods=['POST'])
+  @require_token
+  def parse_invoice_route():
+      data = request.json
+      result = parse_invoice(data['input'], data.get('is_image', True))
+      return jsonify(result)
+  ```
+
+## Testing and Validation
+- **Test Cases**:
+  - Invoice Parsing: Test with sample images (300x300 PNG) and SEF XML strings.
+  - Chat: Query with "invoice status", "financial summary", validate context inclusion.
+  - Form Generation: Test prompts for invoice, lead, and budget forms.
+  - UI Components: Test table, card, and timeline generation for all libraries.
+  - Charts: Test bar, line, and pie charts with mock and real data.
+- **Validation**:
+  - Ensure JSON outputs are valid and match schema.
+  - Verify HTML compatibility with Flowbite/DaisyUI classes.
+  - Check chart rendering in browser with ApexCharts/Flowbite-Svelte.
+
+## Future Iterations
+- **Iteration 4 (Days 11-15)**: Add DistilBERT for embedding generation, optimize TensorFlow OCR.
+- **Iteration 5 (Days 16-20)**: Fine-tune LLMs for Serbian financial terms, add multi-language support.
+- **Iteration 6 (Days 21-25)**: Implement real-time chat with streaming responses, enhance chart interactivity.
+
+## Notes
+- Use lightweight models (Phi-2, Gemma) for initial iterations to reduce compute requirements.
+- Cache LLM outputs in `llm_embeddings` to improve performance.
+- Test with small datasets (10-20 records) in early iterations, scale to larger datasets (100+ records) later.
+- Ensure all outputs are JSON-serializable for API compatibility.

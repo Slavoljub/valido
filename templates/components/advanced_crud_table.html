@@ -1,0 +1,1885 @@
+{% comment %}
+Advanced CRUD Table Component - Enhanced data management interface
+{% endcomment %}
+
+<!-- Advanced CRUD Table Component -->
+<div class="advanced-crud-container" x-data="advancedCRUDTable()">
+    <!-- Table Header with Actions -->
+    <div class="crud-header">
+        <div class="crud-header-info">
+            <h3 class="crud-title">
+                <i class="fas fa-table text-blue-500 mr-3"></i>
+                <span x-text="tableConfig.title || 'Data Management'"></span>
+            </h3>
+            <p class="crud-subtitle" x-text="tableConfig.description || 'Manage your data efficiently with advanced features'"></p>
+        </div>
+
+        <div class="crud-header-actions">
+            <!-- Quick Actions -->
+            <div class="quick-actions-dropdown">
+                <button class="crud-action-btn secondary" @click="toggleQuickActions()">
+                    <i class="fas fa-bolt"></i>
+                    <span>Quick Actions</span>
+                </button>
+                <div class="quick-actions-menu" x-show="showQuickActions" x-transition>
+                    <button class="quick-action-item" @click="exportData()">
+                        <i class="fas fa-download"></i>
+                        <span>Export Data</span>
+                    </button>
+                    <button class="quick-action-item" @click="importData()">
+                        <i class="fas fa-upload"></i>
+                        <span>Import Data</span>
+                    </button>
+                    <button class="quick-action-item" @click="duplicateSelected()">
+                        <i class="fas fa-copy"></i>
+                        <span>Duplicate</span>
+                    </button>
+                    <button class="quick-action-item" @click="showBulkEdit()">
+                        <i class="fas fa-edit"></i>
+                        <span>Bulk Edit</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Add New Button -->
+            <button class="crud-action-btn primary" @click="showCreateModal()">
+                <i class="fas fa-plus"></i>
+                <span>Add New</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Advanced Filters -->
+    <div class="crud-filters" x-show="showFilters" x-transition>
+        <div class="filters-header">
+            <h4 class="filters-title">
+                <i class="fas fa-filter text-blue-500 mr-2"></i>
+                Advanced Filters
+            </h4>
+            <button class="filter-toggle" @click="clearAllFilters()">
+                <i class="fas fa-times"></i>
+                <span>Clear All</span>
+            </button>
+        </div>
+
+        <div class="filters-grid">
+            <!-- Search Input -->
+            <div class="filter-group">
+                <label class="filter-label">Search</label>
+                <div class="search-input-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text"
+                           class="filter-input search-input"
+                           placeholder="Search across all fields..."
+                           x-model="searchQuery"
+                           @input="debounceSearch()">
+                </div>
+            </div>
+
+            <!-- Date Range Filter -->
+            <div class="filter-group">
+                <label class="filter-label">Date Range</label>
+                <div class="date-range-input">
+                    <input type="date" class="filter-input" x-model="dateFrom" @change="applyFilters()">
+                    <span class="date-separator">to</span>
+                    <input type="date" class="filter-input" x-model="dateTo" @change="applyFilters()">
+                </div>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="filter-group">
+                <label class="filter-label">Status</label>
+                <select class="filter-select" x-model="statusFilter" @change="applyFilters()">
+                    <option value="">All Statuses</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="pending">Pending</option>
+                    <option value="suspended">Suspended</option>
+                    <option value="archived">Archived</option>
+                </select>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="filter-group">
+                <label class="filter-label">Category</label>
+                <select class="filter-select" x-model="categoryFilter" @change="applyFilters()">
+                    <option value="">All Categories</option>
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                    <option value="system">System</option>
+                    <option value="api">API</option>
+                </select>
+            </div>
+
+            <!-- Custom Filters -->
+            <template x-for="filter in customFilters" :key="filter.key">
+                <div class="filter-group">
+                    <label class="filter-label" x-text="filter.label"></label>
+                    <select class="filter-select" :value="filter.value" @change="updateCustomFilter(filter.key, $event.target.value)">
+                        <option value="">All</option>
+                        <template x-for="option in filter.options" :key="option.value">
+                            <option :value="option.value" x-text="option.label"></option>
+                        </template>
+                    </select>
+                </div>
+            </template>
+        </div>
+
+        <!-- Active Filters Display -->
+        <div class="active-filters" x-show="activeFilters.length > 0">
+            <div class="active-filters-label">Active Filters:</div>
+            <div class="active-filters-list">
+                <template x-for="filter in activeFilters" :key="filter.key">
+                    <span class="active-filter-chip">
+                        <span class="filter-name" x-text="filter.label"></span>
+                        <span class="filter-value" x-text="filter.value"></span>
+                        <button class="filter-remove" @click="removeFilter(filter.key)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </span>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Controls -->
+    <div class="crud-controls">
+        <div class="crud-controls-left">
+            <!-- Bulk Actions -->
+            <div class="bulk-actions" x-show="selectedItems.length > 0">
+                <span class="bulk-count" x-text="`${selectedItems.length} item(s) selected`"></span>
+                <button class="bulk-action-btn" @click="bulkDelete()">
+                    <i class="fas fa-trash"></i>
+                    <span>Delete</span>
+                </button>
+                <button class="bulk-action-btn" @click="bulkEdit()">
+                    <i class="fas fa-edit"></i>
+                    <span>Edit</span>
+                </button>
+                <button class="bulk-action-btn" @click="bulkExport()">
+                    <i class="fas fa-download"></i>
+                    <span>Export</span>
+                </button>
+            </div>
+
+            <!-- Results Count -->
+            <div class="results-info">
+                <span x-text="`Showing ${currentPage * itemsPerPage + 1}-${Math.min((currentPage + 1) * itemsPerPage, totalItems)} of ${totalItems} entries`"></span>
+            </div>
+        </div>
+
+        <div class="crud-controls-right">
+            <!-- View Options -->
+            <div class="view-options">
+                <button class="view-option-btn" :class="{ active: viewMode === 'table' }" @click="setViewMode('table')">
+                    <i class="fas fa-table"></i>
+                </button>
+                <button class="view-option-btn" :class="{ active: viewMode === 'cards' }" @click="setViewMode('cards')">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button class="view-option-btn" :class="{ active: viewMode === 'compact' }" @click="setViewMode('compact')">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+
+            <!-- Items Per Page -->
+            <select class="items-per-page" x-model="itemsPerPage" @change="changeItemsPerPage()">
+                <option value="10">10 per page</option>
+                <option value="25">25 per page</option>
+                <option value="50">50 per page</option>
+                <option value="100">100 per page</option>
+            </select>
+
+            <!-- Column Selector -->
+            <div class="column-selector">
+                <button class="column-toggle-btn" @click="toggleColumnSelector()">
+                    <i class="fas fa-columns"></i>
+                    <span>Columns</span>
+                </button>
+                <div class="column-selector-menu" x-show="showColumnSelector" x-transition>
+                    <template x-for="column in columns" :key="column.key">
+                        <label class="column-option">
+                            <input type="checkbox"
+                                   :checked="column.visible"
+                                   @change="toggleColumn(column.key)">
+                            <span x-text="column.label"></span>
+                        </label>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table View -->
+    <div class="crud-table-view" x-show="viewMode === 'table'">
+        <div class="table-responsive">
+            <table class="crud-table">
+                <thead>
+                    <tr>
+                        <th class="checkbox-column">
+                            <input type="checkbox"
+                                   x-model="selectAll"
+                                   @change="toggleSelectAll()">
+                        </th>
+                        <template x-for="column in visibleColumns" :key="column.key">
+                            <th :class="column.class" @click="sortBy(column.key)" :style="column.width ? `width: ${column.width}` : ''">
+                                <div class="header-content">
+                                    <span x-text="column.label"></span>
+                                    <div class="sort-indicators">
+                                        <i class="fas fa-chevron-up sort-icon" :class="{ active: sortBy === column.key && sortOrder === 'asc' }"></i>
+                                        <i class="fas fa-chevron-down sort-icon" :class="{ active: sortBy === column.key && sortOrder === 'desc' }"></i>
+                                    </div>
+                                </div>
+                            </th>
+                        </template>
+                        <th class="actions-column">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="item in paginatedData" :key="item.id">
+                        <tr :class="{ selected: selectedItems.includes(item.id) }" @click="toggleRowSelection(item.id)">
+                            <td class="checkbox-column">
+                                <input type="checkbox"
+                                       :checked="selectedItems.includes(item.id)"
+                                       @change.stop="toggleRowSelection(item.id)">
+                            </td>
+                            <template x-for="column in visibleColumns" :key="column.key">
+                                <td :class="column.class">
+                                    <div class="cell-content" x-html="renderCellValue(item, column)"></div>
+                                </td>
+                            </template>
+                            <td class="actions-column">
+                                <div class="row-actions">
+                                    <button class="row-action-btn view" @click.stop="viewItem(item)" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="row-action-btn edit" @click.stop="editItem(item)" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="row-action-btn duplicate" @click.stop="duplicateItem(item)" title="Duplicate">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <div class="row-actions-dropdown">
+                                        <button class="row-action-btn more" @click.stop="toggleRowMenu(item.id)" title="More Actions">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <div class="row-menu" x-show="activeRowMenu === item.id" x-transition>
+                                            <button class="row-menu-item" @click="exportItem(item)">
+                                                <i class="fas fa-download"></i>
+                                                <span>Export</span>
+                                            </button>
+                                            <button class="row-menu-item" @click="archiveItem(item)">
+                                                <i class="fas fa-archive"></i>
+                                                <span>Archive</span>
+                                            </button>
+                                            <button class="row-menu-item delete" @click="deleteItem(item)">
+                                                <i class="fas fa-trash"></i>
+                                                <span>Delete</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" x-show="paginatedData.length === 0">
+            <div class="empty-state-icon">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <h3 class="empty-state-title">No data found</h3>
+            <p class="empty-state-message">Try adjusting your search criteria or filters.</p>
+            <button class="empty-state-action" @click="clearAllFilters()">
+                <i class="fas fa-filter"></i>
+                <span>Clear Filters</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Card View -->
+    <div class="crud-card-view" x-show="viewMode === 'cards'">
+        <div class="cards-grid">
+            <template x-for="item in paginatedData" :key="item.id">
+                <div class="data-card" :class="{ selected: selectedItems.includes(item.id) }" @click="toggleRowSelection(item.id)">
+                    <div class="card-header">
+                        <div class="card-checkbox">
+                            <input type="checkbox"
+                                   :checked="selectedItems.includes(item.id)"
+                                   @change.stop="toggleRowSelection(item.id)">
+                        </div>
+                        <div class="card-title" x-text="getItemTitle(item)"></div>
+                        <div class="card-actions">
+                            <button class="card-action-btn" @click.stop="editItem(item)">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="card-action-btn" @click.stop="viewItem(item)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card-content">
+                        <template x-for="column in visibleColumns.slice(0, 4)" :key="column.key">
+                            <div class="card-field">
+                                <span class="field-label" x-text="column.label"></span>
+                                <span class="field-value" x-html="renderCellValue(item, column)"></span>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="card-meta">
+                            <span class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span x-text="formatDate(item.created_at || item.createdAt)"></span>
+                            </span>
+                        </div>
+                        <div class="card-status" :class="getItemStatus(item)">
+                            <span class="status-dot"></span>
+                            <span class="status-text" x-text="getItemStatus(item)"></span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="crud-pagination">
+        <div class="pagination-info">
+            <span x-text="`Page ${currentPage + 1} of ${totalPages}`"></span>
+        </div>
+
+        <div class="pagination-controls">
+            <button class="pagination-btn" :disabled="currentPage === 0" @click="goToPage(0)">
+                <i class="fas fa-angle-double-left"></i>
+            </button>
+            <button class="pagination-btn" :disabled="currentPage === 0" @click="goToPage(currentPage - 1)">
+                <i class="fas fa-angle-left"></i>
+            </button>
+
+            <template x-for="page in visiblePages" :key="page">
+                <button class="pagination-btn"
+                        :class="{ active: page === currentPage }"
+                        @click="goToPage(page)"
+                        x-text="page + 1"></button>
+            </template>
+
+            <button class="pagination-btn" :disabled="currentPage >= totalPages - 1" @click="goToPage(currentPage + 1)">
+                <i class="fas fa-angle-right"></i>
+            </button>
+            <button class="pagination-btn" :disabled="currentPage >= totalPages - 1" @click="goToPage(totalPages - 1)">
+                <i class="fas fa-angle-double-right"></i>
+            </button>
+        </div>
+
+        <div class="pagination-jumper">
+            <span>Go to page:</span>
+            <input type="number"
+                   class="page-input"
+                   :value="currentPage + 1"
+                   @keyup.enter="goToPage($event.target.value - 1)"
+                   min="1"
+                   :max="totalPages">
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="crud-loading" x-show="isLoading" x-transition>
+        <div class="loading-spinner"></div>
+        <span>Loading data...</span>
+    </div>
+</div>
+
+<!-- Advanced CRUD Table Styles -->
+<style>
+/* Base CRUD Styles */
+.advanced-crud-container {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* CRUD Header */
+.crud-header {
+    padding: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.crud-header-info {
+    margin-bottom: 1.5rem;
+}
+
+.crud-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+}
+
+.crud-subtitle {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.crud-header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.crud-action-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.crud-action-btn.primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+}
+
+.crud-action-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+}
+
+.crud-action-btn.secondary {
+    background: #f8fafc;
+    color: #374151;
+    border: 2px solid #e5e7eb;
+}
+
+.crud-action-btn.secondary:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+}
+
+/* Quick Actions Dropdown */
+.quick-actions-dropdown {
+    position: relative;
+}
+
+.quick-actions-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 200px;
+    margin-top: 0.5rem;
+}
+
+.quick-action-item {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.quick-action-item:hover {
+    background: #f8fafc;
+    color: #1e293b;
+}
+
+.quick-action-item i {
+    width: 1rem;
+    text-align: center;
+}
+
+/* Advanced Filters */
+.crud-filters {
+    padding: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f8fafc;
+}
+
+.filters-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.filters-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-toggle {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e5e7eb;
+    background: white;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #64748b;
+    transition: all 0.2s ease;
+}
+
+.filter-toggle:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.filter-input,
+.filter-select {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+.search-input {
+    padding-left: 2.5rem;
+}
+
+.date-range-input {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.date-separator {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+/* Active Filters */
+.active-filters {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.active-filters-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.active-filters-list {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.active-filter-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    background: #dbeafe;
+    border: 1px solid #bfdbfe;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    color: #1e40af;
+}
+
+.filter-name {
+    font-weight: 600;
+}
+
+.filter-remove {
+    background: none;
+    border: none;
+    color: #1e40af;
+    cursor: pointer;
+    padding: 0;
+    border-radius: 50%;
+    width: 1rem;
+    height: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.filter-remove:hover {
+    background: rgba(30, 64, 175, 0.1);
+}
+
+/* Table Controls */
+.crud-controls {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.crud-controls-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.crud-controls-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Bulk Actions */
+.bulk-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.bulk-count {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.bulk-action-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e5e7eb;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bulk-action-btn:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+}
+
+.results-info {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+/* View Options */
+.view-options {
+    display: flex;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.view-option-btn {
+    padding: 0.5rem 0.75rem;
+    border: none;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.view-option-btn:hover {
+    background: #e2e8f0;
+}
+
+.view-option-btn.active {
+    background: #3b82f6;
+    color: white;
+}
+
+.items-per-page {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    background: white;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+/* Column Selector */
+.column-selector {
+    position: relative;
+}
+
+.column-toggle-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e5e7eb;
+    background: white;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.column-selector-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 200px;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0;
+}
+
+.column-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.column-option:hover {
+    background: #f8fafc;
+}
+
+.column-option input {
+    margin: 0;
+}
+
+/* CRUD Table */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.crud-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.crud-table th {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    background: #f8fafc;
+    border-bottom: 2px solid #e5e7eb;
+    white-space: nowrap;
+    position: relative;
+}
+
+.crud-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.crud-table th.sortable:hover {
+    background: #e2e8f0;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.sort-indicators {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.sort-icon {
+    font-size: 0.625rem;
+    color: #9ca3af;
+    transition: all 0.2s ease;
+}
+
+.sort-icon.active {
+    color: #3b82f6;
+}
+
+.crud-table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    color: #64748b;
+}
+
+.crud-table tr:hover {
+    background: #f8fafc;
+}
+
+.crud-table tr.selected {
+    background: #dbeafe;
+}
+
+.checkbox-column {
+    width: 50px;
+    text-align: center;
+}
+
+.actions-column {
+    width: 150px;
+    text-align: center;
+}
+
+.cell-content {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Row Actions */
+.row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.row-action-btn {
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 0.75rem;
+}
+
+.row-action-btn.view {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.row-action-btn.view:hover {
+    background: #a7f3d0;
+}
+
+.row-action-btn.edit {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.row-action-btn.edit:hover {
+    background: #bfdbfe;
+}
+
+.row-action-btn.duplicate {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.row-action-btn.duplicate:hover {
+    background: #c7d2fe;
+}
+
+.row-action-btn.more {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.row-action-btn.more:hover {
+    background: #e5e7eb;
+}
+
+/* Row Actions Dropdown */
+.row-actions-dropdown {
+    position: relative;
+}
+
+.row-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 150px;
+    margin-top: 0.5rem;
+}
+
+.row-menu-item {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.row-menu-item:hover {
+    background: #f8fafc;
+}
+
+.row-menu-item.delete {
+    color: #dc2626;
+}
+
+.row-menu-item.delete:hover {
+    background: #fef2f2;
+}
+
+/* Empty State */
+.empty-state {
+    padding: 4rem 2rem;
+    text-align: center;
+    color: #64748b;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+}
+
+.empty-state-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-message {
+    margin-bottom: 2rem;
+}
+
+.empty-state-action {
+    padding: 0.75rem 1.5rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.empty-state-action:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+}
+
+/* Pagination */
+.crud-pagination {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #e5e7eb;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.pagination-info {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.pagination-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid #e5e7eb;
+    background: white;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+.pagination-btn.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-jumper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.page-input {
+    width: 3rem;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.25rem;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+/* Loading State */
+.crud-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.loading-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid #e5e7eb;
+    border-top: 3px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .crud-header {
+        padding: 1.5rem;
+    }
+
+    .crud-title {
+        font-size: 1.25rem;
+    }
+
+    .crud-header-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .crud-action-btn {
+        justify-content: center;
+    }
+
+    .crud-controls {
+        padding: 1rem 1.5rem;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .crud-controls-left,
+    .crud-controls-right {
+        justify-content: center;
+    }
+
+    .filters-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .crud-filters {
+        padding: 1.5rem;
+    }
+
+    .table-responsive {
+        border-radius: 0.5rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .crud-table {
+        min-width: 800px;
+        font-size: 0.75rem;
+    }
+
+    .crud-table th,
+    .crud-table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .actions-column {
+        width: 100px;
+    }
+
+    .row-actions {
+        gap: 0.25rem;
+    }
+
+    .row-action-btn {
+        width: 1.5rem;
+        height: 1.5rem;
+        font-size: 0.625rem;
+    }
+
+    .crud-pagination {
+        padding: 1rem 1.5rem;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .pagination-controls {
+        justify-content: center;
+    }
+
+    .bulk-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .bulk-action-btn {
+        justify-content: center;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .advanced-crud-container {
+        background: rgba(30, 41, 59, 0.95);
+        border-color: rgba(71, 85, 105, 0.3);
+        color: #f8fafc;
+    }
+
+    .crud-header {
+        background: linear-gradient(135deg, rgba(51, 65, 85, 0.5) 0%, rgba(30, 41, 59, 0.5) 100%);
+        border-color: rgba(71, 85, 105, 0.3);
+    }
+
+    .crud-title {
+        color: #f8fafc;
+    }
+
+    .crud-subtitle {
+        color: #cbd5e1;
+    }
+
+    .crud-filters {
+        background: rgba(51, 65, 85, 0.5);
+        border-color: rgba(71, 85, 105, 0.3);
+    }
+
+    .crud-controls {
+        background: rgba(30, 41, 59, 0.5);
+        border-color: rgba(71, 85, 105, 0.3);
+    }
+
+    .crud-table th {
+        background: rgba(51, 65, 85, 0.5);
+        color: #f8fafc;
+        border-color: rgba(71, 85, 105, 0.3);
+    }
+
+    .crud-table td {
+        color: #cbd5e1;
+        border-color: rgba(71, 85, 105, 0.3);
+    }
+
+    .crud-table tr:hover {
+        background: rgba(51, 65, 85, 0.3);
+    }
+
+    .crud-pagination {
+        background: rgba(51, 65, 85, 0.5);
+        border-color: rgba(71, 85, 105, 0.3);
+    }
+
+    .pagination-btn {
+        background: rgba(30, 41, 59, 0.5);
+        border-color: rgba(71, 85, 105, 0.3);
+        color: #cbd5e1;
+    }
+
+    .pagination-btn.active {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .column-selector-menu,
+    .quick-actions-menu,
+    .row-menu {
+        background: rgba(30, 41, 59, 0.95);
+        border-color: rgba(71, 85, 105, 0.3);
+    }
+
+    .quick-action-item,
+    .column-option,
+    .row-menu-item {
+        color: #cbd5e1;
+    }
+
+    .quick-action-item:hover,
+    .column-option:hover,
+    .row-menu-item:hover {
+        background: rgba(51, 65, 85, 0.5);
+        color: #f8fafc;
+    }
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+    .advanced-crud-container,
+    .crud-header,
+    .crud-filters,
+    .crud-controls,
+    .crud-pagination {
+        border: 2px solid;
+    }
+
+    .crud-action-btn,
+    .bulk-action-btn,
+    .pagination-btn,
+    .filter-toggle {
+        border: 2px solid;
+    }
+
+    .crud-table,
+    .crud-table th,
+    .crud-table td {
+        border: 2px solid;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .crud-action-btn,
+    .bulk-action-btn,
+    .pagination-btn,
+    .row-action-btn,
+    .filter-toggle,
+    .column-toggle-btn {
+        transition: none;
+    }
+
+    .crud-action-btn:hover,
+    .bulk-action-btn:hover,
+    .pagination-btn:hover,
+    .row-action-btn:hover,
+    .filter-toggle:hover,
+    .column-toggle-btn:hover {
+        transform: none;
+    }
+
+    .loading-spinner {
+        animation: none;
+    }
+}
+</style>
+
+<!-- Advanced CRUD Table JavaScript -->
+<script>
+function advancedCRUDTable() {
+    return {
+        // Data and Configuration
+        data: [],
+        filteredData: [],
+        columns: [],
+        visibleColumns: [],
+        selectedItems: [],
+        selectAll: false,
+
+        // Search and Filters
+        searchQuery: '',
+        showFilters: false,
+        showAdvancedSearch: false,
+        showColumnSelector: false,
+        showQuickActions: false,
+        activeRowMenu: null,
+        activeFilters: [],
+        customFilters: [],
+
+        // Pagination
+        currentPage: 0,
+        itemsPerPage: 25,
+        totalPages: 0,
+        totalItems: 0,
+
+        // Sorting
+        sortBy: '',
+        sortOrder: 'asc',
+
+        // View Mode
+        viewMode: 'table',
+
+        // Loading States
+        isLoading: false,
+
+        // Initialize component
+        init() {
+            this.loadConfig();
+            this.loadData();
+            this.setupEventListeners();
+        },
+
+        // Configuration
+        loadConfig() {
+            // Default columns configuration
+            this.columns = [
+                { key: 'id', label: 'ID', visible: true, width: '80px', sortable: true },
+                { key: 'name', label: 'Name', visible: true, sortable: true },
+                { key: 'email', label: 'Email', visible: true, sortable: true },
+                { key: 'role', label: 'Role', visible: true, sortable: true },
+                { key: 'status', label: 'Status', visible: true, sortable: true },
+                { key: 'created_at', label: 'Created', visible: true, sortable: true },
+                { key: 'updated_at', label: 'Updated', visible: false, sortable: true }
+            ];
+
+            this.updateVisibleColumns();
+        },
+
+        // Data Management
+        async loadData() {
+            this.isLoading = true;
+
+            // Simulate API call
+            setTimeout(() => {
+                this.data = this.generateSampleData();
+                this.filteredData = [...this.data];
+                this.applyFilters();
+                this.isLoading = false;
+            }, 1000);
+        },
+
+        generateSampleData() {
+            const sampleData = [];
+            for (let i = 1; i <= 100; i++) {
+                sampleData.push({
+                    id: i,
+                    name: `User ${i}`,
+                    email: `user${i}@example.com`,
+                    role: ['Admin', 'Editor', 'User'][Math.floor(Math.random() * 3)],
+                    status: ['active', 'inactive', 'pending'][Math.floor(Math.random() * 3)],
+                    created_at: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+                    updated_at: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
+                });
+            }
+            return sampleData;
+        },
+
+        // Filtering and Search
+        debounceSearch() {
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+                this.applyFilters();
+            }, 300);
+        },
+
+        applyFilters() {
+            let filtered = [...this.data];
+
+            // Apply search query
+            if (this.searchQuery) {
+                const query = this.searchQuery.toLowerCase();
+                filtered = filtered.filter(item =>
+                    Object.values(item).some(value =>
+                        String(value).toLowerCase().includes(query)
+                    )
+                );
+            }
+
+            // Apply status filter
+            if (this.statusFilter) {
+                filtered = filtered.filter(item => item.status === this.statusFilter);
+            }
+
+            // Apply category filter
+            if (this.categoryFilter) {
+                filtered = filtered.filter(item => item.role === this.categoryFilter);
+            }
+
+            // Apply date range filter
+            if (this.dateFrom || this.dateTo) {
+                filtered = filtered.filter(item => {
+                    const itemDate = new Date(item.created_at);
+                    const fromDate = this.dateFrom ? new Date(this.dateFrom) : null;
+                    const toDate = this.dateTo ? new Date(this.dateTo) : null;
+
+                    if (fromDate && itemDate < fromDate) return false;
+                    if (toDate && itemDate > toDate) return false;
+
+                    return true;
+                });
+            }
+
+            // Apply custom filters
+            this.customFilters.forEach(filter => {
+                if (filter.value) {
+                    filtered = filtered.filter(item => {
+                        const value = this.getNestedValue(item, filter.key);
+                        return String(value).toLowerCase().includes(filter.value.toLowerCase());
+                    });
+                }
+            });
+
+            this.filteredData = filtered;
+            this.updateActiveFilters();
+            this.sortData();
+            this.updatePagination();
+        },
+
+        updateActiveFilters() {
+            this.activeFilters = [];
+
+            if (this.searchQuery) {
+                this.activeFilters.push({
+                    key: 'search',
+                    label: 'Search',
+                    value: this.searchQuery
+                });
+            }
+
+            if (this.statusFilter) {
+                this.activeFilters.push({
+                    key: 'status',
+                    label: 'Status',
+                    value: this.statusFilter
+                });
+            }
+
+            if (this.categoryFilter) {
+                this.activeFilters.push({
+                    key: 'category',
+                    label: 'Category',
+                    value: this.categoryFilter
+                });
+            }
+
+            if (this.dateFrom || this.dateTo) {
+                this.activeFilters.push({
+                    key: 'date',
+                    label: 'Date Range',
+                    value: `${this.dateFrom || '...'} to ${this.dateTo || '...'}`
+                });
+            }
+        },
+
+        removeFilter(filterKey) {
+            switch (filterKey) {
+                case 'search':
+                    this.searchQuery = '';
+                    break;
+                case 'status':
+                    this.statusFilter = '';
+                    break;
+                case 'category':
+                    this.categoryFilter = '';
+                    break;
+                case 'date':
+                    this.dateFrom = '';
+                    this.dateTo = '';
+                    break;
+            }
+            this.applyFilters();
+        },
+
+        clearAllFilters() {
+            this.searchQuery = '';
+            this.statusFilter = '';
+            this.categoryFilter = '';
+            this.dateFrom = '';
+            this.dateTo = '';
+            this.customFilters.forEach(filter => filter.value = '');
+            this.applyFilters();
+        },
+
+        // Column Management
+        updateVisibleColumns() {
+            this.visibleColumns = this.columns.filter(col => col.visible);
+        },
+
+        toggleColumn(columnKey) {
+            const column = this.columns.find(col => col.key === columnKey);
+            if (column) {
+                column.visible = !column.visible;
+                this.updateVisibleColumns();
+            }
+        },
+
+        // Sorting
+        sortBy(columnKey) {
+            if (this.sortBy === columnKey) {
+                this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortBy = columnKey;
+                this.sortOrder = 'asc';
+            }
+            this.applyFilters();
+        },
+
+        sortData() {
+            if (!this.sortBy) return;
+
+            this.filteredData.sort((a, b) => {
+                let aVal = this.getNestedValue(a, this.sortBy);
+                let bVal = this.getNestedValue(b, this.sortBy);
+
+                // Handle date sorting
+                if (this.sortBy.includes('date') || this.sortBy.includes('created') || this.sortBy.includes('updated')) {
+                    aVal = new Date(aVal);
+                    bVal = new Date(bVal);
+                }
+
+                // Handle string sorting
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+
+                if (aVal < bVal) return this.sortOrder === 'asc' ? -1 : 1;
+                if (aVal > bVal) return this.sortOrder === 'asc' ? 1 : -1;
+                return 0;
+            });
+        },
+
+        // Selection Management
+        toggleSelectAll() {
+            if (this.selectAll) {
+                this.selectedItems = this.paginatedData.map(item => item.id);
+            } else {
+                this.selectedItems = [];
+            }
+        },
+
+        toggleRowSelection(itemId) {
+            const index = this.selectedItems.indexOf(itemId);
+            if (index > -1) {
+                this.selectedItems.splice(index, 1);
+            } else {
+                this.selectedItems.push(itemId);
+            }
+            this.selectAll = this.selectedItems.length === this.paginatedData.length;
+        },
+
+        // Pagination
+        updatePagination() {
+            this.totalItems = this.filteredData.length;
+            this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+            this.currentPage = Math.min(this.currentPage, this.totalPages - 1);
+            if (this.currentPage < 0) this.currentPage = 0;
+        },
+
+        get paginatedData() {
+            const start = this.currentPage * this.itemsPerPage;
+            const end = start + this.itemsPerPage;
+            return this.filteredData.slice(start, end);
+        },
+
+        get visiblePages() {
+            const pages = [];
+            const start = Math.max(0, this.currentPage - 2);
+            const end = Math.min(this.totalPages, this.currentPage + 3);
+
+            for (let i = start; i < end; i++) {
+                pages.push(i);
+            }
+
+            return pages;
+        },
+
+        goToPage(page) {
+            this.currentPage = Math.max(0, Math.min(page, this.totalPages - 1));
+        },
+
+        changeItemsPerPage() {
+            this.currentPage = 0;
+            this.updatePagination();
+        },
+
+        // View Management
+        setViewMode(mode) {
+            this.viewMode = mode;
+        },
+
+        // Data Operations
+        viewItem(item) {
+            console.log('Viewing item:', item);
+            this.showNotification(`Viewing ${item.name}`, 'info');
+        },
+
+        editItem(item) {
+            console.log('Editing item:', item);
+            this.showNotification(`Editing ${item.name}`, 'info');
+        },
+
+        deleteItem(item) {
+            if (confirm(`Are you sure you want to delete ${item.name}?`)) {
+                console.log('Deleting item:', item);
+                this.showNotification(`${item.name} deleted successfully`, 'success');
+            }
+        },
+
+        duplicateItem(item) {
+            console.log('Duplicating item:', item);
+            this.showNotification(`Duplicating ${item.name}`, 'info');
+        },
+
+        // Bulk Operations
+        bulkDelete() {
+            if (this.selectedItems.length === 0) return;
+
+            if (confirm(`Delete ${this.selectedItems.length} selected items?`)) {
+                console.log('Bulk deleting:', this.selectedItems);
+                this.showNotification(`${this.selectedItems.length} items deleted successfully`, 'success');
+                this.selectedItems = [];
+                this.selectAll = false;
+            }
+        },
+
+        bulkEdit() {
+            if (this.selectedItems.length === 0) return;
+
+            console.log('Bulk editing:', this.selectedItems);
+            this.showNotification(`Editing ${this.selectedItems.length} items`, 'info');
+        },
+
+        bulkExport() {
+            if (this.selectedItems.length === 0) return;
+
+            console.log('Bulk exporting:', this.selectedItems);
+            this.showNotification(`Exporting ${this.selectedItems.length} items`, 'info');
+        },
+
+        // Export Operations
+        exportData() {
+            console.log('Exporting all data');
+            this.showNotification('Data export started', 'info');
+        },
+
+        exportItem(item) {
+            console.log('Exporting item:', item);
+            this.showNotification(`Exporting ${item.name}`, 'info');
+        },
+
+        // Import Operations
+        importData() {
+            console.log('Importing data');
+            this.showNotification('Data import started', 'info');
+        },
+
+        // Archive Operations
+        archiveItem(item) {
+            console.log('Archiving item:', item);
+            this.showNotification(`${item.name} archived successfully`, 'success');
+        },
+
+        // Quick Actions
+        showCreateModal() {
+            console.log('Showing create modal');
+            this.showNotification('Create modal would open here', 'info');
+        },
+
+        showBulkEdit() {
+            if (this.selectedItems.length === 0) return;
+
+            console.log('Showing bulk edit modal');
+            this.showNotification('Bulk edit modal would open here', 'info');
+        },
+
+        toggleQuickActions() {
+            this.showQuickActions = !this.showQuickActions;
+        },
+
+        toggleRowMenu(itemId) {
+            this.activeRowMenu = this.activeRowMenu === itemId ? null : itemId;
+        },
+
+        // Utility Functions
+        getNestedValue(obj, path) {
+            return path.split('.').reduce((current, key) => current?.[key], obj);
+        },
+
+        renderCellValue(item, column) {
+            const value = this.getNestedValue(item, column.key);
+
+            if (!value) return '-';
+
+            // Format dates
+            if (column.key.includes('date') || column.key.includes('created') || column.key.includes('updated')) {
+                return this.formatDate(value);
+            }
+
+            // Format status
+            if (column.key === 'status') {
+                return `<span class="status-indicator status-${value}">${value.charAt(0).toUpperCase() + value.slice(1)}</span>`;
+            }
+
+            return String(value);
+        },
+
+        formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        },
+
+        getItemTitle(item) {
+            return item.name || item.title || `Item ${item.id}`;
+        },
+
+        getItemStatus(item) {
+            return item.status || 'active';
+        },
+
+        // Event Listeners
+        setupEventListeners() {
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.quick-actions-dropdown')) {
+                    this.showQuickActions = false;
+                }
+                if (!e.target.closest('.column-selector')) {
+                    this.showColumnSelector = false;
+                }
+                if (!e.target.closest('.row-actions-dropdown')) {
+                    this.activeRowMenu = null;
+                }
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    this.showQuickActions = false;
+                    this.showColumnSelector = false;
+                    this.activeRowMenu = null;
+                }
+            });
+        },
+
+        // Notifications
+        showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-6 right-6 z-50 p-4 rounded-xl shadow-2xl max-w-sm transform transition-all duration-300 ${
+                type === 'success' ? 'bg-green-100 border border-green-500 text-green-700' :
+                type === 'error' ? 'bg-red-100 border border-red-500 text-red-700' :
+                type === 'warning' ? 'bg-yellow-100 border border-yellow-500 text-yellow-700' :
+                'bg-blue-100 border border-blue-500 text-blue-700'
+            }`;
+
+            notification.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : 'info'}-circle"></i>
+                    <span class="flex-1">${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+    };
+}
+</script>
+{% endblock %}

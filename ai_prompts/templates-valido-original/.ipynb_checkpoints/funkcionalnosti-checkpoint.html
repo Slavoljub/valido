@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ValidoAI - Funkcionalnosti</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1c1c1e;
+            color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .navbar {
+            background-color: #0d1117;
+        }
+        .navbar-brand, .nav-link {
+            color: #f8f9fa !important;
+        }
+
+        /* Animacija za VA i lidoAI */
+        .animation-wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center; /* Centriranje */
+            height: 40vh;
+            position: relative;
+            margin-bottom: 50px;
+            text-align: center; /* Poravnanje teksta */
+        }
+
+        .text-left, .text-right {
+            position: absolute;
+            font-size: 4rem;
+            font-weight: bold;
+            white-space: nowrap;
+            color: #0d6efd;
+        }
+
+        .text-left {
+            left: -200px;
+            animation: slideToCenterLeft 2s forwards;
+        }
+
+        .text-right {
+            right: -200px;
+            animation: slideToCenterRight 2s forwards;
+        }
+
+        .description-text {
+            font-size: 1.5rem;
+            font-weight: normal;
+            color: #b3b3b3;
+            margin-top: 120px; /* Razmak između teksta i animacije */
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 2s forwards 2.5s;
+        }
+
+        /* Divovi za funkcionalnosti */
+        .functionalities {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .functionality-card {
+            background-color: #2c2c2e;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .functionality-card h3 {
+            color: #f8f9fa;
+            margin-bottom: 10px;
+        }
+
+        .functionality-card p {
+            color: #b3b3b3;
+            margin-bottom: 15px;
+        }
+
+        .functionality-card a {
+            color: #0d6efd;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        @keyframes slideToCenterLeft {
+            to {
+                left: calc(50% - 60px); /* Smanjen razmak za bolje dodirivanje */
+                transform: translateX(-50%);
+}
+        }
+
+        @keyframes slideToCenterRight {
+            to {
+               right: calc(50% - 60px); /* Smanjen razmak za bolje dodirivanje */
+               transform: translateX(50%);
+}
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">ValidoAI</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Početna</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/funkcionalnosti">Funkcionalnosti</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/kontakt">Kontakt</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Animacija -->
+    <div class="animation-wrapper">
+        <div class="text-left">Va</div>
+        <div class="text-right">lidoAI</div>
+        <p class="description-text">Medijator između zakona i vaših potreba!</p>
+    </div>
+
+    <!-- Divovi za funkcionalnosti -->
+    <div class="functionalities">
+        <div class="functionality-card">
+            <h3>Predikcija</h3>
+            <p>Prikaz tržišnih predikcija na osnovu istorijskih podataka.</p>
+            <a href="#">Saznaj više</a>
+        </div>
+        <div class="functionality-card">
+            <h3>Analiza trendova</h3>
+            <p>Vizualizacija tržišnih kretanja i ključnih trendova.</p>
+            <a href="#">Saznaj više</a>
+        </div>
+        <div class="functionality-card">
+            <h3>Anomalije</h3>
+            <p>Detekcija i analiza odstupanja u podacima.</p>
+            <a href="#">Saznaj više</a>
+        </div>
+        <div class="functionality-card">
+            <h3>Sentiment analiza</h3>
+            <p>Analiza tona i raspoloženja u finansijskim tekstovima.</p>
+            <a href="#">Saznaj više</a>
+        </div>
+    </div>
+
+    <footer class="text-center mt-4">
+        <p>&copy; 2025 ValidoAI. Sva prava zadržana.</p>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const descriptionText = document.querySelector('.description-text');
+
+            // Prikazivanje opisa nakon što se animacija završi
+            setTimeout(() => {
+                descriptionText.style.opacity = '1';
+            }, 2000); // 2 sekunde čekanja nakon spajanja VA i lidoAI
+        });
+    </script>
+</body>
+</html>

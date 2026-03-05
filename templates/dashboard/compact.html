@@ -1,0 +1,159 @@
+{% extends "layouts/compact-layout.html" %}
+
+{% block title %}Compact Dashboard - ValidoAI{% endblock %}
+{% block description %}Compact financial dashboard overview{% endblock %}
+{% block breadcrumb %}Compact Dashboard{% endblock %}
+{% block page_title %}Compact Dashboard{% endblock %}
+{% block page_description %}Streamlined view of your financial data{% endblock %}
+
+{% block content %}
+<!-- Quick Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <!-- Balance -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-gray-600">Balance</p>
+                <p class="text-xl font-bold text-gray-900">$857,967</p>
+            </div>
+            <div class="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
+                <i class="fas fa-wallet text-blue-600 text-sm"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expenses -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-gray-600">Expenses</p>
+                <p class="text-xl font-bold text-red-600">-$7,534</p>
+            </div>
+            <div class="w-8 h-8 bg-red-100 rounded flex items-center justify-center">
+                <i class="fas fa-shopping-cart text-red-600 text-sm"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Savings -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs font-medium text-gray-600">Savings</p>
+                <p class="text-xl font-bold text-gray-900">$20,449</p>
+            </div>
+            <div class="w-8 h-8 bg-green-100 rounded flex items-center justify-center">
+                <i class="fas fa-piggy-bank text-green-600 text-sm"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="flex items-center justify-end space-x-2 mb-6">
+    <button class="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm">
+        <i class="fas fa-plus mr-1"></i>Add Money
+    </button>
+    <button class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm">
+        <i class="fas fa-credit-card mr-1"></i>Payment
+    </button>
+</div>
+
+<!-- Recent Activity -->
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+    
+    <div class="space-y-3">
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-arrow-down text-green-600 text-xs"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900 text-sm">Salary Payment</p>
+                    <p class="text-xs text-gray-600">Today, 9:30 AM</p>
+                </div>
+            </div>
+            <span class="text-sm font-medium text-green-600">+$3,500</span>
+        </div>
+
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-arrow-up text-red-600 text-xs"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900 text-sm">Grocery Store</p>
+                    <p class="text-xs text-gray-600">Yesterday, 2:15 PM</p>
+                </div>
+            </div>
+            <span class="text-sm font-medium text-red-600">-$127.50</span>
+        </div>
+
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-arrow-up text-blue-600 text-xs"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900 text-sm">Gas Station</p>
+                    <p class="text-xs text-gray-600">2 days ago</p>
+                </div>
+            </div>
+            <span class="text-sm font-medium text-red-600">-$45.20</span>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+    <!-- Savings Goals -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Savings Goals</h3>
+        
+        <div class="space-y-3">
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs text-gray-600">House</span>
+                    <span class="text-xs text-green-600">75%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-1">
+                    <div class="bg-blue-600 h-1 rounded-full" style="width: 75%"></div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs text-gray-600">Car</span>
+                    <span class="text-xs text-green-600">85%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-1">
+                    <div class="bg-blue-600 h-1 rounded-full" style="width: 85%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Info -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Account Info</h3>
+        
+        <div class="space-y-2">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-dollar-sign text-gray-400 text-xs"></i>
+                <span class="text-xs text-gray-600">Main Account (USD)</span>
+            </div>
+            <p class="text-xs text-gray-500 font-mono">USD395768402049576GFH598</p>
+            
+            <div class="flex items-center space-x-2 mt-3">
+                <button class="px-2 py-1 border border-gray-300 text-gray-700 rounded text-xs hover:bg-gray-50">
+                    Transactions
+                </button>
+                <button class="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700">
+                    New Payment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,483 @@
+<!-- Header Partial -->
+<header class="sticky-header bg-white border-b border-neutral-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <!-- Left Section: Hamburger Menu & Logo -->
+            <div class="flex items-center space-x-3">
+                <!-- Hamburger Menu Button -->
+                <button 
+                    @click="sidebarOpen = !sidebarOpen" 
+                    class="p-2 rounded-md text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+                    aria-label="Toggle sidebar"
+                >
+                    <i class="fas fa-bars text-lg"></i>
+                </button>
+                
+                <!-- Logo -->
+                <div class="flex-shrink-0">
+                    <a href="/" class="flex items-center">
+                        <img src="{{ url_for('static', filename='img/logo-horizontal-dark.svg') }}" alt="ValidoAI" class="logo-img h-8 w-auto" data-logo>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Center Section: Dynamic Search Bar -->
+            <div class="flex-1 max-w-2xl mx-4 hidden md:block" x-data="{
+                searchQuery: '',
+                searchResults: [],
+                selectedIndex: -1,
+                isSearchOpen: false,
+                sidebarLinks: [],
+
+                init() {
+                    this.loadSidebarLinks();
+                },
+
+                loadSidebarLinks() {
+                    // Get all sidebar links from the page
+                    const links = document.querySelectorAll('aside a[href]');
+                    this.sidebarLinks = Array.from(links).map(link => ({
+                        href: link.href,
+                        text: link.textContent.trim(),
+                        icon: link.querySelector('i')?.className || '',
+                        category: link.closest('[data-category]')?.dataset.category || 'General'
+                    }));
+                },
+
+                search() {
+                    if (this.searchQuery.length < 2) {
+                        this.searchResults = [];
+                        this.isSearchOpen = false;
+                        return;
+                    }
+
+                    const query = this.searchQuery.toLowerCase();
+                    this.searchResults = this.sidebarLinks.filter(link =>
+                        link.text.toLowerCase().includes(query) ||
+                        link.category.toLowerCase().includes(query)
+                    ).slice(0, 8); // Limit to 8 results
+
+                    this.isSearchOpen = this.searchResults.length > 0;
+                    this.selectedIndex = -1;
+                },
+
+                selectResult(result) {
+                    window.location.href = result.href;
+                },
+
+                navigateResults(event) {
+                    if (!this.isSearchOpen) return;
+
+                    switch (event.key) {
+                        case 'ArrowDown':
+                            event.preventDefault();
+                            this.selectedIndex = Math.min(this.selectedIndex + 1, this.searchResults.length - 1);
+                            break;
+                        case 'ArrowUp':
+                            event.preventDefault();
+                            this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
+                            break;
+                        case 'Enter':
+                            event.preventDefault();
+                            if (this.selectedIndex >= 0 && this.selectedIndex < this.searchResults.length) {
+                                this.selectResult(this.searchResults[this.selectedIndex]);
+                            }
+                            break;
+                        case 'Escape':
+                            this.isSearchOpen = false;
+                            this.selectedIndex = -1;
+                            break;
+                    }
+                },
+
+
+            }">
+
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-neutral-400"></i>
+                    </div>
+                    <input
+                        type="text"
+                        x-model="searchQuery"
+                        @input="search()"
+                        @keydown="navigateResults($event)"
+                        @focus="if (searchQuery.length >= 2) isSearchOpen = searchResults.length > 0"
+                        @blur="setTimeout(() => isSearchOpen = false, 200)"
+                        placeholder="Search navigation, features..."
+                        class="block w-full pl-10 pr-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-neutral-50 hover:bg-white transition-colors"
+                        autocomplete="off"
+                        spellcheck="false"
+                    >
+
+                    <!-- Search Results Dropdown -->
+                    <div
+                        x-show="isSearchOpen"
+                        x-transition:enter="transition ease-out duration-100"
+                        x-transition:enter-start="transform opacity-0 scale-95"
+                        x-transition:enter-end="transform opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75"
+                        x-transition:leave-start="transform opacity-100 scale-100"
+                        x-transition:leave-end="transform opacity-0 scale-95"
+                        class="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-neutral-200 z-50 max-h-96 overflow-y-auto"
+                    >
+                        <!-- Results Header -->
+                        <div class="px-4 py-2 bg-neutral-50 border-b border-neutral-200">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium text-neutral-900">
+                                    <i class="fas fa-search mr-2 text-neutral-500"></i>
+                                    Search Results
+                                </span>
+                                <span class="text-xs text-neutral-500" x-text="`${searchResults.length} results`"></span>
+                            </div>
+                        </div>
+
+                        <!-- Results List -->
+                        <div class="py-1">
+                            <template x-for="(result, index) in searchResults" :key="result.href">
+                                <a
+                                    :href="result.href"
+                                    @click="selectResult(result)"
+                                    class="block px-4 py-3 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 transition-colors duration-150"
+                                    :class="{ 'bg-primary-50': selectedIndex === index }"
+                                >
+                                    <div class="flex items-center space-x-3">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center">
+                                                <i :class="result.icon || 'fas fa-link'" class="text-primary-600 text-sm"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between">
+                                                <h4 class="text-sm font-medium text-neutral-900 truncate"
+                                                    x-html="highlightText(result.text, searchQuery)"></h4>
+                                                <div class="flex items-center space-x-2">
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-neutral-100 text-neutral-700"
+                                                          x-text="result.category"></span>
+                                                    <i class="fas fa-external-link-alt text-neutral-400 text-xs" x-show="result.href.startsWith('http')"></i>
+                                                </div>
+                                            </div>
+                                            <p class="text-xs text-neutral-500 mt-1 truncate" x-text="result.href.replace(window.location.origin, '')"></p>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-chevron-right text-neutral-400 text-sm" x-show="selectedIndex !== index"></i>
+                                            <i class="fas fa-check text-primary-600 text-sm" x-show="selectedIndex === index"></i>
+                                        </div>
+                                    </div>
+                                </a>
+                            </template>
+
+                            <!-- No Results -->
+                            <div x-show="searchResults.length === 0 && searchQuery.length >= 2" class="px-4 py-8 text-center">
+                                <i class="fas fa-search text-neutral-400 text-2xl mb-2"></i>
+                                <p class="text-sm text-neutral-500 mb-1">No results found</p>
+                                <p class="text-xs text-neutral-400" x-text="`Try searching for: Dashboard, Settings, Profile, etc.`"></p>
+                            </div>
+                        </div>
+
+                        <!-- Results Footer -->
+                        <div x-show="searchResults.length > 0" class="px-4 py-2 bg-neutral-50 border-t border-neutral-200">
+                            <div class="flex items-center justify-between text-xs text-neutral-500">
+                                <span>
+                                    <i class="fas fa-keyboard mr-1"></i>
+                                    Use ↑↓ to navigate, Enter to select
+                                </span>
+                                <span>
+                                    <i class="fas fa-escape mr-1"></i>
+                                    Esc to close
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                         <!-- Right Section: Actions & User Menu -->
+             <div class="flex items-center space-x-2 sm:space-x-4">
+                 <!-- Mobile Search Button -->
+                 <button 
+                     @click="searchOpen = !searchOpen"
+                     class="md:hidden p-2 rounded-md hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+                     aria-label="Search"
+                 >
+                     <i class="fas fa-search text-lg"></i>
+                 </button>
+
+                 <!-- Theme Switcher Button -->
+                 <button onclick="openThemeModal()"
+                         class="p-2 rounded-md text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+                         title="Theme Settings (Ctrl+T)">
+                     <i class="fas fa-palette text-lg"></i>
+                 </button>
+
+                 <!-- Notifications -->
+                 <div class="relative" x-data="notificationDropdown()">
+                    <button 
+                        @click="toggleDropdown()"
+                        class="relative p-2 rounded-md text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+                        aria-label="Notifications"
+                        id="notificationBell"
+                    >
+                        <i class="fas fa-bell text-lg"></i>
+                        <span class="absolute -top-1 -right-1 block h-5 w-5 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center" id="notificationCount" style="display: none;">
+                            <span id="notificationCountText">0</span>
+                        </span>
+                    </button>
+                    
+                    <!-- Notification Dropdown -->
+                    <div 
+                        x-show="isDropdownOpen" 
+                        @click.away="closeDropdown()"
+                        x-transition:enter="transition ease-out duration-100"
+                        x-transition:enter-start="transform opacity-0 scale-95"
+                        x-transition:enter-end="transform opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75"
+                        x-transition:leave-start="transform opacity-100 scale-100"
+                        x-transition:leave-end="transform opacity-0 scale-95"
+                        class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-neutral-200 py-1 z-50"
+                        style="display: none;"
+                    >
+                        <!-- Dropdown Header -->
+                        <div class="px-4 py-2 border-b border-neutral-200 bg-neutral-50">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-sm font-semibold text-neutral-900">Recent Notifications</h3>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xs text-neutral-500" x-text="`${notifications.slice(0, 5).length}/5`"></span>
+                                    <span class="text-xs text-neutral-400">•</span>
+                                    <span class="text-xs text-neutral-500" x-text="`${notifications.length} total`"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Notifications List -->
+                        <div class="max-h-64 overflow-y-auto">
+                            <template x-for="notification in notifications.slice(0, 5)" :key="notification.id">
+                                <div class="px-4 py-3 hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0 transition-colors duration-150">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="flex-shrink-0 mt-1">
+                                            <div class="w-2 h-2 rounded-full" 
+                                                 :class="{
+                                                     'bg-green-500': notification.type === 'success',
+                                                     'bg-red-500': notification.type === 'error',
+                                                     'bg-yellow-500': notification.type === 'warning',
+                                                     'bg-blue-500': notification.type === 'info'
+                                                 }"></div>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between">
+                                                <p class="text-sm font-medium text-neutral-900 truncate" x-text="notification.title"></p>
+                                                <div class="flex items-center space-x-2">
+                                                    <span x-show="!notification.is_read" class="w-2 h-2 bg-red-500 rounded-full"></span>
+                                                    <button 
+                                                        @click="markAsRead(notification.id)"
+                                                        class="text-xs text-neutral-400 hover:text-neutral-600 transition-colors"
+                                                        x-show="!notification.is_read"
+                                                        title="Mark as read"
+                                                    >
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <p class="text-xs text-neutral-500 mt-1 line-clamp-2" x-text="notification.message"></p>
+                                            <p class="text-xs text-neutral-400 mt-1" x-text="formatTime(notification.created_at)"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <!-- Empty State -->
+                            <div x-show="notifications.length === 0" class="px-4 py-8 text-center">
+                                <i class="fas fa-bell text-neutral-400 text-2xl mb-2"></i>
+                                <p class="text-sm text-neutral-500">No notifications</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Dropdown Footer -->
+                        <div class="px-4 py-2 border-t border-neutral-200 bg-neutral-50">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-neutral-500" x-text="`${notifications.filter(n => !n.is_read).length} unread`"></span>
+                                <a 
+                                    href="/notifications" 
+                                    class="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors"
+                                    @click="closeDropdown()"
+                                >
+                                    View all notifications
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Theme Switcher Button -->
+                <button
+                    @click="openThemeSelector()"
+                    class="relative p-2 rounded-md text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+                    title="Theme Settings (Ctrl+Shift+T)"
+                    aria-label="Theme selector"
+                >
+                    <i class="fas fa-palette text-lg"></i>
+                </button>
+
+                <!-- Switch Account -->
+                {% include 'partials/switch_account.html' %}
+
+                                 <!-- User Menu -->
+                 <div class="relative" x-data="{
+                     userMenuOpen: false,
+                     openThemeSelector() {
+                         const themeSelector = document.querySelector('[x-data*=\"themeSelector\"]');
+                         if (themeSelector && themeSelector.__x) {
+                             themeSelector.__x.$data.isOpen = true;
+                         }
+                     }
+                 }">
+                     <button 
+                         @click="userMenuOpen = !userMenuOpen" 
+                         class="flex items-center space-x-2 p-2 rounded-md hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+                         aria-label="User menu"
+                     >
+                         <img class="h-8 w-8 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="User avatar">
+                         <span class="hidden lg:block text-sm font-medium">John Doe</span>
+                         <i class="fas fa-chevron-down text-xs"></i>
+                     </button>
+                    
+                    <!-- User Dropdown -->
+                    <div 
+                        x-show="userMenuOpen" 
+                        @click.away="userMenuOpen = false"
+                        x-transition:enter="transition ease-out duration-100"
+                        x-transition:enter-start="transform opacity-0 scale-95"
+                        x-transition:enter-end="transform opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75"
+                        x-transition:leave-start="transform opacity-100 scale-100"
+                        x-transition:leave-end="transform opacity-0 scale-95"
+                        class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-neutral-200 py-1 z-50"
+                    >
+                        <div class="px-3 py-2 border-b border-neutral-200">
+                            <div class="text-sm font-medium text-neutral-900">John Doe</div>
+                            <div class="text-xs text-neutral-500">john.doe@valido.online</div>
+                            <div class="text-xs text-neutral-500">Company: ValidoAI</div>
+                        </div>
+                        <a href="/profile" class="block px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-100">
+                            <i class="fas fa-user mr-2"></i>Profile
+                        </a>
+                        <a href="/settings" class="block px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-100">
+                            <i class="fas fa-cog mr-2"></i>Settings
+                        </a>
+                        <a href="/company" class="block px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-100">
+                            <i class="fas fa-building mr-2"></i>Company
+                        </a>
+                        <div class="border-t border-neutral-200"></div>
+                        <a href="/logout" class="block px-3 py-2 text-sm text-red-600 hover:bg-red-50">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<script>
+// Notification count functionality
+document.addEventListener('DOMContentLoaded', function() {
+    updateNotificationCount();
+    
+    // Update notification count every 30 seconds
+    setInterval(updateNotificationCount, 30000);
+});
+
+function updateNotificationCount() {
+    fetch('/notifications/api/v1/notifications/unread-count')
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const count = data.data.unread_count;
+            const countElement = document.getElementById('notificationCount');
+            const countTextElement = document.getElementById('notificationCountText');
+            
+            if (count > 0) {
+                countTextElement.textContent = count > 99 ? '99+' : count;
+                countElement.style.display = 'flex';
+            } else {
+                countElement.style.display = 'none';
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching notification count:', error);
+    });
+}
+
+// Notification dropdown functionality
+function notificationDropdown() {
+    return {
+        isDropdownOpen: false,
+        notifications: [],
+        
+        init() {
+            this.loadNotifications();
+        },
+        
+        toggleDropdown() {
+            this.isDropdownOpen = !this.isDropdownOpen;
+            if (this.isDropdownOpen) {
+                this.loadNotifications();
+            }
+        },
+        
+        closeDropdown() {
+            this.isDropdownOpen = false;
+        },
+        
+        loadNotifications() {
+            fetch('/notifications/api/v1/notifications?limit=10')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    this.notifications = data.data.notifications || [];
+                }
+            })
+            .catch(error => {
+                console.error('Error loading notifications:', error);
+                this.notifications = [];
+            });
+        },
+        
+        markAsRead(notificationId) {
+            fetch(`/notifications/api/v1/notifications/${notificationId}/mark-read`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Update the notification in the list
+                    const notification = this.notifications.find(n => n.id === notificationId);
+                    if (notification) {
+                        notification.is_read = true;
+                    }
+                    // Update the count
+                    updateNotificationCount();
+                }
+            })
+            .catch(error => {
+                console.error('Error marking notification as read:', error);
+            });
+        },
+        
+        formatTime(timestamp) {
+            if (!timestamp) return '';
+            
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+            
+            if (diffInMinutes < 1) return 'Just now';
+            if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+            if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+            return `${Math.floor(diffInMinutes / 1440)}d ago`;
+        }
+    }
+}
+</script>

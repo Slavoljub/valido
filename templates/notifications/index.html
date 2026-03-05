@@ -1,0 +1,870 @@
+{% extends "layouts/base.html"" %}
+
+{% block title %}Notifications - ValidoAI{% endblock %}
+
+{% block container_class %}w-full px-4 sm:px-6 lg:px-8{% endblock %}
+
+{% block conditional_css %}
+<style>
+    .notifications-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .notifications-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border-primary);
+    }
+    
+    .notifications-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .notifications-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+    
+    .notifications-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    
+    .stat-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-primary);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        transition: all 0.2s;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .stat-number {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--primary-600);
+        margin-bottom: 8px;
+    }
+    
+    .stat-label {
+        font-size: 14px;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .notifications-filters {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .filter-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+    
+    .filter-select {
+        padding: 8px 12px;
+        border: 1px solid var(--border-primary);
+        border-radius: 8px;
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        font-size: 14px;
+        min-width: 120px;
+    }
+    
+    .notifications-list {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-primary);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .notification-item {
+        padding: 20px;
+        border-bottom: 1px solid var(--border-primary);
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+    
+    .notification-item:hover {
+        background: var(--bg-surface-hover);
+    }
+    
+    .notification-item.unread {
+        background: rgba(59, 130, 246, 0.05);
+        border-left: 4px solid var(--primary-500);
+    }
+    
+    .notification-item.unread:hover {
+        background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .notification-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+    
+    .notification-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+    }
+    
+    .notification-message {
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin-bottom: 12px;
+    }
+    
+    .notification-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+    
+    .notification-type {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .notification-type.success {
+        background: rgba(34, 197, 94, 0.1);
+        color: #16a34a;
+    }
+    
+    .notification-type.error {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+    }
+    
+    .notification-type.warning {
+        background: rgba(245, 158, 11, 0.1);
+        color: #d97706;
+    }
+    
+    .notification-type.info {
+        background: rgba(59, 130, 246, 0.1);
+        color: #2563eb;
+    }
+    
+    .notification-type.system {
+        background: rgba(107, 114, 128, 0.1);
+        color: #6b7280;
+    }
+    
+    .notification-type.security {
+        background: rgba(168, 85, 247, 0.1);
+        color: #9333ea;
+    }
+    
+    .notification-type.financial {
+        background: rgba(34, 197, 94, 0.1);
+        color: #16a34a;
+    }
+    
+    .notification-type.ai {
+        background: rgba(59, 130, 246, 0.1);
+        color: #2563eb;
+    }
+    
+    .notification-type.ticket {
+        background: rgba(245, 158, 11, 0.1);
+        color: #d97706;
+    }
+    
+    .notification-type.user {
+        background: rgba(168, 85, 247, 0.1);
+        color: #9333ea;
+    }
+    
+    .notification-priority {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .notification-priority.low {
+        background: rgba(34, 197, 94, 0.1);
+        color: #16a34a;
+    }
+    
+    .notification-priority.normal {
+        background: rgba(59, 130, 246, 0.1);
+        color: #2563eb;
+    }
+    
+    .notification-priority.high {
+        background: rgba(245, 158, 11, 0.1);
+        color: #d97706;
+    }
+    
+    .notification-priority.urgent {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+    }
+    
+    .notification-actions {
+        display: flex;
+        gap: 8px;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    
+    .notification-item:hover .notification-actions {
+        opacity: 1;
+    }
+    
+    .notification-btn {
+        padding: 6px 10px;
+        border: 1px solid var(--border-primary);
+        border-radius: 6px;
+        background: var(--bg-surface);
+        color: var(--text-secondary);
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .notification-btn:hover {
+        background: var(--bg-surface-hover);
+        color: var(--text-primary);
+    }
+    
+    .notification-btn.primary {
+        background: var(--primary-600);
+        color: white;
+        border-color: var(--primary-600);
+    }
+    
+    .notification-btn.primary:hover {
+        background: var(--primary-700);
+    }
+    
+    .notification-btn.danger {
+        background: var(--danger-600);
+        color: white;
+        border-color: var(--danger-600);
+    }
+    
+    .notification-btn.danger:hover {
+        background: var(--danger-700);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-muted);
+    }
+    
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+    
+    .empty-state-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--text-secondary);
+    }
+    
+    .empty-state-message {
+        font-size: 14px;
+        margin-bottom: 24px;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 24px;
+        padding: 16px;
+    }
+    
+    .pagination-btn {
+        padding: 8px 12px;
+        border: 1px solid var(--border-primary);
+        border-radius: 6px;
+        background: var(--bg-surface);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .pagination-btn:hover:not(:disabled) {
+        background: var(--bg-surface-hover);
+        color: var(--text-primary);
+    }
+    
+    .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .pagination-btn.active {
+        background: var(--primary-600);
+        color: white;
+        border-color: var(--primary-600);
+    }
+    
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--border-primary);
+        border-radius: 50%;
+        border-top-color: var(--primary-600);
+        animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    @media (max-width: 768px) {
+        .notifications-header {
+            flex-direction: column;
+            gap: 16px;
+            align-items: flex-start;
+        }
+        
+        .notifications-actions {
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .notifications-filters {
+            flex-direction: column;
+        }
+        
+        .filter-group {
+            width: 100%;
+        }
+        
+        .filter-select {
+            width: 100%;
+        }
+        
+        .notification-header {
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .notification-meta {
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-start;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="notifications-container">
+    <!-- Header -->
+    <div class="notifications-header">
+        <div class="notifications-title">
+            <i class="fas fa-bell"></i>
+            Notifications
+            {% if unread_count > 0 %}
+            <span class="badge badge-primary">{{ unread_count }}</span>
+            {% endif %}
+        </div>
+        <div class="notifications-actions">
+            <button class="btn btn-secondary" onclick="markAllAsRead()">
+                <i class="fas fa-check-double"></i>
+                Mark All Read
+            </button>
+            <button class="btn btn-primary" onclick="refreshNotifications()">
+                <i class="fas fa-sync-alt"></i>
+                Refresh
+            </button>
+        </div>
+    </div>
+    
+    <!-- Statistics -->
+    <div class="notifications-stats">
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.total }}</div>
+            <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.unread }}</div>
+            <div class="stat-label">Unread</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.read }}</div>
+            <div class="stat-label">Read</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.archived }}</div>
+            <div class="stat-label">Archived</div>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="notifications-filters">
+        <div class="filter-group">
+            <label class="filter-label">Status</label>
+            <select class="filter-select" id="statusFilter" onchange="filterNotifications()">
+                <option value="">All</option>
+                <option value="unread">Unread</option>
+                <option value="read">Read</option>
+                <option value="archived">Archived</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Type</label>
+            <select class="filter-select" id="typeFilter" onchange="filterNotifications()">
+                <option value="">All</option>
+                <option value="success">Success</option>
+                <option value="error">Error</option>
+                <option value="warning">Warning</option>
+                <option value="info">Info</option>
+                <option value="system">System</option>
+                <option value="security">Security</option>
+                <option value="financial">Financial</option>
+                <option value="ai">AI</option>
+                <option value="ticket">Ticket</option>
+                <option value="user">User</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Priority</label>
+            <select class="filter-select" id="priorityFilter" onchange="filterNotifications()">
+                <option value="">All</option>
+                <option value="low">Low</option>
+                <option value="normal">Normal</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Sort By</label>
+            <select class="filter-select" id="sortFilter" onchange="filterNotifications()">
+                <option value="created_at_desc">Newest First</option>
+                <option value="created_at_asc">Oldest First</option>
+                <option value="priority_desc">Priority (High to Low)</option>
+                <option value="priority_asc">Priority (Low to High)</option>
+            </select>
+        </div>
+    </div>
+    
+    <!-- Notifications List -->
+    <div class="notifications-list" id="notificationsList">
+        {% if notifications %}
+            {% for notification in notifications %}
+            <div class="notification-item {% if notification.status == 'unread' %}unread{% endif %}" 
+                 data-id="{{ notification.id }}" 
+                 data-type="{{ notification.type }}" 
+                 data-priority="{{ notification.priority }}" 
+                 data-status="{{ notification.status }}">
+                <div class="notification-header">
+                    <div class="notification-content">
+                        <div class="notification-title">{{ notification.title }}</div>
+                        <div class="notification-message">{{ notification.message }}</div>
+                        <div class="notification-meta">
+                            <div class="notification-info">
+                                <span class="notification-type {{ notification.type }}">
+                                    <i class="{{ notification.icon or 'fas fa-info-circle' }}"></i>
+                                    {{ notification.type }}
+                                </span>
+                                <span class="notification-priority {{ notification.priority }}">
+                                    {{ notification.priority }}
+                                </span>
+                                <span class="notification-time">{{ notification.created_at }}</span>
+                            </div>
+                            <div class="notification-actions">
+                                {% if notification.status == 'unread' %}
+                                <button class="notification-btn primary" onclick="markAsRead('{{ notification.id }}')">
+                                    <i class="fas fa-check"></i>
+                                    Mark Read
+                                </button>
+                                {% endif %}
+                                <button class="notification-btn" onclick="markAsArchived('{{ notification.id }}')">
+                                    <i class="fas fa-archive"></i>
+                                    Archive
+                                </button>
+                                <button class="notification-btn danger" onclick="deleteNotification('{{ notification.id }}')">
+                                    <i class="fas fa-trash"></i>
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-bell-slash"></i>
+                </div>
+                <div class="empty-state-title">No notifications</div>
+                <div class="empty-state-message">
+                    You're all caught up! No notifications to display.
+                </div>
+                <button class="btn btn-primary" onclick="refreshNotifications()">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
+                </button>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if notifications and notifications|length >= 50 %}
+    <div class="pagination">
+        <button class="pagination-btn" onclick="loadPage(1)">
+            <i class="fas fa-angle-double-left"></i>
+        </button>
+        <button class="pagination-btn" onclick="loadPage(currentPage - 1)" id="prevBtn">
+            <i class="fas fa-angle-left"></i>
+        </button>
+        <span class="pagination-info">Page <span id="currentPage">1</span></span>
+        <button class="pagination-btn" onclick="loadPage(currentPage + 1)" id="nextBtn">
+            <i class="fas fa-angle-right"></i>
+        </button>
+        <button class="pagination-btn" onclick="loadPage(lastPage)">
+            <i class="fas fa-angle-double-right"></i>
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+let currentPage = 1;
+let lastPage = 1;
+let isLoading = false;
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    updatePagination();
+});
+
+function filterNotifications() {
+    const statusFilter = document.getElementById('statusFilter').value;
+    const typeFilter = document.getElementById('typeFilter').value;
+    const priorityFilter = document.getElementById('priorityFilter').value;
+    
+    const notifications = document.querySelectorAll('.notification-item');
+    
+    notifications.forEach(notification => {
+        let show = true;
+        
+        if (statusFilter && notification.dataset.status !== statusFilter) {
+            show = false;
+        }
+        
+        if (typeFilter && notification.dataset.type !== typeFilter) {
+            show = false;
+        }
+        
+        if (priorityFilter && notification.dataset.priority !== priorityFilter) {
+            show = false;
+        }
+        
+        notification.style.display = show ? 'block' : 'none';
+    });
+    
+    // Show empty state if no notifications are visible
+    const visibleNotifications = document.querySelectorAll('.notification-item[style="display: block"], .notification-item:not([style*="display"])');
+    const emptyState = document.querySelector('.empty-state');
+    
+    if (visibleNotifications.length === 0 && emptyState) {
+        emptyState.style.display = 'block';
+    } else if (emptyState) {
+        emptyState.style.display = 'none';
+    }
+}
+
+function markAsRead(notificationId) {
+    if (isLoading) return;
+    
+    isLoading = true;
+    const btn = event.target.closest('.notification-btn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<div class="loading-spinner"></div>';
+    
+    fetch(`/notifications/api/v1/notifications/${notificationId}/read`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const notification = document.querySelector(`[data-id="${notificationId}"]`);
+            notification.classList.remove('unread');
+            notification.dataset.status = 'read';
+            
+            // Update unread count
+            updateUnreadCount();
+            
+            // Show success message
+            showToast('Notification marked as read', 'success');
+        } else {
+            showToast(data.message || 'Failed to mark as read', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Failed to mark as read', 'error');
+    })
+    .finally(() => {
+        isLoading = false;
+        btn.innerHTML = originalText;
+    });
+}
+
+function markAsArchived(notificationId) {
+    if (isLoading) return;
+    
+    if (!confirm('Are you sure you want to archive this notification?')) {
+        return;
+    }
+    
+    isLoading = true;
+    const btn = event.target.closest('.notification-btn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<div class="loading-spinner"></div>';
+    
+    fetch(`/notifications/api/v1/notifications/${notificationId}/archive`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const notification = document.querySelector(`[data-id="${notificationId}"]`);
+            notification.style.display = 'none';
+            
+            showToast('Notification archived', 'success');
+        } else {
+            showToast(data.message || 'Failed to archive', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Failed to archive notification', 'error');
+    })
+    .finally(() => {
+        isLoading = false;
+        btn.innerHTML = originalText;
+    });
+}
+
+function deleteNotification(notificationId) {
+    if (isLoading) return;
+    
+    if (!confirm('Are you sure you want to delete this notification? This action cannot be undone.')) {
+        return;
+    }
+    
+    isLoading = true;
+    const btn = event.target.closest('.notification-btn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<div class="loading-spinner"></div>';
+    
+    fetch(`/notifications/api/v1/notifications/${notificationId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const notification = document.querySelector(`[data-id="${notificationId}"]`);
+            notification.style.display = 'none';
+            
+            showToast('Notification deleted', 'success');
+        } else {
+            showToast(data.message || 'Failed to delete', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Failed to delete notification', 'error');
+    })
+    .finally(() => {
+        isLoading = false;
+        btn.innerHTML = originalText;
+    });
+}
+
+function markAllAsRead() {
+    if (isLoading) return;
+    
+    if (!confirm('Are you sure you want to mark all notifications as read?')) {
+        return;
+    }
+    
+    isLoading = true;
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<div class="loading-spinner"></div> Marking...';
+    
+    fetch('/notifications/api/v1/notifications/mark-all-read', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Mark all unread notifications as read
+            const unreadNotifications = document.querySelectorAll('.notification-item.unread');
+            unreadNotifications.forEach(notification => {
+                notification.classList.remove('unread');
+                notification.dataset.status = 'read';
+            });
+            
+            // Update unread count
+            updateUnreadCount();
+            
+            showToast(`Marked ${data.data.marked_count} notifications as read`, 'success');
+        } else {
+            showToast(data.message || 'Failed to mark all as read', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Failed to mark all as read', 'error');
+    })
+    .finally(() => {
+        isLoading = false;
+        btn.innerHTML = originalText;
+    });
+}
+
+function refreshNotifications() {
+    if (isLoading) return;
+    
+    isLoading = true;
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<div class="loading-spinner"></div> Refreshing...';
+    
+    // Reload the page
+    window.location.reload();
+}
+
+function updateUnreadCount() {
+    fetch('/notifications/api/v1/notifications/unread-count')
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const badge = document.querySelector('.notifications-title .badge');
+            const count = data.data.unread_count;
+            
+            if (count > 0) {
+                if (badge) {
+                    badge.textContent = count;
+                } else {
+                    const title = document.querySelector('.notifications-title');
+                    const newBadge = document.createElement('span');
+                    newBadge.className = 'badge badge-primary';
+                    newBadge.textContent = count;
+                    title.appendChild(newBadge);
+                }
+            } else {
+                if (badge) {
+                    badge.remove();
+                }
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error updating unread count:', error);
+    });
+}
+
+function updatePagination() {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const currentPageSpan = document.getElementById('currentPage');
+    
+    if (prevBtn) prevBtn.disabled = currentPage <= 1;
+    if (nextBtn) nextBtn.disabled = currentPage >= lastPage;
+    if (currentPageSpan) currentPageSpan.textContent = currentPage;
+}
+
+function loadPage(page) {
+    if (page < 1 || page > lastPage || isLoading) return;
+    
+    currentPage = page;
+    const url = new URL(window.location);
+    url.searchParams.set('page', page);
+    window.location.href = url.toString();
+}
+
+function showToast(message, type = 'info') {
+    // Use existing toast system
+    if (typeof showNotification === 'function') {
+        showNotification(message, type);
+    } else {
+        // Fallback alert
+        alert(message);
+    }
+}
+</script>
+{% endblock %}

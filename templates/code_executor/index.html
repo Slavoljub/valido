@@ -1,0 +1,391 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Code Executor - ValidoAI{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Code Executor</h1>
+                    <p class="text-gray-600">Execute Python and Julia code in isolated kernels</p>
+                </div>
+                <div class="flex space-x-3">
+                    <button id="create-session" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        New Session
+                    </button>
+                    <button id="clear-output" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Code Editor -->
+            <div class="lg:col-span-2">
+                <div class="bg-white shadow rounded-lg">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-medium text-gray-900">Code Editor</h3>
+                            <div class="flex space-x-3">
+                                <select id="kernel-type" class="block w-32 pl-3 pr-10 py-1 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                    <option value="python">Python</option>
+                                    <option value="julia">Julia</option>
+                                </select>
+                                <button id="execute-code" class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-7 4h12m-7-8h4m-4-4h4m6 8a2 2 0 100-4 2 2 0 000 4z"></path>
+                                    </svg>
+                                    Run
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <textarea id="code-input" rows="15" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+                                  placeholder="Enter your code here...
+
+# Python example
+print('Hello from Python kernel!')
+import numpy as np
+arr = np.array([1, 2, 3, 4, 5])
+print(f'Array: {arr}')
+print(f'Mean: {arr.mean()}')
+
+# Julia example
+# println("Hello from Julia kernel!")
+# using Statistics
+# arr = [1, 2, 3, 4, 5]
+# println("Array: ", arr)
+# println("Mean: ", mean(arr))"></textarea>
+                    </div>
+                </div>
+
+                <!-- Output Display -->
+                <div class="bg-white shadow rounded-lg mt-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-medium text-gray-900">Execution Results</h3>
+                            <div class="flex items-center space-x-2">
+                                <div id="execution-status" class="text-sm text-gray-500">Ready</div>
+                                <div id="execution-time" class="text-sm text-gray-500"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div id="output-display" class="bg-gray-900 text-green-400 p-4 rounded-md font-mono text-sm min-h-64 whitespace-pre-wrap overflow-auto">
+                            <div class="text-gray-500">Output will appear here...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+
+                <!-- Session Info -->
+                <div class="bg-white shadow rounded-lg">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Session</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-sm font-medium text-gray-700">Session ID</label>
+                                <div id="session-id" class="text-sm text-gray-500 mt-1">None</div>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-700">Kernel Type</label>
+                                <div id="session-kernel" class="text-sm text-gray-500 mt-1">None</div>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-700">Status</label>
+                                <div id="session-status" class="text-sm text-gray-500 mt-1">Not connected</div>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-700">Executions</label>
+                                <div id="session-executions" class="text-sm text-gray-500 mt-1">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Examples -->
+                <div class="bg-white shadow rounded-lg">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Quick Examples</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-2">
+                            <button class="python-example w-full text-left px-3 py-2 text-sm bg-gray-50 hover:bg-gray-100 rounded-md transition-colors" data-code="print('Hello, World!')\nx = 2 + 3\nprint(f'2 + 3 = {x}')">
+                                Python: Hello World
+                            </button>
+                            <button class="python-example w-full text-left px-3 py-2 text-sm bg-gray-50 hover:bg-gray-100 rounded-md transition-colors" data-code="import matplotlib.pyplot as plt\nimport numpy as np\n\nx = np.linspace(0, 10, 100)\ny = np.sin(x)\n\nplt.figure(figsize=(8, 4))\nplt.plot(x, y)\nplt.title('Sine Wave')\nplt.xlabel('x')\nplt.ylabel('sin(x)')\nplt.show()">
+                                Python: Plot Graph
+                            </button>
+                            <button class="python-example w-full text-left px-3 py-2 text-sm bg-gray-50 hover:bg-gray-100 rounded-md transition-colors" data-code="import pandas as pd\nimport numpy as np\n\n# Create sample data\ndata = {\n    'Name': ['Alice', 'Bob', 'Charlie', 'David'],\n    'Age': [25, 30, 35, 28],\n    'Salary': [50000, 60000, 70000, 55000]\n}\n\ndf = pd.DataFrame(data)\nprint(df)\nprint(f'\\nAverage Age: {df[\"Age\"].mean():.1f}')">
+                                Python: Data Analysis
+                            </button>
+                            <button class="julia-example w-full text-left px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 rounded-md transition-colors" data-code="println(\"Hello from Julia!\")\nx = 2 + 3\nprintln(\"2 + 3 = \", x)\n\n# Array operations\narr = [1, 2, 3, 4, 5]\nprintln(\"Array: \", arr)\nprintln(\"Sum: \", sum(arr))\nprintln(\"Mean: \", mean(arr))">
+                                Julia: Basic Operations
+                            </button>
+                            <button class="julia-example w-full text-left px-3 py-2 text-sm bg-blue-50 hover:bg-blue-100 rounded-md transition-colors" data-code="using Plots\n\n# Create a simple plot\nx = range(0, 10, length=100)\ny = sin.(x)\n\nplot(x, y, title=\"Sine Wave\", xlabel=\"x\", ylabel=\"sin(x)\", legend=false)">
+                                Julia: Plotting
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Execution History -->
+                <div class="bg-white shadow rounded-lg">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Execution History</h3>
+                    </div>
+                    <div class="p-6">
+                        <div id="execution-history" class="space-y-2 max-h-64 overflow-y-auto">
+                            <div class="text-sm text-gray-500">No executions yet</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Code Executor -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentSession = null;
+    let executionHistory = [];
+
+    // DOM elements
+    const codeInput = document.getElementById('code-input');
+    const kernelType = document.getElementById('kernel-type');
+    const executeBtn = document.getElementById('execute-code');
+    const createSessionBtn = document.getElementById('create-session');
+    const clearOutputBtn = document.getElementById('clear-output');
+    const outputDisplay = document.getElementById('output-display');
+    const executionStatus = document.getElementById('execution-status');
+    const executionTime = document.getElementById('execution-time');
+    const sessionId = document.getElementById('session-id');
+    const sessionKernel = document.getElementById('session-kernel');
+    const sessionStatus = document.getElementById('session-status');
+    const sessionExecutions = document.getElementById('session-executions');
+    const executionHistoryDiv = document.getElementById('execution-history');
+
+    // Event listeners
+    executeBtn.addEventListener('click', executeCode);
+    createSessionBtn.addEventListener('click', createNewSession);
+    clearOutputBtn.addEventListener('click', clearOutput);
+    codeInput.addEventListener('keydown', handleKeyDown);
+
+    // Example buttons
+    document.querySelectorAll('.python-example, .julia-example').forEach(btn => {
+        btn.addEventListener('click', function() {
+            codeInput.value = this.dataset.code;
+            const isJulia = this.classList.contains('julia-example');
+            kernelType.value = isJulia ? 'julia' : 'python';
+        });
+    });
+
+    async function createNewSession() {
+        try {
+            executionStatus.textContent = 'Creating session...';
+            executionStatus.className = 'text-sm text-blue-600';
+
+            const response = await fetch('/api/session/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    kernel_type: kernelType.value
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                currentSession = result.session_id;
+                updateSessionInfo(result.kernel_type, result.session_id);
+                executionStatus.textContent = 'Session created';
+                executionStatus.className = 'text-sm text-green-600';
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (error) {
+            console.error('Error creating session:', error);
+            executionStatus.textContent = 'Error creating session';
+            executionStatus.className = 'text-sm text-red-600';
+        }
+    }
+
+    async function executeCode() {
+        const code = codeInput.value.trim();
+        if (!code) {
+            alert('Please enter some code to execute');
+            return;
+        }
+
+        try {
+            executionStatus.textContent = 'Executing...';
+            executionStatus.className = 'text-sm text-blue-600';
+            executeBtn.disabled = true;
+            executeBtn.textContent = 'Running...';
+
+            const startTime = Date.now();
+
+            let response;
+            if (currentSession && kernelType.value === 'python') {
+                // Execute in existing Python session
+                response = await fetch(`/api/session/${currentSession}/execute`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        timeout: 30
+                    })
+                });
+            } else {
+                // Execute directly (for Julia or new Python execution)
+                response = await fetch('/api/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        kernel_type: kernelType.value,
+                        timeout: 30
+                    })
+                });
+            }
+
+            const result = await response.json();
+            const endTime = Date.now();
+
+            // Update UI
+            executionTime.textContent = `${(endTime - startTime) / 1000}s`;
+
+            if (result.success) {
+                executionStatus.textContent = 'Success';
+                executionStatus.className = 'text-sm text-green-600';
+
+                let output = '';
+                if (result.output) {
+                    output += result.output;
+                }
+                if (result.error) {
+                    output += `\n⚠️ Warnings/Errors:\n${result.error}`;
+                }
+                if (result.html_output) {
+                    output += `\n📄 HTML Output:\n${result.html_output}`;
+                }
+
+                outputDisplay.innerHTML = `<div class="text-green-400">${escapeHtml(output || 'No output')}</div>`;
+
+                // Update execution count
+                if (currentSession) {
+                    const currentCount = parseInt(sessionExecutions.textContent) || 0;
+                    sessionExecutions.textContent = currentCount + 1;
+                }
+
+                // Add to history
+                addToExecutionHistory(result, (endTime - startTime) / 1000);
+
+            } else {
+                executionStatus.textContent = 'Error';
+                executionStatus.className = 'text-sm text-red-600';
+                outputDisplay.innerHTML = `<div class="text-red-400">❌ Error: ${escapeHtml(result.error)}</div>`;
+            }
+
+        } catch (error) {
+            console.error('Error executing code:', error);
+            executionStatus.textContent = 'Error';
+            executionStatus.className = 'text-sm text-red-600';
+            outputDisplay.innerHTML = `<div class="text-red-400">❌ Error: ${escapeHtml(error.message)}</div>`;
+        } finally {
+            executeBtn.disabled = false;
+            executeBtn.innerHTML = '<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-7 4h12m-7-8h4m-4-4h4m6 8a2 2 0 100-4 2 2 0 000 4z"></path></svg>Run';
+        }
+    }
+
+    function updateSessionInfo(kernelType, sessionId) {
+        sessionId.textContent = sessionId;
+        sessionKernel.textContent = kernelType;
+        sessionStatus.textContent = 'Connected';
+        sessionExecutions.textContent = '0';
+    }
+
+    function clearOutput() {
+        outputDisplay.innerHTML = '<div class="text-gray-500">Output will appear here...</div>';
+        executionStatus.textContent = 'Ready';
+        executionTime.textContent = '';
+    }
+
+    function addToExecutionHistory(result, execTime) {
+        const historyItem = document.createElement('div');
+        historyItem.className = 'text-xs p-2 bg-gray-50 rounded';
+        historyItem.innerHTML = `
+            <div class="flex justify-between">
+                <span class="${result.success ? 'text-green-600' : 'text-red-600'}">${result.success ? '✓' : '✗'}</span>
+                <span class="text-gray-500">${execTime.toFixed(2)}s</span>
+            </div>
+            <div class="text-gray-600 mt-1">${result.kernel_type}</div>
+        `;
+
+        // Add to beginning of history
+        if (executionHistoryDiv.firstChild.textContent === 'No executions yet') {
+            executionHistoryDiv.innerHTML = '';
+        }
+        executionHistoryDiv.insertBefore(historyItem, executionHistoryDiv.firstChild);
+
+        // Keep only last 10 items
+        while (executionHistoryDiv.children.length > 10) {
+            executionHistoryDiv.removeChild(executionHistoryDiv.lastChild);
+        }
+    }
+
+    function handleKeyDown(event) {
+        // Ctrl+Enter to execute
+        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+            event.preventDefault();
+            executeCode();
+        }
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Initialize
+    clearOutput();
+});
+</script>
+
+<style>
+#code-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+</style>
+
+{% endblock %}

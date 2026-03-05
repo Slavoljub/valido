@@ -1,0 +1,81 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "ValidoAI Services Overview",
+    "tags": ["validoai", "monitoring"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Docker Containers Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "count(container_cpu_usage_seconds_total)",
+            "legendFormat": "Running Containers"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "green", "value": 1}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "CPU Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{name=~\".*ai_valido.*\"}[5m]) * 100",
+            "legendFormat": "{{name}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes{name=~\".*ai_valido.*\"} / 1024 / 1024",
+            "legendFormat": "{{name}} (MB)"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Network I/O",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(container_network_receive_bytes_total{name=~\".*ai_valido.*\"}[5m]) / 1024",
+            "legendFormat": "{{name}} Receive (KB/s)"
+          },
+          {
+            "expr": "rate(container_network_transmit_bytes_total{name=~\".*ai_valido.*\"}[5m]) / 1024",
+            "legendFormat": "{{name}} Transmit (KB/s)"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}

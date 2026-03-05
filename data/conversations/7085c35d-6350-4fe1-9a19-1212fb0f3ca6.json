@@ -1,0 +1,25 @@
+{
+  "id": "7085c35d-6350-4fe1-9a19-1212fb0f3ca6",
+  "title": "Conversation 7085c35d",
+  "messages": [
+    {
+      "id": "070f1c5c-9993-4f79-813c-c0200d823310",
+      "role": "user",
+      "content": "Hello! How can you help me today?",
+      "timestamp": "2025-08-31T21:56:50.359195",
+      "model": "Llama 2 13B"
+    },
+    {
+      "id": "3e576353-c433-4371-a425-348a6c7bca9b",
+      "role": "assistant",
+      "content": "Error generating response: Model Llama 2 13B not found",
+      "timestamp": "2025-08-31T21:56:50.359625",
+      "model": "Llama 2 13B"
+    }
+  ],
+  "system_message": "You are a helpful AI assistant. Provide clear, accurate, and helpful responses.",
+  "created_at": "2025-08-31T21:56:50.359173",
+  "last_updated": "2025-08-31T21:56:50.359634",
+  "message_count": 2,
+  "model": null
+}

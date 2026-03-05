@@ -1,0 +1,223 @@
+<!-- Database Explorer Component -->
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+            <i class="fas fa-database text-blue-600 dark:text-blue-400"></i>
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Database Explorer</h3>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <!-- App Database -->
+        <div class="database-card bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-4 border-2 border-blue-200 dark:border-blue-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-200 cursor-pointer"
+             onclick="selectDatabase('app')">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-blue-500 rounded-lg">
+                        <i class="fas fa-server text-white"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900 dark:text-white">Application DB</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">data/sqlite/app.db</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-lg font-bold text-blue-600 dark:text-blue-400" id="app-table-count">-</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">tables</div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500 dark:text-gray-400" id="app-status">Loading...</span>
+                <button class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-full transition-colors duration-200">
+                    Connect
+                </button>
+            </div>
+        </div>
+
+        <!-- Sample Database -->
+        <div class="database-card bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg p-4 border-2 border-green-200 dark:border-green-700 hover:border-green-300 dark:hover:border-green-600 transition-all duration-200 cursor-pointer"
+             onclick="selectDatabase('sample')">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-green-500 rounded-lg">
+                        <i class="fas fa-flask text-white"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-900 dark:text-white">Sample DB</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">data/sqlite/sample.db</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-lg font-bold text-green-600 dark:text-green-400" id="sample-table-count">-</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">tables</div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500 dark:text-gray-400" id="sample-status">Loading...</span>
+                <button class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs font-medium rounded-full transition-colors duration-200">
+                    Connect
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selected Database Tables -->
+    <div id="databaseTables" class="hidden">
+        <div class="flex items-center justify-between mb-4">
+            <h4 class="text-md font-semibold text-gray-900 dark:text-white" id="selectedDbTitle">Database Tables</h4>
+            <div class="flex gap-2">
+                <button onclick="refreshTables()" class="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white text-xs font-medium rounded transition-colors duration-200">
+                    <i class="fas fa-refresh mr-1"></i>Refresh
+                </button>
+                <button onclick="closeDatabaseExplorer()" class="px-3 py-1 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 text-xs font-medium rounded transition-colors duration-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="tablesList" class="space-y-2 max-h-96 overflow-y-auto">
+            <!-- Tables will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<script>
+// Database Explorer Functions
+let selectedDatabase = null;
+
+function loadDatabaseInfo() {
+    // Load app database info
+    fetch('/api/database/info')
+        .then(response => response.json())
+        .then(data => {
+            if (data.app) {
+                document.getElementById('app-table-count').textContent = data.app.tables;
+                document.getElementById('app-status').textContent = data.app.status;
+                document.getElementById('app-status').className = data.app.status === 'connected' ?
+                    'text-xs text-green-600 dark:text-green-400' : 'text-xs text-red-600 dark:text-red-400';
+            }
+            if (data.sample) {
+                document.getElementById('sample-table-count').textContent = data.sample.tables;
+                document.getElementById('sample-status').textContent = data.sample.status;
+                document.getElementById('sample-status').className = data.sample.status === 'connected' ?
+                    'text-xs text-green-600 dark:text-green-400' : 'text-xs text-red-600 dark:text-red-400';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading database info:', error);
+            document.getElementById('app-status').textContent = 'Error';
+            document.getElementById('sample-status').textContent = 'Error';
+        });
+}
+
+function selectDatabase(dbName) {
+    selectedDatabase = dbName;
+    document.getElementById('selectedDbTitle').textContent = `${dbName.toUpperCase()} Database Tables`;
+    document.getElementById('databaseTables').classList.remove('hidden');
+    loadTables(dbName);
+}
+
+function loadTables(dbName) {
+    const tablesList = document.getElementById('tablesList');
+    tablesList.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Loading tables...</div>';
+
+    fetch(`/api/database/${dbName}/tables`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.tables && data.tables.length > 0) {
+                tablesList.innerHTML = data.tables.map(table => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded">
+                                <i class="fas fa-table text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900 dark:text-white">${table.name}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">${table.records} records</div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="viewTable('${dbName}', '${table.name}')"
+                                    class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded transition-colors duration-200">
+                                <i class="fas fa-eye mr-1"></i>View
+                            </button>
+                            <button onclick="exportTable('${dbName}', '${table.name}')"
+                                    class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs font-medium rounded transition-colors duration-200">
+                                <i class="fas fa-download mr-1"></i>Export
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                tablesList.innerHTML = '<div class="text-center py-4 text-gray-500 dark:text-gray-400">No tables found</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading tables:', error);
+            tablesList.innerHTML = '<div class="text-center py-4 text-red-600 dark:text-red-400">Error loading tables</div>';
+        });
+}
+
+function viewTable(dbName, tableName) {
+    // Open table viewer modal or redirect to table view
+    window.open(`/database/${dbName}/table/${tableName}`, '_blank');
+}
+
+function exportTable(dbName, tableName) {
+    // Create export options
+    const exportOptions = ['json', 'csv', 'excel', 'xml'];
+    const format = prompt(`Choose export format for ${tableName}:\n${exportOptions.join(', ')}`, 'json');
+
+    if (format && exportOptions.includes(format)) {
+        fetch(`/api/database/export/${dbName}/${tableName}?format=${format}`)
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    throw new Error('Export failed');
+                }
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `${tableName}_${new Date().toISOString().split('T')[0]}.${format}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                // Show success message
+                if (window.showToast) {
+                    showToast('success', `Table ${tableName} exported successfully as ${format.toUpperCase()}`);
+                }
+            })
+            .catch(error => {
+                console.error('Export error:', error);
+                if (window.showToast) {
+                    showToast('error', 'Export failed');
+                }
+            });
+    }
+}
+
+function refreshTables() {
+    if (selectedDatabase) {
+        loadTables(selectedDatabase);
+    }
+}
+
+function closeDatabaseExplorer() {
+    document.getElementById('databaseTables').classList.add('hidden');
+    selectedDatabase = null;
+}
+
+// Initialize database info on load
+document.addEventListener('DOMContentLoaded', function() {
+    loadDatabaseInfo();
+});
+
+// Auto-refresh database info every 30 seconds
+setInterval(loadDatabaseInfo, 30000);
+</script>

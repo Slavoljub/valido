@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ValidoAI - AI Sveska</title>
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/vendors/font_awesome/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background-color: #0056b3;
+        }
+        .navbar-brand, .nav-link {
+            color: white !important;
+        }
+        .page-header {
+            text-align: center;
+            padding: 30px 0;
+        }
+        .white-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .card-title {
+            font-weight: 600;
+            font-size: 1.6rem;
+        }
+        .white-box::-webkit-scrollbar {
+          width: 6px;
+      }
+
+      .white-box::-webkit-scrollbar-thumb {
+          background-color: #ccc;
+          border-radius: 4px;
+      }
+
+      .white-box::-webkit-scrollbar-track {
+          background: transparent;
+      }
+      .white-box {
+          background-color: #fff;
+          border-radius: 0.5rem;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+          padding: 1.5rem;
+      }
+
+      .card-body::-webkit-scrollbar {
+          width: 6px;
+      }
+
+      .card-body::-webkit-scrollbar-thumb {
+          background-color: #C738D8;
+          border-radius: 10px;
+      }
+
+      .card-body::-webkit-scrollbar-track {
+          background: #f1f1f1;
+      }
+
+       .white-box::-webkit-scrollbar-track {
+          background: transparent;
+      }
+      .white-box {
+          background-color: #fff;
+          border-radius: 0.5rem;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+          padding: 1.5rem;
+      }
+
+      .card-body::-webkit-scrollbar {
+          width: 6px;
+      }
+
+      .card-body::-webkit-scrollbar-thumb {
+          background-color: #C738D8;
+          border-radius: 10px;
+      }
+
+      .card-body::-webkit-scrollbar-track {
+          background: #f1f1f1;
+      }
+
+
+  </style>
+</head>
+<body>
+     <!-- Navbar -->
+   <nav class="navbar navbar-expand-lg bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="{{ url_for('static', filename='img/valido.svg') }}" alt="ValidoAI Logo" height="30">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link text-white" href="/">Početna</a></li>
+                    <li class="nav-item"><a class="nav-link active text-white" href="/funkcionalnosti">Funkcionalnosti</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="#" data-bs-toggle="modal" data-bs-target="#prijavaModal">
+                            Prijavi me
+                        </a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link text-white" href="/kontakt">Kontakt</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="page-header text-center">
+            <h1>📘 AI Sveska</h1>
+            <p class="lead">Sveobuhvatan uvid u novčane tokove firme — od isplata zarada do plaćanja dobavljača.</p>
+            <p class="text-muted" style="max-width: 700px; margin: 0 auto;">
+                AI Sveska omogućava pregled stvarnog odliva sredstava kroz vreme, sa fokusom na ključne pravce potrošnje. 
+                Na osnovu dostupnih finansijskih podataka, sistem analizira dinamiku isplata i poredi ih po kategorijama. 
+                Vizuelni prikaz troškova pruža firmama osnovu za donošenje boljih odluka u vezi likvidnosti, planiranja i optimizacije operativnih rashoda.
+            </p>
+        </div>
+
+        <!-- LOADING prikaz -->
+        <div id="loadingSection" class="text-center my-4 d-none">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Učitavanje...</span>
+            </div>
+            <p class="mt-2 text-muted">Podaci se učitavaju, molimo sačekajte...</p>
+        </div>
+
+        <!-- LEVA I DESNA KOLONA -->
+        <div class="row align-items-start g-4 d-none" id="sadrzajSveske">
+            <!-- LEVA KOLONA -->
+            <div class="col-md-6">
+                <div class="white-box" style="min-height: 100%;">
+                    <div class="row text-center mb-4">
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Odlivi ka dobavljačima</h6>
+                            <p id="ukupnoDug" class="fw-bold">--</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Bruto 2 (zaposleni)</h6>
+                            <p id="ukupnoBruto" class="fw-bold">--</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Ukupan odliv</h6>
+                            <p id="ukupnoTrosak" class="fw-bold">--</p>
+                        </div>
+                    </div>
+
+                    <div class="row text-center mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-secondary">% odliva ka dobavljačima</h6>
+                            <p id="procenatDob" class="fw-semibold text-dark">--</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-secondary">% odliva ka zaposlenima</h6>
+                            <p id="procenatPlata" class="fw-semibold text-dark">--</p>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4" style="max-width: 100%; overflow: hidden;">
+                      <div class="card-body p-4" style="max-height: 250px; overflow-y: auto;">
+                        <h4 class="card-title text-center text-dark mb-4">
+                          Finansijski Uvid
+                      </h4>
+                      <p id="gptText" class="card-text" style="white-space: pre-wrap; line-height: 1.7; margin-bottom: 0;"></p>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- DESNA KOLONA -->
+      <div class="col-md-6">
+        <div class="white-box" style="min-height: 100%; max-height: 600px; overflow-y: auto; scrollbar-width: thin;">
+            <div class="card-body">
+                <h5 class="card-title text-center text-dark mb-3">Trend Tokova</h5>
+
+                <div style="width: 100%; max-width: 100%; height: 300px;">
+                    <canvas id="trendChart"></canvas>
+                </div>
+
+                <p id="trendFallback" class="text-muted small text-center mt-3">Trenutno nema dostupnih podataka za prikaz grafikona.</p>
+
+                <!-- Odabir kategorije odliva -->
+                <div class="form-group mb-4 text-center">
+                    <label class="mb-2 fw-bold">Odaberi kategoriju odliva:</label>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center flex-wrap">
+                        <button class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2 px-4 py-2 shadow-sm"
+                        onclick="ucitajBilansAnalizu()">
+                        <i class="bi bi-pie-chart-fill"></i>
+                        Imovina i obaveze – bilans stanja
+                    </button>    
+                    <button class="btn btn-danger" onclick="ucitajRTGFirmu()">❤️ EKG firme</button>
+                    <button class="btn btn-primary btn-sm px-4 py-2" onclick="ucitajSlozenuAnalizu()">Prihodi i rashodi</button>
+                    <button class="btn btn-primary btn-sm px-4 py-2" onclick="ucitajTopFakture()">Top 10 Dobavljača</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Modal za analizu TOP faktura -->
+<div id="modalTopFakture" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-fullscreen" role="document">
+    <div class="modal-content">
+
+      <div class="modal-header border-0">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+    </div>
+
+    <div class="modal-body">
+
+        <!-- 📌 Naslov i opis -->
+        <div class="text-center mb-4">
+          <h1 class="fs-3 fw-bold text-primary">Top 10 faktura</h1>
+          <p class="text-muted mt-2 mb-0">
+            Bitno je znati koji su najveći odlivi – analiziramo najveće fakture dobavljača.
+        </p>
+    </div>
+
+    <!-- Loader -->
+    <div id="loadingSection" class="text-center my-4">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Učitavanje...</span>
+    </div>
+    <p class="mt-2 text-muted">Podaci se učitavaju, molimo sačekajte...</p>
+</div>
+
+<!-- GPT komentar -->
+<div id="gptKomentar" class="mt-4" style="display: none;"></div>
+
+<!-- Lista TOP faktura -->
+<div id="topFaktureLista" class="mt-4" style="display: none;"></div>
+
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Modal za RTG Firme -->
+<div id="modalRTGFirma" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-fullscreen" role="document">
+    <div class="modal-content shadow-lg">
+
+      <div class="text-center mt-5">
+          <h1 class="fs-3 fw-bold text-primary mb-3">
+            📊 Finansijsko zdravlje firme
+        </h1>
+        <p class="text-muted fs-6 mb-2" style="max-width: 700px; margin: 0 auto;">
+            Na osnovu finansijskih pokazatelja i AI analize, prikazujemo trenutnu likvidnost i stabilnost vaše firme.
+        </p>
+        <div id="rtgStatusOcena" class="fs-5 mt-3"></div>
+    </div>
+
+    <div class="modal-body px-5 py-4">
+        <!-- Loading sekcija -->
+        <div id="loadingSection" class="text-center my-4">
+          <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Učitavanje...</span>
+        </div>
+        <p class="mt-2 text-muted">Podaci se učitavaju, molimo sačekajte...</p>
+    </div>
+
+    <!-- Glavni sadržaj -->
+    <div id="rtgSadrzaj" class="d-none">
+      <!-- AI komentar -->
+      <div id="gptKomentar" class="mb-5">
+        <h5 class="fw-bold text-secondary">AI analiza:</h5>
+        <p id="aiText" class="fs-6 lh-lg"></p>
+    </div>
+
+    <!-- Finansijski pokazatelji -->
+    <div id="rtgPodaci">
+        <h5 class="fw-bold text-secondary">Ključni finansijski pokazatelji:</h5>
+        <ul id="rtgListaPodataka" class="list-group list-group-flush mt-3">
+          <!-- Ovde JS ubacuje listu -->
+      </ul>
+  </div>
+</div>
+</div>
+</div> <!-- .modal-body -->
+
+</div> <!-- .modal-content -->
+</div>
+
+<!-- Modal za Bilans Stanja -->
+<div id="modalBilansStanja" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-content shadow-lg rounded-4">
+
+      <!-- Naslov i opis -->
+      <div class="text-center mt-4">
+        <h1 class="fs-3 fw-bold text-primary mb-2">📊 Bilans stanja firme</h1>
+        <p class="text-muted fs-6" style="max-width: 700px; margin: 0 auto;">
+          Vizuelni prikaz strukture imovine i obaveza, zajedno sa AI analizom finansijskog zdravlja.
+      </p>
+  </div>
+
+  <div class="modal-body px-4 py-4">
+    <!-- Loading sekcija -->
+    <div id="bilansLoading" class="text-center my-4">
+      <div class="spinner-border text-primary" role="status" style="width: 2.5rem; height: 2.5rem;">
+        <span class="visually-hidden">Učitavanje...</span>
+    </div>
+    <p class="mt-2 text-muted">Analiziramo bilans, molimo sačekajte...</p>
+</div>
+
+<!-- Sadržaj nakon učitavanja -->
+<div id="bilansSadrzaj" class="d-none">
+  <div class="row">
+    <!-- Leva kolona: GPT komentar -->
+    <div class="col-md-6">
+      <div class="bg-light rounded-3 p-4 shadow-sm h-100">
+        <h5 class="fw-bold text-secondary mb-3">AI analiza</h5>
+        <p id="bilansAiKomentar" class="fs-6 lh-lg" style="white-space: pre-wrap;"></p>
+    </div>
+</div>
+
+<!-- Desna kolona: Pie Chart -->
+<div class="col-md-6">
+  <div class="bg-white border rounded-3 p-3 shadow-sm">
+    <h5 class="fw-bold text-secondary mb-3 text-center">📊 Struktura bilansa</h5>
+    <canvas id="bilansChart" style="min-height: 300px;"></canvas>
+</div>
+</div>
+</div>
+</div>
+
+</div> <!-- /.modal-body -->
+</div>
+</div>
+</div>
+</body>
+</html>
+<script src="../static/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const dug = document.getElementById("ukupnoDug");
+        const bruto = document.getElementById("ukupnoBruto");
+        const trosak = document.getElementById("ukupnoTrosak");
+        const procDob = document.getElementById("procenatDob");
+        const procPlata = document.getElementById("procenatPlata");
+        const aiText = document.getElementById("gptText");
+        const loading = document.getElementById("loadingSection");
+        const sadrzaj = document.getElementById("sadrzajSveske");
+        const trendFallback = document.getElementById("trendFallback");
+
+        function typeWriterWithParagraphs(text, element, delay = 25) {
+            element.textContent = "";
+            let i = 0;
+            const interval = setInterval(() => {
+                element.textContent += text[i++];
+                if (i >= text.length) clearInterval(interval);
+            }, delay);
+        }
+
+        loading.classList.remove("d-none");
+        sadrzaj.classList.add("d-none");
+
+        fetch("/api/ai-sveska")
+        .then(res => res.json())
+        .then(data => {
+                console.log("📊 Podaci iz API-ja:", data); // ✅ Debug ispis
+
+                loading.classList.add("d-none");
+                sadrzaj.classList.remove("d-none");
+
+                window.dispatchEvent(new Event('resize'));
+
+                dug.innerText = `${data.ukupno_duguje.toLocaleString("sr-RS")} RSD`;
+                bruto.innerText = `${data.ukupno_bruto2.toLocaleString("sr-RS")} RSD`;
+                trosak.innerText = `${data.ukupno_trosak.toLocaleString("sr-RS")} RSD`;
+                procDob.innerText = `${data.procenat_dobavljaci} %`;
+                procPlata.innerText = `${data.procenat_plate} %`;
+
+                const gptOutput = data.gpt_tekst || "Nema AI analize.";
+                typeWriterWithParagraphs(gptOutput, aiText);
+
+                // 🎯 Trend bruto 2 grafikon
+                const trend = data.trend_bruto2;
+                if (trend && Array.isArray(trend) && trend.length > 0) {
+                    trendFallback.style.display = "none";
+                    const labels = trend.map(item => item["Mesec"]);
+                    const values = trend.map(item => item["Bruto 2"]);
+
+                    new Chart(document.getElementById("trendChart"), {
+                        type: "line",
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: "Bruto 2 po mesecima",
+                                data: values,
+                                fill: false,
+                                borderColor: "#4e73df",
+                                tension: 0.3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: true },
+                                tooltip: { mode: 'index', intersect: false }
+                            },
+                            scales: {
+                                x: { title: { display: true, text: "Mesec" }},
+                                y: { title: { display: true, text: "Bruto 2 (RSD)" }}
+                            }
+                        }
+                    });
+                }
+            })
+        .catch(err => {
+            loading.classList.add("d-none");
+            sadrzaj.classList.add("d-none");
+            aiText.innerText = "Greška u komunikaciji sa serverom.";
+            console.error(err);
+        });  
+    });
+
+
+    function typeWriterWithParagraphs(text, element, delay = 40) {
+        element.textContent = "";
+        let i = 0;
+        const interval = setInterval(() => {
+            element.textContent += text[i++];
+            if (i >= text.length) clearInterval(interval);
+        }, delay);
+    }
+
+    function ucitajTopFakture() {
+        const modalEl = document.getElementById('modalTopFakture');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+
+        const loading = modalEl.querySelector('#loadingSection');
+        const komentarDiv = modalEl.querySelector('#gptKomentar');
+        const faktureDiv = modalEl.querySelector('#topFaktureLista');
+
+        loading.style.display = 'block';
+        komentarDiv.style.display = 'none';
+        faktureDiv.style.display = 'none';
+        komentarDiv.innerHTML = "";
+        faktureDiv.innerHTML = "";
+
+        fetch("/api/dublja-analiza", { method: "POST" })
+        .then(res => res.json())
+        .then(data => {
+            loading.style.display = 'none';
+
+            // GPT komentar sa typing efektom
+            komentarDiv.innerHTML = `
+            <h5 class="fw-bold">AI analiza:</h5>
+            <p id="topFakturaText" class="mt-2"></p>`;
+            const textEl = komentarDiv.querySelector("#topFakturaText");
+            typeWriterWithParagraphs(data.komentar, textEl);
+            komentarDiv.style.display = 'block';
+
+            // Fakture
+            let faktureHTML = "<h5 class='fw-bold mt-4'>Top 10 faktura:</h5><ul class='list-group'>";
+            data.fakture.forEach(f => {
+                faktureHTML += `
+                <li class='list-group-item'>
+                <strong>${f.dobavljac}</strong><br>
+                Datum: ${new Date(f.datum).toLocaleDateString()}<br>
+                Iznos: <strong>${f.iznos_sa_pdv.toLocaleString("sr-RS")} RSD</strong>
+                </li>`;
+            });
+            faktureHTML += "</ul>";
+            faktureDiv.innerHTML = faktureHTML;
+            faktureDiv.style.display = 'block';
+        })
+        .catch(err => {
+            loading.style.display = 'none';
+            komentarDiv.innerHTML = `<p class='text-danger'>Greška pri učitavanju: ${err}</p>`;
+            komentarDiv.style.display = 'block';
+        });
+    }
+
+
+
+    function ucitajRTGFirmu() {
+    const modalEl = document.getElementById('modalRTGFirma');
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+
+    const komentarDiv = modalEl.querySelector('#gptKomentar');
+    const aiText = modalEl.querySelector('#aiText');
+    const rtgList = modalEl.querySelector('#rtgListaPodataka');
+    const statusDiv = modalEl.querySelector('#rtgStatusOcena');
+    const loading = modalEl.querySelector('#loadingSection');
+    const sadrzaj = modalEl.querySelector('#rtgSadrzaj');
+
+    // Reset prikaza
+    loading.style.display = 'block';
+    sadrzaj.classList.add('d-none');
+    komentarDiv.style.display = 'none';
+    rtgList.innerHTML = '';
+    statusDiv.innerHTML = '';
+    aiText.innerHTML = '';
+
+    fetch("/api/rtg-firma")
+        .then(res => res.json())
+        .then(data => {
+            const vrednosti = data.data || {};
+            const komentar = data.komentar || "Nema AI komentara.";
+
+            loading.style.display = 'none';
+            sadrzaj.classList.remove('d-none');
+            komentarDiv.style.display = 'block';
+
+            // Vizuelna ocena
+            const racuni = vrednosti["računi"] || 0;
+            const potraživanja = vrednosti["potraživanja"] || 0;
+            const obaveze = Math.abs(vrednosti["obaveze"] || 0);
+            const likvidno = racuni + potraživanja;
+
+            let statusHTML = "";
+            if (likvidno && obaveze) {
+                if (likvidno >= obaveze * 1.2) {
+                    statusHTML = `<span class="badge bg-success fs-6">🟢 Stabilno</span>`;
+                } else if (likvidno >= obaveze * 0.8) {
+                    statusHTML = `<span class="badge bg-warning text-dark fs-6">🟡 Upozorenje</span>`;
+                } else {
+                    statusHTML = `<span class="badge bg-danger fs-6">🔴 Kritično</span>`;
+                }
+            }
+            statusDiv.innerHTML = statusHTML;
+
+            // GPT komentar
+            typeWriterWithParagraphs(komentar, aiText);
+
+            // Grupisani prikaz pokazatelja
+            const redosled = [
+                { grupa: "🧱 Imovina", stavke: ["osnovna_sredstva", "zalihe", "potraživanja", "računi"] },
+                { grupa: "🏦 Izvori finansiranja", stavke: ["kapital", "obaveze"] },
+                { grupa: "📊 Finansijski pokazatelji", stavke: ["likvidnost", "likvidnost_badge", "likvidnost_status"] }
+            ];
+
+            rtgList.innerHTML = "";
+
+            redosled.forEach(grupa => {
+                const naslov = document.createElement("li");
+                naslov.className = "list-group-item fw-bold text-primary";
+                naslov.textContent = grupa.grupa;
+                rtgList.appendChild(naslov);
+
+                grupa.stavke.forEach(stavka => {
+                    const vrednost = vrednosti[stavka];
+                    if (vrednost !== undefined && vrednost !== null) {
+                        const li = document.createElement("li");
+                        li.className = "list-group-item d-flex justify-content-between align-items-center";
+
+                        const prikaz = typeof vrednost === "number"
+                            ? `${Number(vrednost).toLocaleString("sr-RS")} RSD`
+                            : vrednost;
+
+                        li.innerHTML = `
+                            ${stavka.replace(/_/g, " ").replace(/^\w/, c => c.toUpperCase())}
+                            <span><strong>${prikaz}</strong></span>
+                        `;
+                        rtgList.appendChild(li);
+                    }
+                });
+            });
+        })
+        .catch(err => {
+            loading.style.display = 'none';
+            komentarDiv.style.display = 'block';
+            aiText.innerHTML = `<p class="text-danger">Greška: ${err}</p>`;
+        });
+}
+
+
+    window.ucitajBilansAnalizu = function () {
+        const modalEl = document.getElementById('modalBilansStanja');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+
+        const loading = modalEl.querySelector('#bilansLoading');
+        const sadrzaj = modalEl.querySelector('#bilansSadrzaj');
+        const komentarDiv = modalEl.querySelector('#bilansAiKomentar');
+        const canvas = document.getElementById('bilansChart');
+
+    // Reset
+        loading.style.display = 'block';
+        loading.querySelector('.spinner-border').classList.add("text-danger");
+        sadrzaj.classList.add('d-none');
+        komentarDiv.innerHTML = '';
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        fetch("/api/bilans")
+        .then(res => res.json())
+        .then(data => {
+            loading.style.display = 'none';
+            sadrzaj.classList.remove('d-none');
+
+            // Komentar
+            const komentar = data.komentar || "GPT komentar nije dostupan.";
+            typeWriterWithParagraphs(komentar, komentarDiv);
+
+            // Chart
+            const kategorije = data.chart_data.map(item => item.Kategorija);
+            const vrednosti = data.chart_data.map(item => item.RSD);
+
+            new Chart(canvas, {
+                type: 'pie',
+                data: {
+                    labels: kategorije,
+                    datasets: [{
+                        data: vrednosti,
+                        backgroundColor: ['#6f42c1', '#0dcaf0', '#198754', '#dc3545', '#ffc107']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        })
+        .catch(err => {
+            loading.style.display = 'none';
+            komentarDiv.innerHTML = `<p class="text-danger">Greška: ${err}</p>`;
+        });
+    };
+
+
+
+</script>
+

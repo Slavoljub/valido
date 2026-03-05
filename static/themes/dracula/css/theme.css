@@ -1,0 +1,51 @@
+/* Dracula Theme - Main CSS */
+
+:root {
+    /* Primary Colors */
+    --primary-500: #bd93f9;
+    --primary-600: #bd93f9;
+    
+    /* Background Colors */
+    --bg-primary: #282a36;
+    --bg-secondary: #282a36;
+    --bg-surface: #282a36;
+    
+    /* Text Colors */
+    --text-primary: #f8f8f2;
+    --text-secondary: #f8f8f2;
+    
+    /* Typography */
+    --font-family-sans: 'Fira Code', system-ui, sans-serif;
+}
+
+[data-theme="dracula"] {
+    color-scheme: dark;
+}
+
+[data-theme="dracula"] body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-family-sans);
+}
+
+[data-theme="dracula"] .card {
+    background-color: var(--bg-surface);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+}
+
+[data-theme="dracula"] .btn-primary {
+    background-color: var(--primary-500);
+    color: white;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 150ms ease-out;
+}
+
+[data-theme="dracula"] .btn-primary:hover {
+    background-color: var(--primary-600);
+    transform: translateY(-1px);
+}

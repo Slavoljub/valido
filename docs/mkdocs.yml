@@ -1,0 +1,50 @@
+site_name: validoai documentation
+site_url: https://validoai.local
+repo_url: https://github.com/validoai/validoai
+nav:
+  - overview: index.md
+  - api:
+      - reference: api/API_REFERENCE.md
+      - database guide: api/DATABASE_API_GUIDE.md
+  - architecture:
+      - architecture & database: architecture/ARCHITECTURE_AND_DATABASE.md
+      - project status 2024: architecture/PROJECT_STATUS_2024.md
+  - guides:
+      - development guide: guides/DEVELOPMENT_GUIDE.md
+      - optimization guide: guides/OPTIMIZATION_GUIDE.md
+      - ai integration: guides/AI_GUIDE.md
+      - testing plan: guides/COMPREHENSIVE_TESTING_PLAN.md
+  - deployment:
+      - deployment guide: deployment/DEPLOYMENT_GUIDE.md
+      - consolidation summary: deployment/CONSOLIDATION_SUMMARY.md
+  - security:
+      - security guide: SECURITY_GUIDE.md
+  - tutorials:
+      - user guide: USER_GUIDE.md
+  - tests:
+      - test organisation plan: tests/test_organization_plan.md
+      - test reorganisation plan: tests/test_reorganization_plan.md
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle: 
+        icon: material/weather-night
+        name: switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: switch to light mode
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - toc:
+      permalink: true
+plugins:
+  - search

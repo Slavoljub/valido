@@ -1,0 +1,603 @@
+{% comment %}
+Admin Sidebar Component - Navigation for administration interface
+{% endcomment %}
+
+<!-- Admin Sidebar Component -->
+<div class="admin-sidebar" x-data="adminSidebar()">
+    <!-- Sidebar Header -->
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            <i class="fas fa-cogs text-2xl text-blue-600"></i>
+            <span class="sidebar-title">Admin Panel</span>
+        </div>
+        <button @click="toggleSidebar()" class="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="sidebar-nav">
+        <!-- Dashboard -->
+        <div class="nav-section">
+            <div class="nav-section-title">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="{{ url_for('dashboard.index') }}" class="nav-link" :class="{ 'active': currentPage === 'dashboard' }">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Overview</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('dashboard.analytics') }}" class="nav-link" :class="{ 'active': currentPage === 'analytics' }">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Analytics</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- System Management -->
+        <div class="nav-section">
+            <div class="nav-section-title">
+                <i class="fas fa-server"></i>
+                <span>System</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="{{ url_for('settings.index') }}" class="nav-link" :class="{ 'active': currentPage === 'settings' }">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('settings.database') }}" class="nav-link" :class="{ 'active': currentPage === 'database' }">
+                        <i class="fas fa-database"></i>
+                        <span>Database</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('settings.backup') }}" class="nav-link" :class="{ 'active': currentPage === 'backup' }">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Backup</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('settings.logs') }}" class="nav-link" :class="{ 'active': currentPage === 'logs' }">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Logs</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- AI Models -->
+        <div class="nav-section">
+            <div class="nav-section-title">
+                <i class="fas fa-robot"></i>
+                <span>AI Models</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="{{ url_for('settings.ai_models') }}" class="nav-link" :class="{ 'active': currentPage === 'ai_models' }">
+                        <i class="fas fa-brain"></i>
+                        <span>Model Manager</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('settings.model_config') }}" class="nav-link" :class="{ 'active': currentPage === 'model_config' }">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>Configuration</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('settings.model_training') }}" class="nav-link" :class="{ 'active': currentPage === 'model_training' }">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Training</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Content Management -->
+        <div class="nav-section">
+            <div class="nav-section-title">
+                <i class="fas fa-edit"></i>
+                <span>Content</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="{{ url_for('companies.index') }}" class="nav-link" :class="{ 'active': currentPage === 'companies' }">
+                        <i class="fas fa-building"></i>
+                        <span>Companies</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('users.index') }}" class="nav-link" :class="{ 'active': currentPage === 'users' }">
+                        <i class="fas fa-users"></i>
+                        <span>Users</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('products.index') }}" class="nav-link" :class="{ 'active': currentPage === 'products' }">
+                        <i class="fas fa-box"></i>
+                        <span>Products</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('ticketing.index') }}" class="nav-link" :class="{ 'active': currentPage === 'ticketing' }">
+                        <i class="fas fa-ticket-alt"></i>
+                        <span>Support</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Financial -->
+        <div class="nav-section">
+            <div class="nav-section-title">
+                <i class="fas fa-dollar-sign"></i>
+                <span>Financial</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="{{ url_for('financial.dashboard') }}" class="nav-link" :class="{ 'active': currentPage === 'financial' }">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('financial.reports') }}" class="nav-link" :class="{ 'active': currentPage === 'reports' }">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('financial.banking') }}" class="nav-link" :class="{ 'active': currentPage === 'banking' }">
+                        <i class="fas fa-university"></i>
+                        <span>Banking</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Security -->
+        <div class="nav-section">
+            <div class="nav-section-title">
+                <i class="fas fa-shield-alt"></i>
+                <span>Security</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="{{ url_for('settings.security') }}" class="nav-link" :class="{ 'active': currentPage === 'security' }">
+                        <i class="fas fa-lock"></i>
+                        <span>Security</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('settings.api_keys') }}" class="nav-link" :class="{ 'active': currentPage === 'api_keys' }">
+                        <i class="fas fa-key"></i>
+                        <span>API Keys</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('settings.webhooks') }}" class="nav-link" :class="{ 'active': currentPage === 'webhooks' }">
+                        <i class="fas fa-webhook"></i>
+                        <span>Webhooks</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Tools -->
+        <div class="nav-section">
+            <div class="nav-section-title">
+                <i class="fas fa-tools"></i>
+                <span>Tools</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="{{ url_for('test_suite.index') }}" class="nav-link" :class="{ 'active': currentPage === 'test_suite' }">
+                        <i class="fas fa-vial"></i>
+                        <span>Test Suite</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('file_manager.index') }}" class="nav-link" :class="{ 'active': currentPage === 'file_manager' }">
+                        <i class="fas fa-folder"></i>
+                        <span>File Manager</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('recycle_bin.index') }}" class="nav-link" :class="{ 'active': currentPage === 'recycle_bin' }">
+                        <i class="fas fa-trash-restore"></i>
+                        <span>Recycle Bin</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+        <div class="sidebar-user">
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="user-info">
+                <div class="user-name">Admin User</div>
+                <div class="user-role">Administrator</div>
+            </div>
+        </div>
+        <div class="sidebar-actions">
+            <button @click="logout()" class="sidebar-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div
+        x-show="isOpen && isMobile"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="mobile-overlay"
+        @click="closeSidebar()"
+    ></div>
+</div>
+
+<!-- Admin Sidebar Alpine.js Component -->
+<script>
+function adminSidebar() {
+    return {
+        isOpen: false,
+        isMobile: false,
+        currentPage: '{{ current_page or "dashboard" }}',
+
+        init() {
+            this.checkScreenSize();
+            window.addEventListener('resize', () => this.checkScreenSize());
+        },
+
+        checkScreenSize() {
+            this.isMobile = window.innerWidth < 1024;
+            if (!this.isMobile) {
+                this.isOpen = true; // Always open on desktop
+            } else {
+                this.isOpen = false; // Closed by default on mobile
+            }
+        },
+
+        toggleSidebar() {
+            this.isOpen = !this.isOpen;
+        },
+
+        closeSidebar() {
+            if (this.isMobile) {
+                this.isOpen = false;
+            }
+        },
+
+        logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '{{ url_for("auth.logout") }}';
+            }
+        }
+    }
+}
+</script>
+
+<!-- Admin Sidebar Styles -->
+<style>
+/* Admin Sidebar Base */
+.admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    background-color: var(--valido-bg-primary, #ffffff);
+    border-right: 1px solid var(--valido-border, #e5e7eb);
+    box-shadow: var(--valido-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+    z-index: 40;
+    transform: translateX(0);
+    transition: transform 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-sidebar:not(.open) {
+    transform: translateX(-100%);
+}
+
+/* Sidebar Header */
+.sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--valido-border, #e5e7eb);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--valido-bg-secondary, #f8fafc);
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.sidebar-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--valido-text-primary, #1e293b);
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    color: var(--valido-text-secondary, #64748b);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+    background-color: var(--valido-bg-tertiary, #f1f5f9);
+    color: var(--valido-text-primary, #1e293b);
+}
+
+/* Navigation */
+.sidebar-nav {
+    flex: 1;
+    padding: 1rem 0;
+    overflow-y: auto;
+}
+
+.nav-section {
+    margin-bottom: 1.5rem;
+}
+
+.nav-section-title {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--valido-text-secondary, #64748b);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-item {
+    margin-bottom: 0.25rem;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    color: var(--valido-text-secondary, #64748b);
+    text-decoration: none;
+    border-radius: 0;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.nav-link:hover {
+    background-color: var(--valido-bg-secondary, #f8fafc);
+    color: var(--valido-text-primary, #1e293b);
+}
+
+.nav-link.active {
+    background-color: var(--valido-primary, #3b82f6);
+    color: white;
+}
+
+.nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: var(--valido-primary-dark, #1e40af);
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--valido-border, #e5e7eb);
+    background-color: var(--valido-bg-secondary, #f8fafc);
+}
+
+.sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.user-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background-color: var(--valido-primary, #3b82f6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.user-info {
+    flex: 1;
+}
+
+.user-name {
+    font-weight: 600;
+    color: var(--valido-text-primary, #1e293b);
+    font-size: 0.875rem;
+}
+
+.user-role {
+    font-size: 0.75rem;
+    color: var(--valido-text-secondary, #64748b);
+}
+
+.sidebar-actions .sidebar-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background-color: var(--valido-danger, #ef4444);
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.sidebar-actions .sidebar-btn:hover {
+    background-color: var(--valido-danger-dark, #dc2626);
+}
+
+/* Mobile Overlay */
+.mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 30;
+}
+
+/* Mobile Responsive */
+@media (max-width: 1023px) {
+    .admin-sidebar {
+        z-index: 50;
+    }
+
+    .admin-sidebar:not(.open) {
+        transform: translateX(-100%);
+    }
+}
+
+/* Dark Theme Support */
+.theme-valido-dark .admin-sidebar {
+    background-color: var(--valido-bg-secondary, #1e293b);
+    border-color: var(--valido-border, #475569);
+}
+
+.theme-valido-dark .sidebar-header {
+    background-color: var(--valido-bg-tertiary, #334155);
+    border-color: var(--valido-border, #475569);
+}
+
+.theme-valido-dark .sidebar-title {
+    color: var(--valido-text-primary, #f8fafc);
+}
+
+.theme-valido-dark .sidebar-toggle {
+    color: var(--valido-text-secondary, #cbd5e1);
+}
+
+.theme-valido-dark .sidebar-toggle:hover {
+    background-color: var(--valido-bg-tertiary, #334155);
+    color: var(--valido-text-primary, #f8fafc);
+}
+
+.theme-valido-dark .nav-section-title {
+    color: var(--valido-text-secondary, #cbd5e1);
+}
+
+.theme-valido-dark .nav-link {
+    color: var(--valido-text-secondary, #cbd5e1);
+}
+
+.theme-valido-dark .nav-link:hover {
+    background-color: var(--valido-bg-tertiary, #334155);
+    color: var(--valido-text-primary, #f8fafc);
+}
+
+.theme-valido-dark .sidebar-footer {
+    background-color: var(--valido-bg-tertiary, #334155);
+    border-color: var(--valido-border, #475569);
+}
+
+.theme-valido-dark .user-name {
+    color: var(--valido-text-primary, #f8fafc);
+}
+
+.theme-valido-dark .user-role {
+    color: var(--valido-text-secondary, #cbd5e1);
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+    .admin-sidebar {
+        border-width: 2px;
+    }
+
+    .sidebar-header {
+        border-width: 2px;
+    }
+
+    .nav-link {
+        border: 1px solid transparent;
+    }
+
+    .nav-link:focus {
+        border-color: var(--valido-primary, #0000ff);
+    }
+
+    .sidebar-toggle {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .admin-sidebar {
+        transition: none;
+    }
+
+    .nav-link,
+    .sidebar-toggle,
+    .sidebar-btn {
+        transition: none;
+    }
+
+    .mobile-overlay {
+        transition: none;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .admin-sidebar {
+        display: none !important;
+    }
+
+    .mobile-overlay {
+        display: none !important;
+    }
+}
+</style>

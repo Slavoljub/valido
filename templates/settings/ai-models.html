@@ -1,0 +1,793 @@
+{% extends "layouts/base.html"" %}
+
+{% block title %}AI Models Management - Settings{% endblock %}
+
+{% block extra_css %}
+<style>
+    .model-card {
+        transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .model-card:hover {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .model-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .status-downloaded {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+    
+    .status-downloading {
+        background-color: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .status-not-downloaded {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+    
+    .status-failed {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .progress-bar {
+        height: 8px;
+        border-radius: 4px;
+        background-color: #e5e7eb;
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+        transition: width 0.3s ease;
+    }
+    
+    .system-info-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .tag {
+        display: inline-block;
+        padding: 0.125rem 0.5rem;
+        margin: 0.125rem;
+        background-color: #f3f4f6;
+        color: #374151;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+    }
+    
+    .recommendation-badge {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background-color: #10b981;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .loading-spinner {
+        border: 2px solid #f3f4f6;
+        border-top: 2px solid #3b82f6;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .model-actions {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .model-card:hover .model-actions {
+        opacity: 1;
+    }
+    
+    .filter-tabs {
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .filter-tab {
+        padding: 0.75rem 1.5rem;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-tab.active {
+        border-bottom-color: #3b82f6;
+        color: #3b82f6;
+    }
+    
+    .filter-tab:hover {
+        background-color: #f9fafb;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">AI Models Management</h1>
+        <p class="text-gray-600">Download and manage local AI models for enhanced functionality</p>
+    </div>
+
+    <!-- System Information -->
+    <div class="system-info-card rounded-lg p-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <h3 class="text-lg font-semibold mb-2">System Capabilities</h3>
+                <div id="system-info" class="space-y-2">
+                    <div class="loading-spinner mx-auto"></div>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold mb-2">Download Summary</h3>
+                <div id="download-summary" class="space-y-2">
+                    <div class="loading-spinner mx-auto"></div>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold mb-2">Recommendations</h3>
+                <div id="recommendations" class="space-y-2">
+                    <div class="loading-spinner mx-auto"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Actions -->
+    <div class="mb-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <!-- Filter Tabs -->
+            <div class="filter-tabs flex space-x-1">
+                <div class="filter-tab active" data-filter="all">
+                    All Models
+                </div>
+                <div class="filter-tab" data-filter="downloaded">
+                    Downloaded
+                </div>
+                <div class="filter-tab" data-filter="not-downloaded">
+                    Available
+                </div>
+                <div class="filter-tab" data-filter="downloading">
+                    Downloading
+                </div>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="flex gap-2">
+                <button id="download-recommended" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                    Download Recommended
+                </button>
+                <button id="refresh-status" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                    Refresh Status
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Models Grid -->
+    <div id="models-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="col-span-full flex justify-center">
+            <div class="loading-spinner" style="width: 40px; height: 40px;"></div>
+        </div>
+    </div>
+
+    <!-- Progress Modal -->
+    <div id="progress-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg p-6 max-w-md w-full">
+                <h3 class="text-lg font-semibold mb-4">Download Progress</h3>
+                <div id="progress-content">
+                    <!-- Progress content will be populated here -->
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button id="close-progress" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Model Card Template -->
+<template id="model-card-template">
+    <div class="model-card bg-white rounded-lg p-6 relative">
+        <div class="recommendation-badge hidden">Recommended</div>
+        
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 model-name"></h3>
+                <p class="text-sm text-gray-600 model-description"></p>
+            </div>
+            <div class="model-status status-not-downloaded"></div>
+        </div>
+
+        <div class="space-y-3 mb-4">
+            <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Size:</span>
+                <span class="font-medium model-size"></span>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Memory Required:</span>
+                <span class="font-medium model-memory"></span>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Format:</span>
+                <span class="font-medium model-format"></span>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Language:</span>
+                <span class="font-medium model-language"></span>
+            </div>
+        </div>
+
+        <div class="model-tags mb-4">
+            <!-- Tags will be populated here -->
+        </div>
+
+        <div class="progress-container hidden mb-4">
+            <div class="flex justify-between text-sm mb-2">
+                <span class="text-gray-600">Download Progress</span>
+                <span class="font-medium progress-percentage">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                <span class="progress-speed">0 MB/s</span>
+                <span class="progress-eta">--</span>
+            </div>
+        </div>
+
+        <div class="model-actions flex gap-2">
+            <button class="download-btn bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex-1">
+                Download
+            </button>
+            <button class="delete-btn bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors hidden">
+                Delete
+            </button>
+            <button class="retry-btn bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors hidden">
+                Retry
+            </button>
+            <button class="cancel-btn bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors hidden">
+                Cancel
+            </button>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class AIModelsManager {
+    constructor() {
+        this.models = [];
+        this.currentFilter = 'all';
+        this.progressInterval = null;
+        this.init();
+    }
+
+    async init() {
+        await this.loadSystemInfo();
+        await this.loadModels();
+        this.setupEventListeners();
+        this.startProgressPolling();
+    }
+
+    async loadSystemInfo() {
+        try {
+            const [systemResponse, recommendationsResponse] = await Promise.all([
+                fetch('/api/ai-models/system-info'),
+                fetch('/api/ai-models/recommendations')
+            ]);
+
+            const systemData = await systemResponse.json();
+            const recommendationsData = await recommendationsResponse.json();
+
+            if (systemData.success) {
+                this.updateSystemInfo(systemData.system_info);
+            }
+
+            if (recommendationsData.success) {
+                this.updateRecommendations(recommendationsData.recommendations, recommendationsData.system_capabilities);
+            }
+        } catch (error) {
+            console.error('Error loading system info:', error);
+        }
+    }
+
+    updateSystemInfo(systemInfo) {
+        const container = document.getElementById('system-info');
+        container.innerHTML = `
+            <div class="space-y-2">
+                <div class="flex justify-between">
+                    <span>GPU Available:</span>
+                    <span class="font-medium">${systemInfo.gpu_available.cuda ? 'CUDA' : systemInfo.gpu_available.rocm ? 'ROCm' : systemInfo.gpu_available.mps ? 'MPS' : 'No'}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>PyTorch:</span>
+                    <span class="font-medium">${systemInfo.torch_available ? 'Available' : 'Not Available'}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>TensorFlow:</span>
+                    <span class="font-medium">${systemInfo.tensorflow_available ? 'Available' : 'Not Available'}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Total Models:</span>
+                    <span class="font-medium">${systemInfo.total_models}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    updateRecommendations(recommendations, capabilities) {
+        const container = document.getElementById('recommendations');
+        const category = capabilities.recommended_category;
+        
+        container.innerHTML = `
+            <div class="space-y-2">
+                <div class="text-sm">
+                    <span class="font-medium">Recommended:</span> ${category.charAt(0).toUpperCase() + category.slice(1)}
+                </div>
+                <div class="text-sm">
+                    <span class="font-medium">Lightweight:</span> ${recommendations.lightweight.length} models
+                </div>
+                <div class="text-sm">
+                    <span class="font-medium">Balanced:</span> ${recommendations.balanced.length} models
+                </div>
+                <div class="text-sm">
+                    <span class="font-medium">Powerful:</span> ${recommendations.powerful.length} models
+                </div>
+            </div>
+        `;
+
+        // Store recommendations for later use
+        this.recommendations = recommendations;
+        this.recommendedCategory = category;
+    }
+
+    async loadModels() {
+        try {
+            const response = await fetch('/api/ai-models/status');
+            const data = await response.json();
+
+            if (data.success) {
+                this.models = data.models;
+                this.renderModels();
+                this.updateDownloadSummary();
+                
+                // Update system info if available
+                if (data.system_info) {
+                    this.updateSystemInfo(data.system_info);
+                }
+            } else {
+                console.error('Error loading models:', data.error);
+            }
+        } catch (error) {
+            console.error('Error loading models:', error);
+        }
+    }
+
+    renderModels() {
+        const container = document.getElementById('models-container');
+        container.innerHTML = '';
+
+        const filteredModels = this.filterModels(this.models, this.currentFilter);
+
+        if (filteredModels.length === 0) {
+            container.innerHTML = `
+                <div class="col-span-full text-center py-8">
+                    <p class="text-gray-500">No models found for the selected filter.</p>
+                </div>
+            `;
+            return;
+        }
+
+        filteredModels.forEach(model => {
+            const card = this.createModelCard(model);
+            container.appendChild(card);
+        });
+    }
+
+    filterModels(models, filter) {
+        switch (filter) {
+            case 'downloaded':
+                return models.filter(m => m.status === 'downloaded');
+            case 'not-downloaded':
+                return models.filter(m => m.status === 'not_downloaded');
+            case 'downloading':
+                return models.filter(m => m.download_progress && m.download_progress.status === 'downloading');
+            default:
+                return models;
+        }
+    }
+
+    createModelCard(model) {
+        const template = document.getElementById('model-card-template');
+        const card = template.content.cloneNode(true);
+
+        // Set basic info
+        card.querySelector('.model-name').textContent = model.name;
+        card.querySelector('.model-description').textContent = model.description;
+        card.querySelector('.model-size').textContent = `${model.size_gb} GB`;
+        
+        // Set status
+        const statusElement = card.querySelector('.model-status');
+        statusElement.textContent = this.getStatusText(model.status);
+        statusElement.className = `model-status ${this.getStatusClass(model.status)}`;
+
+        // Set data attributes for actions
+        card.querySelector('.model-card').setAttribute('data-model', model.id);
+
+        // Show recommendation badge if applicable
+        if (this.recommendations && this.recommendedCategory) {
+            const categoryModels = this.recommendations[this.recommendedCategory] || [];
+            if (categoryModels.some(m => m.id === model.id)) {
+                card.querySelector('.recommendation-badge').classList.remove('hidden');
+            }
+        }
+
+        // Setup action buttons
+        this.setupModelActions(card, model);
+
+        // Setup progress tracking
+        if (model.download_progress) {
+            this.updateModelProgress(card, model.download_progress);
+        }
+
+        return card;
+    }
+
+    getStatusText(status) {
+        switch (status) {
+            case 'downloaded': return 'Downloaded';
+            case 'downloading': return 'Downloading';
+            case 'not_downloaded': return 'Not Downloaded';
+            case 'failed': return 'Failed';
+            default: return status;
+        }
+    }
+
+    getStatusClass(status) {
+        switch (status) {
+            case 'downloaded': return 'status-downloaded';
+            case 'downloading': return 'status-downloading';
+            case 'not_downloaded': return 'status-not-downloaded';
+            case 'failed': return 'status-failed';
+            default: return 'status-not-downloaded';
+        }
+    }
+
+    setupModelActions(card, model) {
+        const downloadBtn = card.querySelector('.download-btn');
+        const deleteBtn = card.querySelector('.delete-btn');
+        const retryBtn = card.querySelector('.retry-btn');
+        const cancelBtn = card.querySelector('.cancel-btn');
+
+        // Show/hide buttons based on status
+        if (model.status === 'downloaded') {
+            downloadBtn.classList.add('hidden');
+            deleteBtn.classList.remove('hidden');
+        } else if (model.status === 'failed') {
+            downloadBtn.classList.add('hidden');
+            retryBtn.classList.remove('hidden');
+        } else if (model.download_progress && model.download_progress.status === 'downloading') {
+            downloadBtn.classList.add('hidden');
+            cancelBtn.classList.remove('hidden');
+        }
+
+        // Setup event listeners
+        downloadBtn.addEventListener('click', () => this.downloadModel(model.id));
+        deleteBtn.addEventListener('click', () => this.deleteModel(model.id));
+        retryBtn.addEventListener('click', () => this.retryDownload(model.id));
+        cancelBtn.addEventListener('click', () => this.cancelDownload(model.id));
+    }
+
+    updateModelProgress(card, progress) {
+        const progressContainer = card.querySelector('.progress-container');
+        const progressFill = card.querySelector('.progress-fill');
+        const progressPercentage = card.querySelector('.progress-percentage');
+        const progressSpeed = card.querySelector('.progress-speed');
+        const progressEta = card.querySelector('.progress-eta');
+
+        progressContainer.classList.remove('hidden');
+        progressFill.style.width = `${progress.progress}%`;
+        progressPercentage.textContent = `${Math.round(progress.progress)}%`;
+        
+        if (progress.speed > 0) {
+            progressSpeed.textContent = `${(progress.speed / (1024 * 1024)).toFixed(1)} MB/s`;
+        }
+        
+        if (progress.eta > 0) {
+            progressEta.textContent = this.formatTime(progress.eta);
+        }
+    }
+
+    formatTime(seconds) {
+        if (seconds < 60) return `${seconds}s`;
+        if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+        return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`;
+    }
+
+    async downloadModel(modelId) {
+        try {
+            const response = await fetch('/api/ai-models/download', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ model_id: modelId })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showNotification(data.message, 'success');
+                await this.loadModels(); // Refresh the list
+            } else {
+                this.showNotification(data.error, 'error');
+            }
+        } catch (error) {
+            console.error('Error downloading model:', error);
+            this.showNotification('Failed to download model', 'error');
+        }
+    }
+
+    async deleteModel(modelId) {
+        const model = this.models.find(m => m.id === modelId);
+        if (!model) return;
+        
+        if (!confirm(`Are you sure you want to delete ${model.name}?`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/ai-models/delete/${modelId}`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showNotification(data.message, 'success');
+                await this.loadModels(); // Refresh the list
+            } else {
+                this.showNotification(data.error, 'error');
+            }
+        } catch (error) {
+            console.error('Error deleting model:', error);
+            this.showNotification('Failed to delete model', 'error');
+        }
+    }
+
+    async retryDownload(modelId) {
+        try {
+            const response = await fetch(`/api/ai-models/retry/${modelId}`, {
+                method: 'POST'
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showNotification(data.message, 'success');
+                await this.loadModels(); // Refresh the list
+            } else {
+                this.showNotification(data.error, 'error');
+            }
+        } catch (error) {
+            console.error('Error retrying download:', error);
+            this.showNotification('Failed to retry download', 'error');
+        }
+    }
+
+    async cancelDownload(modelId) {
+        try {
+            const response = await fetch(`/api/ai-models/cancel/${modelId}`, {
+                method: 'POST'
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showNotification(data.message, 'success');
+                await this.loadModels(); // Refresh the list
+            } else {
+                this.showNotification(data.error, 'error');
+            }
+        } catch (error) {
+            console.error('Error cancelling download:', error);
+            this.showNotification('Failed to cancel download', 'error');
+        }
+    }
+
+    async downloadRecommended() {
+        if (!this.recommendations || !this.recommendedCategory) {
+            this.showNotification('No recommendations available', 'error');
+            return;
+        }
+
+        const recommendedModels = this.recommendations[this.recommendedCategory];
+        if (recommendedModels.length === 0) {
+            this.showNotification('No recommended models available', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/ai-models/download-multiple', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ model_names: recommendedModels })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showNotification(data.message, 'success');
+                await this.loadModels(); // Refresh the list
+            } else {
+                this.showNotification(data.error, 'error');
+            }
+        } catch (error) {
+            console.error('Error downloading recommended models:', error);
+            this.showNotification('Failed to download recommended models', 'error');
+        }
+    }
+
+    updateDownloadSummary() {
+        const container = document.getElementById('download-summary');
+        const downloaded = this.models.filter(m => m.status === 'downloaded').length;
+        const downloading = this.models.filter(m => m.download_progress && m.download_progress.status === 'downloading').length;
+        const total = this.models.length;
+
+        container.innerHTML = `
+            <div class="space-y-2">
+                <div class="flex justify-between">
+                    <span>Total Models:</span>
+                    <span class="font-medium">${total}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Downloaded:</span>
+                    <span class="font-medium">${downloaded}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Downloading:</span>
+                    <span class="font-medium">${downloading}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Available:</span>
+                    <span class="font-medium">${total - downloaded}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    updateSystemInfo(systemInfo) {
+        const container = document.getElementById('system-info');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="space-y-2">
+                <div class="flex justify-between">
+                    <span>GPU Available:</span>
+                    <span class="font-medium">${systemInfo.gpu_available ? 'Yes' : 'No'}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>PyTorch Available:</span>
+                    <span class="font-medium">${systemInfo.torch_available ? 'Yes' : 'No'}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Total Models:</span>
+                    <span class="font-medium">${systemInfo.total_models}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Downloaded Models:</span>
+                    <span class="font-medium">${systemInfo.downloaded_models}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Total Size:</span>
+                    <span class="font-medium">${systemInfo.total_size_gb ? systemInfo.total_size_gb.toFixed(1) + ' GB' : 'N/A'}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    setupEventListeners() {
+        // Filter tabs
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                this.currentFilter = tab.dataset.filter;
+                this.renderModels();
+            });
+        });
+
+        // Action buttons
+        document.getElementById('download-recommended').addEventListener('click', () => {
+            this.downloadRecommended();
+        });
+
+        document.getElementById('refresh-status').addEventListener('click', () => {
+            this.loadModels();
+        });
+
+        // Progress modal
+        document.getElementById('close-progress').addEventListener('click', () => {
+            document.getElementById('progress-modal').classList.add('hidden');
+        });
+    }
+
+    startProgressPolling() {
+        this.progressInterval = setInterval(async () => {
+            try {
+                const response = await fetch('/api/ai-models/progress');
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update progress for downloading models
+                    Object.entries(data.progress).forEach(([modelId, progress]) => {
+                        const card = document.querySelector(`[data-model="${modelId}"]`);
+                        if (card) {
+                            this.updateModelProgress(card, progress);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error polling progress:', error);
+            }
+        }, 2000); // Poll every 2 seconds
+    }
+
+    showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 transition-all duration-300 ${
+            type === 'success' ? 'bg-green-600' : 
+            type === 'error' ? 'bg-red-600' : 'bg-blue-600'
+        }`;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new AIModelsManager();
+});
+</script>
+{% endblock %}

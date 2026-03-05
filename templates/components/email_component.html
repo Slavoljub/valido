@@ -1,0 +1,707 @@
+<!-- Email Component - Can be included anywhere in the project -->
+<div class="email-component-wrapper" x-data="emailComponent()">
+    <div class="email-composer" x-show="showComposer" x-transition>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                    <i class="fas fa-envelope mr-2"></i>
+                    <span x-text="isEdit ? 'Edit Email' : 'Compose Email'"></span>
+                </h3>
+                <button @click="closeComposer()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Email Form -->
+            <form @submit.prevent="sendEmail()" class="space-y-6">
+                <!-- Recipients -->
+                <div>
+                    <label class="form-label required">To</label>
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        <template x-for="(recipient, index) in recipients" :key="index">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                                <span x-text="recipient"></span>
+                                <button type="button" @click="removeRecipient(index)" class="ml-1 text-blue-600 dark:text-blue-300 hover:text-blue-800">
+                                    <i class="fas fa-times text-xs"></i>
+                                </button>
+                            </span>
+                        </template>
+                    </div>
+                    <input type="email"
+                           x-model="currentRecipient"
+                           @keydown.enter.prevent="addRecipient()"
+                           @blur="addRecipient()"
+                           placeholder="Enter email address and press Enter"
+                           class="form-input">
+                </div>
+
+                <!-- CC/BCC -->
+                <div x-show="showCcBcc" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="form-label">CC</label>
+                        <input type="email" x-model="cc" placeholder="CC recipients" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">BCC</label>
+                        <input type="email" x-model="bcc" placeholder="BCC recipients" class="form-input">
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="button" @click="toggleCcBcc()" class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700">
+                        <span x-text="showCcBcc ? '- Hide CC/BCC' : '+ Add CC/BCC'"></span>
+                    </button>
+                </div>
+
+                <!-- Subject -->
+                <div>
+                    <label class="form-label required">Subject</label>
+                    <input type="text" x-model="subject" required placeholder="Email subject" class="form-input">
+                </div>
+
+                <!-- Email Content -->
+                <div>
+                    <label class="form-label">Message</label>
+                    <div class="border border-gray-300 dark:border-gray-600 rounded-lg">
+                        <!-- Toolbar -->
+                        <div class="border-b border-gray-200 dark:border-gray-700 p-2 bg-gray-50 dark:bg-gray-700">
+                            <div class="flex flex-wrap gap-1">
+                                <button type="button" @click="formatText('bold')" title="Bold" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded">
+                                    <i class="fas fa-bold"></i>
+                                </button>
+                                <button type="button" @click="formatText('italic')" title="Italic" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded">
+                                    <i class="fas fa-italic"></i>
+                                </button>
+                                <button type="button" @click="formatText('underline')" title="Underline" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded">
+                                    <i class="fas fa-underline"></i>
+                                </button>
+                                <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                                <button type="button" @click="formatText('insertUnorderedList')" title="Bullet List" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded">
+                                    <i class="fas fa-list-ul"></i>
+                                </button>
+                                <button type="button" @click="formatText('insertOrderedList')" title="Numbered List" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded">
+                                    <i class="fas fa-list-ol"></i>
+                                </button>
+                                <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                                <button type="button" @click="insertLink()" title="Insert Link" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded">
+                                    <i class="fas fa-link"></i>
+                                </button>
+                                <button type="button" @click="insertImage()" title="Insert Image" class="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded">
+                                    <i class="fas fa-image"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Content Area -->
+                        <div contenteditable="true"
+                             x-ref="editor"
+                             @input="updateContent"
+                             class="min-h-[200px] p-4 focus:outline-none"
+                             placeholder="Write your email message here..."></div>
+                    </div>
+                </div>
+
+                <!-- Attachments -->
+                <div>
+                    <label class="form-label">Attachments</label>
+                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
+                        <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"></i>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Drag files here or click to browse</p>
+                        <input type="file" multiple @change="handleFileSelect" class="hidden" ref="fileInput">
+                        <button type="button" @click="$refs.fileInput.click()" class="btn-secondary">
+                            Choose Files
+                        </button>
+                    </div>
+
+                    <!-- Selected Files -->
+                    <div x-show="attachments.length > 0" class="mt-3 space-y-2">
+                        <template x-for="(file, index) in attachments" :key="index">
+                            <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                <div class="flex items-center space-x-3">
+                                    <i :class="getFileIcon(file.type)" class="text-gray-500"></i>
+                                    <span class="text-sm text-gray-900 dark:text-gray-100" x-text="file.name"></span>
+                                    <span class="text-xs text-gray-500" x-text="formatFileSize(file.size)"></span>
+                                </div>
+                                <button type="button" @click="removeAttachment(index)" class="text-red-500 hover:text-red-700">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Priority & Options -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="form-label">Priority</label>
+                        <select x-model="priority" class="form-input">
+                            <option value="normal">Normal</option>
+                            <option value="low">Low</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Send Time</label>
+                        <select x-model="sendOption" class="form-input">
+                            <option value="now">Send Now</option>
+                            <option value="scheduled">Schedule</option>
+                        </select>
+                    </div>
+                    <div x-show="sendOption === 'scheduled'">
+                        <label class="form-label">Schedule Date & Time</label>
+                        <input type="datetime-local" x-model="scheduledTime" class="form-input">
+                    </div>
+                </div>
+
+                <!-- Template Selection -->
+                <div x-show="showTemplates">
+                    <label class="form-label">Email Template</label>
+                    <select x-model="selectedTemplate" @change="applyTemplate" class="form-input">
+                        <option value="">Choose a template</option>
+                        <option value="welcome">Welcome Email</option>
+                        <option value="newsletter">Newsletter</option>
+                        <option value="notification">Notification</option>
+                        <option value="invoice">Invoice</option>
+                        <option value="support">Support Response</option>
+                    </select>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button type="button" @click="saveDraft()" class="btn-secondary">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Draft
+                    </button>
+                    <button type="button" @click="closeComposer()" class="btn-secondary">
+                        Cancel
+                    </button>
+                    <button type="submit" :disabled="isSending || recipients.length === 0" class="btn-primary">
+                        <i class="fas fa-paper-plane mr-2" x-show="!isSending"></i>
+                        <i class="fas fa-spinner fa-spin mr-2" x-show="isSending"></i>
+                        <span x-text="isSending ? 'Sending...' : 'Send Email'"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Link Modal -->
+    <div x-show="showLinkModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" @click="closeLinkModal()">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                                Insert Link
+                            </h3>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="form-label">URL</label>
+                                    <input type="url" x-model="linkUrl" placeholder="https://example.com" class="form-input">
+                                </div>
+
+                                <div>
+                                    <label class="form-label">Link Text</label>
+                                    <input type="text" x-model="linkText" placeholder="Link text" class="form-input">
+                                </div>
+
+                                <div class="flex items-center">
+                                    <input type="checkbox" x-model="linkNewTab" class="form-control w-auto mr-2">
+                                    <label class="text-sm text-gray-700 dark:text-gray-300">
+                                        Open in new tab
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button @click="insertLink()" class="btn-primary sm:ml-3">
+                        Insert Link
+                    </button>
+                    <button @click="closeLinkModal()" class="btn-secondary">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div x-show="showImageModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" @click="closeImageModal()">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+                                Insert Image
+                            </h3>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="form-label">Image URL</label>
+                                    <input type="url" x-model="imageUrl" placeholder="https://example.com/image.jpg" class="form-input">
+                                </div>
+
+                                <div>
+                                    <label class="form-label">Alt Text</label>
+                                    <input type="text" x-model="imageAlt" placeholder="Image description" class="form-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button @click="insertImage()" class="btn-primary sm:ml-3">
+                        Insert Image
+                    </button>
+                    <button @click="closeImageModal()" class="btn-secondary">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function emailComponent() {
+    return {
+        showComposer: false,
+        isEdit: false,
+        recipients: [],
+        currentRecipient: '',
+        cc: '',
+        bcc: '',
+        subject: '',
+        content: '',
+        attachments: [],
+        priority: 'normal',
+        sendOption: 'now',
+        scheduledTime: '',
+        selectedTemplate: '',
+        showCcBcc: false,
+        showTemplates: true,
+        showLinkModal: false,
+        showImageModal: false,
+        linkUrl: '',
+        linkText: '',
+        linkNewTab: false,
+        imageUrl: '',
+        imageAlt: '',
+        isSending: false,
+        emailId: null,
+
+        init() {
+            // Initialize email content if editing
+            if (this.emailId) {
+                this.loadEmail(this.emailId);
+            }
+        },
+
+        openComposer(emailData = null) {
+            this.resetForm();
+            this.showComposer = true;
+
+            if (emailData) {
+                this.isEdit = true;
+                this.populateForm(emailData);
+            }
+        },
+
+        closeComposer() {
+            this.showComposer = false;
+            this.isEdit = false;
+            this.resetForm();
+        },
+
+        resetForm() {
+            this.recipients = [];
+            this.currentRecipient = '';
+            this.cc = '';
+            this.bcc = '';
+            this.subject = '';
+            this.content = '';
+            this.attachments = [];
+            this.priority = 'normal';
+            this.sendOption = 'now';
+            this.scheduledTime = '';
+            this.selectedTemplate = '';
+            this.showCcBcc = false;
+            this.isSending = false;
+
+            if (this.$refs.editor) {
+                this.$refs.editor.innerHTML = '';
+            }
+        },
+
+        populateForm(emailData) {
+            this.emailId = emailData.id;
+            this.recipients = emailData.to ? emailData.to.split(',').map(r => r.trim()) : [];
+            this.cc = emailData.cc || '';
+            this.bcc = emailData.bcc || '';
+            this.subject = emailData.subject || '';
+            this.content = emailData.content || '';
+            this.priority = emailData.priority || 'normal';
+
+            if (this.$refs.editor) {
+                this.$refs.editor.innerHTML = this.content;
+            }
+        },
+
+        addRecipient() {
+            const email = this.currentRecipient.trim();
+            if (email && this.isValidEmail(email) && !this.recipients.includes(email)) {
+                this.recipients.push(email);
+                this.currentRecipient = '';
+            }
+        },
+
+        removeRecipient(index) {
+            this.recipients.splice(index, 1);
+        },
+
+        toggleCcBcc() {
+            this.showCcBcc = !this.showCcBcc;
+        },
+
+        isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        },
+
+        updateContent() {
+            if (this.$refs.editor) {
+                this.content = this.$refs.editor.innerHTML;
+            }
+        },
+
+        formatText(command, value = null) {
+            document.execCommand(command, false, value);
+            this.updateContent();
+        },
+
+        insertLink() {
+            this.showLinkModal = true;
+        },
+
+        insertLink() {
+            if (this.linkUrl) {
+                const linkHtml = this.linkNewTab
+                    ? `<a href="${this.linkUrl}" target="_blank" rel="noopener noreferrer">${this.linkText || this.linkUrl}</a>`
+                    : `<a href="${this.linkUrl}">${this.linkText || this.linkUrl}</a>`;
+
+                document.execCommand('insertHTML', false, linkHtml);
+                this.updateContent();
+            }
+            this.closeLinkModal();
+        },
+
+        closeLinkModal() {
+            this.showLinkModal = false;
+            this.linkUrl = '';
+            this.linkText = '';
+            this.linkNewTab = false;
+        },
+
+        insertImage() {
+            this.showImageModal = true;
+        },
+
+        insertImage() {
+            if (this.imageUrl) {
+                const imageHtml = `<img src="${this.imageUrl}" alt="${this.imageAlt || ''}" style="max-width: 100%; height: auto;">`;
+                document.execCommand('insertHTML', false, imageHtml);
+                this.updateContent();
+            }
+            this.closeImageModal();
+        },
+
+        closeImageModal() {
+            this.showImageModal = false;
+            this.imageUrl = '';
+            this.imageAlt = '';
+        },
+
+        handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            files.forEach(file => {
+                if (file.size <= 10 * 1024 * 1024) { // 10MB limit
+                    this.attachments.push({
+                        file: file,
+                        name: file.name,
+                        size: file.size,
+                        type: file.type
+                    });
+                }
+            });
+        },
+
+        removeAttachment(index) {
+            this.attachments.splice(index, 1);
+        },
+
+        getFileIcon(mimeType) {
+            const type = mimeType.toLowerCase();
+
+            if (type.startsWith('image/')) return 'fas fa-image text-green-500';
+            if (type.startsWith('video/')) return 'fas fa-video text-purple-500';
+            if (type.startsWith('audio/')) return 'fas fa-music text-pink-500';
+            if (type.includes('pdf')) return 'fas fa-file-pdf text-red-500';
+            if (type.includes('word') || type.includes('document')) return 'fas fa-file-word text-blue-500';
+            if (type.includes('excel') || type.includes('spreadsheet')) return 'fas fa-file-excel text-green-500';
+
+            return 'fas fa-file text-gray-500';
+        },
+
+        formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        },
+
+        applyTemplate() {
+            const templates = {
+                welcome: {
+                    subject: 'Welcome to ValidoAI!',
+                    content: `<h2>Welcome!</h2><p>Thank you for joining ValidoAI. We're excited to have you on board.</p><p>Best regards,<br>ValidoAI Team</p>`
+                },
+                newsletter: {
+                    subject: 'ValidoAI Newsletter',
+                    content: `<h2>Latest Updates</h2><p>Here's what's new at ValidoAI this month...</p>`
+                },
+                notification: {
+                    subject: 'Notification from ValidoAI',
+                    content: `<p>You have received a new notification.</p>`
+                },
+                invoice: {
+                    subject: 'Invoice from ValidoAI',
+                    content: `<h2>Invoice</h2><p>Please find your invoice attached.</p>`
+                },
+                support: {
+                    subject: 'Support Response',
+                    content: `<p>Dear Customer,</p><p>Thank you for contacting our support team. We're here to help!</p>`
+                }
+            };
+
+            if (this.selectedTemplate && templates[this.selectedTemplate]) {
+                const template = templates[this.selectedTemplate];
+                this.subject = template.subject;
+                if (this.$refs.editor) {
+                    this.$refs.editor.innerHTML = template.content;
+                }
+                this.content = template.content;
+            }
+        },
+
+        async sendEmail() {
+            if (this.recipients.length === 0) {
+                this.showError('Please add at least one recipient');
+                return;
+            }
+
+            if (!this.subject.trim()) {
+                this.showError('Please enter a subject');
+                return;
+            }
+
+            this.isSending = true;
+
+            try {
+                const emailData = {
+                    to: this.recipients.join(', '),
+                    cc: this.cc,
+                    bcc: this.bcc,
+                    subject: this.subject,
+                    content: this.content,
+                    priority: this.priority,
+                    sendOption: this.sendOption,
+                    scheduledTime: this.scheduledTime,
+                    attachments: this.attachments.map(att => ({
+                        name: att.name,
+                        size: att.size,
+                        type: att.type
+                    }))
+                };
+
+                const response = await fetch('/api/email/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(emailData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    this.showSuccess('Email sent successfully!');
+                    this.closeComposer();
+
+                    // Emit success event
+                    this.$el.dispatchEvent(new CustomEvent('emailSent', {
+                        detail: { emailData, result }
+                    }));
+                } else {
+                    this.showError(result.message || 'Failed to send email');
+                }
+            } catch (error) {
+                console.error('Error sending email:', error);
+                this.showError('Failed to send email');
+            } finally {
+                this.isSending = false;
+            }
+        },
+
+        async saveDraft() {
+            try {
+                const draftData = {
+                    to: this.recipients.join(', '),
+                    cc: this.cc,
+                    bcc: this.bcc,
+                    subject: this.subject,
+                    content: this.content,
+                    priority: this.priority
+                };
+
+                const response = await fetch('/api/email/draft', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(draftData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    this.showSuccess('Draft saved successfully!');
+                } else {
+                    this.showError('Failed to save draft');
+                }
+            } catch (error) {
+                console.error('Error saving draft:', error);
+                this.showError('Failed to save draft');
+            }
+        },
+
+        async loadEmail(emailId) {
+            try {
+                const response = await fetch(`/api/email/${emailId}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    this.populateForm(result.email);
+                }
+            } catch (error) {
+                console.error('Error loading email:', error);
+            }
+        },
+
+        showSuccess(message) {
+            if (window.showToast) {
+                window.showToast('Success', message, 'success');
+            } else {
+                alert('Success: ' + message);
+            }
+        },
+
+        showError(message) {
+            if (window.showToast) {
+                window.showToast('Error', message, 'error');
+            } else {
+                alert('Error: ' + message);
+            }
+        }
+    }
+}
+</script>
+
+<style>
+/* Email Component Styles */
+.email-component-wrapper {
+    @apply w-full;
+}
+
+.email-composer {
+    @apply fixed inset-0 z-50 overflow-y-auto;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.email-composer .bg-white {
+    @apply max-w-4xl mx-auto;
+}
+
+/* Email Editor Styles */
+.email-composer [contenteditable] {
+    @apply min-h-[200px] focus:outline-none text-gray-900 dark:text-gray-100;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.email-composer [contenteditable]:empty:before {
+    content: attr(placeholder);
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* File Drop Zone */
+.email-composer .border-dashed {
+    @apply cursor-pointer transition-colors;
+}
+
+/* Recipient Tags */
+.email-composer .rounded-full {
+    @apply inline-flex items-center;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .email-composer .max-w-4xl {
+        @apply mx-4;
+    }
+
+    .email-composer .grid-cols-1 {
+        @apply grid-cols-1;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .email-composer [contenteditable] {
+        @apply border-2 border-black;
+    }
+
+    .email-composer .border-dashed {
+        @apply border-4 border-black;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .email-composer {
+        animation: none;
+    }
+
+    .email-composer .transition-colors {
+        transition: none;
+    }
+}
+</style>
