@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+nito_env/
+
+# Databases
+docker/database/
+
+# Archives
+*.tar.gz
+
+# Logs
+*.log
+
+# OS
+.DS_Store
