@@ -19,3 +19,5 @@ docker/database/
 
 # OS
 .DS_Store
+
+mito_env/
