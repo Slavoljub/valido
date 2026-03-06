@@ -21,3 +21,4 @@ docker/database/
 .DS_Store
 
 mito_env/
+.env

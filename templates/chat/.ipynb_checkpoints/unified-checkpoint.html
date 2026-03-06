@@ -1,0 +1,2077 @@
+{% extends "layouts/base.html" %}
+
+{% block head %}
+{{ super() }}
+
+<!-- Chat Page SEO -->
+{% if seo_manager %}
+{{ seo_manager.generate_meta_tags('ai') }}
+{{ seo_manager.generate_tracking_scripts('ai') }}
+{% endif %}
+
+<!-- Chat-specific CSS -->
+<style>
+/* Chat Container */
+.chat-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    height: calc(100vh - 200px);
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: white;
+}
+
+.chat-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0 0 1rem 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.chat-subtitle {
+    font-size: 1.1rem;
+    font-weight: 400;
+    margin: 0 0 1.5rem 0;
+    opacity: 0.9;
+}
+
+.chat-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+/* Chat Interface */
+.chat-interface {
+    flex: 1;
+    display: flex;
+    gap: 2rem;
+    min-height: 0;
+}
+
+.chat-sidebar {
+    width: 300px;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-main {
+    flex: 1;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Sidebar Components */
+.sidebar-section {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.sidebar-section:last-child {
+    border-bottom: none;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-icon {
+    color: #3b82f6;
+}
+
+/* Model Selection */
+.model-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.model-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 2px solid #e5e7eb;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.model-option:hover {
+    border-color: #3b82f6;
+    background: #f0f9ff;
+}
+
+.model-option.selected {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.model-radio {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #d1d5db;
+    border-radius: 50%;
+    position: relative;
+}
+
+.model-radio.selected::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 8px;
+    height: 8px;
+    background: #3b82f6;
+    border-radius: 50%;
+}
+
+.model-info h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 0.25rem 0;
+}
+
+.model-info p {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Session Management */
+.session-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.session-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 0.5rem;
+}
+
+.session-item:hover {
+    background: #f8fafc;
+}
+
+.session-item.active {
+    background: #eff6ff;
+    border: 1px solid #3b82f6;
+}
+
+.session-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.session-info {
+    flex: 1;
+}
+
+.session-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 0.25rem 0;
+}
+
+.session-meta {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.session-actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.session-action {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    transition: all 0.2s ease;
+}
+
+.session-action:hover {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* Question Suggestions */
+.suggestions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.suggestion-item:hover {
+    background: #f0f9ff;
+    border-color: #3b82f6;
+}
+
+.suggestion-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    background: linear-gradient(135deg, #10b981, #059669);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.suggestion-content {
+    flex: 1;
+}
+
+.suggestion-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 0.25rem 0;
+}
+
+.suggestion-category {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Chat Messages Area */
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    background: #f8fafc;
+}
+
+.message {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.user-avatar {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+}
+
+.ai-avatar {
+    background: linear-gradient(135deg, #10b981, #059669);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.75rem;
+}
+
+.message-content {
+    flex: 1;
+    background: white;
+    border-radius: 1rem;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.message-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.message-author {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.message-text {
+    font-size: 0.875rem;
+    color: #374151;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.message-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.message-action {
+    padding: 0.25rem 0.5rem;
+    border: none;
+    background: #f1f5f9;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.message-action:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+/* Chat Input */
+.chat-input-area {
+    padding: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    background: white;
+}
+
+.input-container {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.message-input {
+    flex: 1;
+    min-height: 48px;
+    max-height: 120px;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    resize: none;
+    transition: all 0.2s ease;
+}
+
+.message-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.file-upload {
+    position: relative;
+}
+
+.file-input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+}
+
+.file-button {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: #f1f5f9;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    transition: all 0.2s ease;
+}
+
+.file-button:hover {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.send-button {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.send-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.send-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.typing-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    animation: typing 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+    30% {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
+}
+
+/* Loading States */
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 1024px) {
+    .chat-interface {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .chat-sidebar {
+        width: 100%;
+        max-height: 300px;
+    }
+
+    .chat-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .chat-container {
+        padding: 1rem;
+    }
+
+    .chat-header {
+        padding: 1.5rem;
+    }
+
+    .chat-title {
+        font-size: 2rem;
+    }
+
+    .input-container {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .input-actions {
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .chat-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .chat-sidebar,
+    .chat-main,
+    .message-content {
+        background: rgba(30, 41, 59, 0.95);
+        border-color: rgba(71, 85, 105, 0.3);
+    }
+
+    .message-text {
+        color: #f1f5f9;
+    }
+
+    .message-author {
+        color: #f8fafc;
+    }
+
+    .session-item:hover,
+    .suggestion-item:hover {
+        background: rgba(71, 85, 105, 0.2);
+    }
+
+    .suggestion-item {
+        background: rgba(51, 65, 85, 0.5);
+        border-color: rgba(71, 85, 105, 0.3);
+    }
+
+    .message-input {
+        background: rgba(30, 41, 59, 0.95);
+        border-color: rgba(71, 85, 105, 0.3);
+        color: #f8fafc;
+    }
+
+    .file-button {
+        background: rgba(51, 65, 85, 0.5);
+        color: #cbd5e1;
+    }
+
+    .file-button:hover {
+        background: rgba(71, 85, 105, 0.3);
+        color: #f1f5f9;
+    }
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+    .chat-sidebar,
+    .chat-main,
+    .message-content,
+    .suggestion-item,
+    .session-item {
+        border-width: 2px;
+    }
+
+    .message-input,
+    .file-button,
+    .send-button {
+        border-width: 2px;
+    }
+}
+
+/* Multi-Modal Tools */
+.multimodal-tools {
+    border-top: 1px solid #e5e7eb;
+    padding: 1rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9fafb;
+    border-radius: 0 0 1rem 1rem;
+}
+
+.tool-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.multimodal-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 0.5rem;
+    background: #f1f5f9;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.multimodal-btn:hover {
+    background: #e2e8f0;
+    color: #475569;
+    transform: translateY(-2px);
+}
+
+.multimodal-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.multimodal-btn.recording {
+    background: #dc2626;
+    color: white;
+    animation: pulse 1.5s infinite;
+}
+
+.voice-btn.recording {
+    animation: pulse-red 1.5s infinite;
+}
+
+.hidden {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.processing-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.processing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    background: #eff6ff;
+    border: 1px solid #3b82f6;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    color: #1e40af;
+}
+
+.processing-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #3b82f6;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.processing-text {
+    font-weight: 500;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes pulse-red {
+    0%, 100% {
+        background: #dc2626;
+        transform: scale(1);
+    }
+    50% {
+        background: #b91c1c;
+        transform: scale(1.05);
+    }
+}
+
+/* Mobile Responsiveness for Multi-Modal */
+@media (max-width: 640px) {
+    .multimodal-tools {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .tool-group {
+        justify-content: center;
+    }
+
+    .processing-indicator {
+        font-size: 0.8125rem;
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* Dark Mode Support for Multi-Modal */
+@media (prefers-color-scheme: dark) {
+    .multimodal-tools {
+        background: rgba(30, 41, 59, 0.5);
+        border-color: rgba(71, 85, 105, 0.3);
+    }
+
+    .multimodal-btn {
+        background: rgba(51, 65, 85, 0.5);
+        color: #cbd5e1;
+        border: 1px solid rgba(71, 85, 105, 0.3);
+    }
+
+    .multimodal-btn:hover {
+        background: rgba(71, 85, 105, 0.3);
+        color: #f8fafc;
+    }
+
+    .processing-indicator {
+        background: rgba(59, 130, 246, 0.1);
+        border-color: #60a5fa;
+        color: #93c5fd;
+    }
+
+    .processing-spinner {
+        border-color: #60a5fa;
+        border-top-color: transparent;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .message-action,
+    .session-action,
+    .file-button,
+    .send-button,
+    .suggestion-item,
+    .session-item,
+    .model-option,
+    .multimodal-btn {
+        transition: none;
+        animation: none;
+    }
+
+    .send-button:hover,
+    .multimodal-btn:hover {
+        transform: none;
+    }
+
+    .typing-dot,
+    .loading-spinner,
+    .processing-spinner {
+        animation: none;
+    }
+
+    .voice-btn.recording {
+        animation: none;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-container" x-data="enhancedUnifiedChatInterface()">
+    <!-- Chat Header -->
+    <div class="chat-header">
+        <h1 class="chat-title">
+            <i class="fas fa-brain mr-4"></i>
+            AI Chat Assistant
+        </h1>
+        <p class="chat-subtitle">
+            Advanced AI-powered business intelligence and analysis
+        </p>
+
+        <!-- Chat Stats -->
+        <div class="chat-stats">
+            <div class="stat-item">
+                <div class="stat-number" x-text="stats.total_sessions">0</div>
+                <div class="stat-label">Active Sessions</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" x-text="stats.total_messages">0</div>
+                <div class="stat-label">Messages Today</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" x-text="stats.cpu_usage + '%'">0%</div>
+                <div class="stat-label">CPU Usage</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" x-text="stats.memory_usage + '%'">0%</div>
+                <div class="stat-label">Memory Usage</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Interface -->
+    <div class="chat-interface">
+        <!-- Sidebar -->
+        <div class="chat-sidebar">
+            <!-- Model Selection -->
+            <div class="sidebar-section">
+                <h3 class="section-title">
+                    <i class="fas fa-cogs section-icon"></i>
+                    AI Models
+                </h3>
+                <div class="model-selector">
+                    <label class="model-option" :class="{ 'selected': selectedModel === 'local' }">
+                        <input type="radio" name="model" value="local" x-model="selectedModel" class="sr-only">
+                        <div class="model-radio" :class="{ 'selected': selectedModel === 'local' }"></div>
+                        <div class="model-info">
+                            <h4>Local AI</h4>
+                            <p>Fast, private, offline-capable</p>
+                        </div>
+                    </label>
+                    <label class="model-option" :class="{ 'selected': selectedModel === 'external' }">
+                        <input type="radio" name="model" value="external" x-model="selectedModel" class="sr-only">
+                        <div class="model-radio" :class="{ 'selected': selectedModel === 'external' }"></div>
+                        <div class="model-info">
+                            <h4>External AI</h4>
+                            <p>Advanced models via API</p>
+                        </div>
+                    </label>
+                    <label class="model-option" :class="{ 'selected': selectedModel === 'hybrid' }">
+                        <input type="radio" name="model" value="hybrid" x-model="selectedModel" class="sr-only">
+                        <div class="model-radio" :class="{ 'selected': selectedModel === 'hybrid' }"></div>
+                        <div class="model-info">
+                            <h4>Hybrid Mode</h4>
+                            <p>Best of both worlds</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Active Sessions -->
+            <div class="sidebar-section">
+                <h3 class="section-title">
+                    <i class="fas fa-comments section-icon"></i>
+                    Sessions
+                </h3>
+                <div class="session-list">
+                    <template x-for="session in sessions" :key="session.id">
+                        <div class="session-item"
+                             :class="{ 'active': activeSession === session.id }"
+                             @click="switchSession(session.id)">
+                            <div class="session-icon" x-text="getSessionInitial(session.title)"></div>
+                            <div class="session-info">
+                                <h4 class="session-title" x-text="session.title"></h4>
+                                <p class="session-meta" x-text="formatSessionTime(session.lastActivity)"></p>
+                            </div>
+                            <div class="session-actions">
+                                <button class="session-action" @click.stop="deleteSession(session.id)" title="Delete Session">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                    <button class="session-item" @click="createNewSession()">
+                        <div class="session-icon">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="session-info">
+                            <h4 class="session-title">New Session</h4>
+                            <p class="session-meta">Start fresh conversation</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question Suggestions -->
+            <div class="sidebar-section">
+                <h3 class="section-title">
+                    <i class="fas fa-lightbulb section-icon"></i>
+                    Suggestions
+                </h3>
+                <div class="suggestions-list">
+                    <template x-for="suggestion in suggestions" :key="suggestion.id">
+                        <div class="suggestion-item" @click="sendSuggestion(suggestion.question)">
+                            <div class="suggestion-icon">
+                                <i :class="suggestion.icon"></i>
+                            </div>
+                            <div class="suggestion-content">
+                                <h4 class="suggestion-title" x-text="suggestion.question"></h4>
+                                <p class="suggestion-category" x-text="suggestion.category"></p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="chat-main">
+            <!-- Messages Area -->
+            <div class="chat-messages" id="messagesContainer">
+                <template x-for="message in messages" :key="message.id">
+                    <div class="message" :class="{ 'message-user': message.type === 'user', 'message-ai': message.type === 'ai' }">
+                        <div class="message-avatar">
+                            <template x-if="message.type === 'user'">
+                                <div class="user-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            </template>
+                            <template x-if="message.type === 'ai'">
+                                <div class="ai-avatar">
+                                    <i class="fas fa-brain"></i>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-header">
+                                <h4 class="message-author" x-text="message.type === 'user' ? 'You' : 'AI Assistant'"></h4>
+                                <span class="message-time" x-text="formatMessageTime(message.timestamp)"></span>
+                            </div>
+                            <div class="message-text" x-html="formatMessage(message.content)"></div>
+                            <div class="message-actions" x-show="message.type === 'ai'">
+                                <button class="message-action" @click="copyMessage(message.content)">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <button class="message-action" @click="regenerateResponse(message.id)">
+                                    <i class="fas fa-redo"></i> Regenerate
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Typing Indicator -->
+                <div class="typing-indicator" x-show="isTyping">
+                    <div class="ai-avatar">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <span>AI is thinking...</span>
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" x-show="messages.length === 0 && !isTyping">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3 class="empty-state-title">Start a conversation</h3>
+                    <p class="empty-state-message">Ask me anything about your business data, financial analysis, or get help with your operations.</p>
+                    <div class="empty-state-actions">
+                        <button class="empty-state-action" @click="sendSuggestion('What is my current revenue trend?')">
+                            <i class="fas fa-chart-line mr-2"></i>
+                            Revenue Analysis
+                        </button>
+                        <button class="empty-state-action" @click="sendSuggestion('Show me profit and loss analysis')">
+                            <i class="fas fa-dollar-sign mr-2"></i>
+                            P&L Analysis
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="chat-input-area">
+                <form class="input-container" @submit.prevent="sendMessage()">
+                    <textarea
+                        class="message-input"
+                        x-model="currentMessage"
+                        @keydown="handleKeydown($event)"
+                        placeholder="Type your message here... (Press Shift+Enter for new line, Enter to send)"
+                        rows="1"
+                        x-ref="messageInput"></textarea>
+
+                    <div class="input-actions">
+                        <div class="file-upload">
+                            <input type="file" class="file-input" @change="handleFileUpload($event)" multiple>
+                            <button type="button" class="file-button" title="Upload file">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                        </div>
+                        <button type="submit" class="send-button" :disabled="!currentMessage.trim() || isTyping" @click="sendMessage()">
+                            <template x-if="!isTyping">
+                                <i class="fas fa-paper-plane"></i>
+                            </template>
+                            <template x-if="isTyping">
+                                <div class="loading-spinner"></div>
+                            </template>
+                        </button>
+                    </div>
+
+                    <!-- Multi-Modal Input Tools -->
+                    <div class="multimodal-tools">
+                        <div class="tool-group">
+                            <!-- Voice Input -->
+                            <button type="button" class="multimodal-btn voice-btn"
+                                    :class="{ 'recording': isRecording }"
+                                    @click="toggleVoiceRecording()"
+                                    :disabled="isProcessingMultimodal"
+                                    title="Voice input">
+                                <i :class="isRecording ? 'fas fa-stop-circle' : 'fas fa-microphone'"></i>
+                            </button>
+
+                            <!-- Image Input -->
+                            <label class="multimodal-btn image-btn" title="Upload image">
+                                <i class="fas fa-camera"></i>
+                                <input type="file" class="hidden" accept="image/*" @change="handleImageUpload($event)">
+                            </label>
+
+                            <!-- Document Input -->
+                            <label class="multimodal-btn document-btn" title="Upload document">
+                                <i class="fas fa-file-alt"></i>
+                                <input type="file" class="hidden" accept=".pdf,.doc,.docx,.txt,.rtf,.odt" @change="handleDocumentUpload($event)">
+                            </label>
+                        </div>
+
+                        <!-- Processing Status -->
+                        <div class="processing-status" x-show="isProcessingMultimodal">
+                            <div class="processing-indicator">
+                                <div class="processing-spinner"></div>
+                                <span class="processing-text" x-text="processingStatus"></span>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Unified Chat JavaScript -->
+<script>
+function unifiedChatInterface() {
+    return {
+        // Data
+        messages: [],
+        currentMessage: '',
+        sessions: [],
+        suggestions: [],
+        selectedModel: 'local',
+        activeSession: null,
+        isTyping: false,
+        stats: {
+            total_sessions: 0,
+            total_messages: 0,
+            cpu_usage: 0,
+            memory_usage: 0
+        },
+
+        // Initialize
+        async init() {
+            console.log('Initializing Unified Chat Interface...');
+            await this.loadSuggestions();
+            await this.createNewSession();
+            await this.updateStats();
+            this.setupEventListeners();
+        },
+
+        // Event Listeners
+        setupEventListeners() {
+            // Auto-resize textarea
+            this.$watch('currentMessage', () => {
+                const textarea = this.$refs.messageInput;
+                if (textarea) {
+                    textarea.style.height = 'auto';
+                    textarea.style.height = textarea.scrollHeight + 'px';
+                }
+            });
+        },
+
+        // Session Management
+        async createNewSession() {
+            try {
+                const response = await fetch('/api/chat/create-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model_type: this.selectedModel
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.session_id) {
+                    this.activeSession = data.session_id;
+                    this.sessions.unshift({
+                        id: data.session_id,
+                        title: 'New Chat Session',
+                        lastActivity: new Date().toISOString(),
+                        messageCount: 0
+                    });
+                    this.messages = [];
+                    this.showNotification('New chat session created!', 'success');
+                }
+            } catch (error) {
+                console.error('Error creating session:', error);
+                this.showNotification('Failed to create chat session', 'error');
+            }
+        },
+
+        switchSession(sessionId) {
+            this.activeSession = sessionId;
+            this.loadSessionMessages(sessionId);
+        },
+
+        async deleteSession(sessionId) {
+            if (confirm('Are you sure you want to delete this session?')) {
+                try {
+                    await fetch(`/api/chat/session/${sessionId}`, {
+                        method: 'DELETE'
+                    });
+
+                    this.sessions = this.sessions.filter(s => s.id !== sessionId);
+                    if (this.activeSession === sessionId) {
+                        this.activeSession = null;
+                        this.messages = [];
+                    }
+                    this.showNotification('Session deleted successfully', 'success');
+                } catch (error) {
+                    console.error('Error deleting session:', error);
+                    this.showNotification('Failed to delete session', 'error');
+                }
+            }
+        },
+
+        // Message Handling
+        async sendMessage() {
+            if (!this.currentMessage.trim() || !this.activeSession) return;
+
+            const message = this.currentMessage.trim();
+            this.currentMessage = '';
+            this.isTyping = true;
+
+            // Add user message
+            const userMessage = {
+                id: Date.now(),
+                type: 'user',
+                content: message,
+                timestamp: new Date()
+            };
+            this.messages.push(userMessage);
+
+            // Scroll to bottom
+            this.scrollToBottom();
+
+            try {
+                const response = await fetch('/api/chat/message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        session_id: this.activeSession,
+                        model_type: this.selectedModel
+                    })
+                });
+
+                if (response.ok) {
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let aiResponse = '';
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        const chunk = decoder.decode(value);
+                        aiResponse += chunk;
+
+                        // Update AI message in real-time
+                        if (!this.messages[this.messages.length - 1] || this.messages[this.messages.length - 1].type !== 'ai') {
+                            this.messages.push({
+                                id: Date.now() + 1,
+                                type: 'ai',
+                                content: aiResponse,
+                                timestamp: new Date()
+                            });
+                        } else {
+                            this.messages[this.messages.length - 1].content = aiResponse;
+                        }
+
+                        this.scrollToBottom();
+                    }
+                } else {
+                    throw new Error('Failed to get AI response');
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                this.messages.push({
+                    id: Date.now() + 2,
+                    type: 'ai',
+                    content: 'Sorry, I encountered an error processing your request. Please try again.',
+                    timestamp: new Date()
+                });
+            } finally {
+                this.isTyping = false;
+                this.updateStats();
+            }
+        },
+
+        sendSuggestion(question) {
+            this.currentMessage = question;
+            this.sendMessage();
+        },
+
+        handleKeydown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                this.sendMessage();
+            }
+        },
+
+        // File Upload
+        handleFileUpload(event) {
+            const files = Array.from(event.target.files);
+            files.forEach(file => {
+                this.uploadFile(file);
+            });
+            event.target.value = '';
+        },
+
+        async uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('session_id', this.activeSession);
+
+            try {
+                const response = await fetch('/api/chat/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    this.showNotification(`File "${file.name}" uploaded successfully`, 'success');
+                } else {
+                    throw new Error(data.error || 'Upload failed');
+                }
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                this.showNotification(`Failed to upload "${file.name}"`, 'error');
+            }
+        },
+
+        // Utility Methods
+        scrollToBottom() {
+            setTimeout(() => {
+                const container = document.getElementById('messagesContainer');
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            }, 100);
+        },
+
+        formatMessage(content) {
+            // Basic markdown-like formatting
+            return content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`(.*?)`/g, '<code>$1</code>')
+                .replace(/\n/g, '<br>');
+        },
+
+        formatMessageTime(timestamp) {
+            return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        },
+
+        formatSessionTime(timestamp) {
+            const now = new Date();
+            const time = new Date(timestamp);
+            const diff = now - time;
+
+            if (diff < 60000) return 'Just now';
+            if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+            if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+            return time.toLocaleDateString();
+        },
+
+        getSessionInitial(title) {
+            return title.charAt(0).toUpperCase();
+        },
+
+        async loadSuggestions() {
+            try {
+                const response = await fetch('/api/chat/question-suggestions');
+                const data = await response.json();
+                this.suggestions = data.suggestions || [];
+            } catch (error) {
+                console.error('Error loading suggestions:', error);
+                // Fallback suggestions
+                this.suggestions = [
+                    {
+                        id: '1',
+                        category: 'Financial Analysis',
+                        question: 'What is my current revenue trend?',
+                        icon: 'fas fa-chart-line'
+                    },
+                    {
+                        id: '2',
+                        category: 'Business Intelligence',
+                        question: 'Show me profit and loss analysis',
+                        icon: 'fas fa-dollar-sign'
+                    },
+                    {
+                        id: '3',
+                        category: 'Operations',
+                        question: 'What are my top clients by revenue?',
+                        icon: 'fas fa-users'
+                    }
+                ];
+            }
+        },
+
+        async loadSessionMessages(sessionId) {
+            try {
+                const response = await fetch(`/api/chat/session/${sessionId}/messages`);
+                const data = await response.json();
+                this.messages = data.messages || [];
+            } catch (error) {
+                console.error('Error loading session messages:', error);
+                this.messages = [];
+            }
+        },
+
+        async updateStats() {
+            try {
+                const response = await fetch('/api/chat/analytics');
+                const data = await response.json();
+                this.stats = {
+                    total_sessions: data.total_sessions || 0,
+                    total_messages: data.total_messages || 0,
+                    cpu_usage: data.system_resources?.cpu_percent || 0,
+                    memory_usage: data.system_resources?.memory?.percent || 0
+                };
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        },
+
+        // Actions
+        copyMessage(content) {
+            navigator.clipboard.writeText(content);
+            this.showNotification('Message copied to clipboard', 'success');
+        },
+
+        async regenerateResponse(messageId) {
+            // Implementation for regenerating AI response
+            this.showNotification('Regeneration feature coming soon', 'info');
+        },
+
+        // Notifications
+        showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-6 right-6 z-50 p-4 rounded-xl shadow-2xl max-w-sm transform transition-all duration-300 ${
+                type === 'success' ? 'bg-green-100 border border-green-500 text-green-700' :
+                type === 'error' ? 'bg-red-100 border border-red-500 text-red-700' :
+                type === 'warning' ? 'bg-yellow-100 border border-yellow-500 text-yellow-700' :
+                'bg-blue-100 border border-blue-500 text-blue-700'
+            }`;
+
+            notification.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : 'info'}-circle"></i>
+                    <span class="flex-1">${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+    };
+}
+
+// WebSocket Chat Functionality
+function initializeWebSocketChat() {
+    // Check if SocketIO is available
+    if (typeof io === 'undefined') {
+        console.warn('SocketIO not available. Install flask-socketio and include socket.io.js');
+        return;
+    }
+
+    // Initialize SocketIO connection
+    const socket = io();
+
+    // Socket event handlers
+    socket.on('connect', function() {
+        console.log('🔗 Connected to WebSocket server');
+        socket.emit('join_chat', {
+            session_id: 'default-session',
+            user_id: 'demo-user',
+            enable_memory: true
+        });
+    });
+
+    socket.on('disconnect', function() {
+        console.log('📴 Disconnected from WebSocket server');
+    });
+
+    socket.on('status', function(data) {
+        console.log('📊 Status:', data.message);
+    });
+
+    socket.on('chat_joined', function(data) {
+        console.log('👤 Joined chat session:', data.session_id);
+        if (data.memory_context) {
+            console.log('🧠 Memory context loaded:', data.memory_context.length, 'characters');
+        }
+    });
+
+    socket.on('typing_start', function(data) {
+        // Update typing indicator
+        window.chatInterface.isTyping = true;
+    });
+
+    socket.on('typing_stop', function(data) {
+        // Remove typing indicator
+        window.chatInterface.isTyping = false;
+    });
+
+    socket.on('message_chunk', function(data) {
+        // Handle streaming message chunks
+        const { session_id, chunk } = data;
+
+        if (!window.chatInterface.messages.length ||
+            window.chatInterface.messages[window.chatInterface.messages.length - 1].type !== 'ai') {
+            window.chatInterface.messages.push({
+                id: Date.now(),
+                type: 'ai',
+                content: chunk,
+                timestamp: new Date()
+            });
+        } else {
+            window.chatInterface.messages[window.chatInterface.messages.length - 1].content += chunk;
+        }
+
+        window.chatInterface.scrollToBottom();
+    });
+
+    socket.on('message_complete', function(data) {
+        // Handle complete message
+        const { session_id, full_response } = data;
+        console.log('✅ Message complete:', full_response.length, 'characters');
+
+        // Ensure typing indicator is off
+        window.chatInterface.isTyping = false;
+    });
+
+    socket.on('error', function(data) {
+        console.error('❌ WebSocket error:', data.message);
+        window.chatInterface.showNotification(data.message, 'error');
+    });
+
+    // Store socket reference globally
+    window.chatSocket = socket;
+}
+
+// Enhanced Chat Interface with WebSocket Support and Multi-Modal Input
+function enhancedUnifiedChatInterface() {
+    return {
+        // Inherit all functionality from original
+        ...unifiedChatInterface(),
+
+        // Multi-modal properties
+        isRecording: false,
+        isProcessingMultimodal: false,
+        processingStatus: '',
+        mediaRecorder: null,
+        audioChunks: [],
+
+        // Multi-modal methods
+        initializeMultimodalCapabilities() {
+            if (window.chatSocket) {
+                this.setupMultimodalWebSocketEvents();
+            }
+            this.checkBrowserCapabilities();
+        },
+
+        setupMultimodalWebSocketEvents() {
+            const socket = window.chatSocket;
+
+            socket.on('multimodal_processed', (data) => {
+                this.handleMultimodalProcessed(data);
+            });
+
+            socket.on('processing_start', (data) => {
+                this.isProcessingMultimodal = true;
+                this.processingStatus = `Processing ${data.input_type}...`;
+            });
+
+            socket.on('processing_stop', (data) => {
+                this.isProcessingMultimodal = false;
+                this.processingStatus = '';
+            });
+
+            socket.on('processing_error', (data) => {
+                this.isProcessingMultimodal = false;
+                this.processingStatus = '';
+                this.showNotification(`Error processing ${data.input_type}: ${data.error}`, 'error');
+            });
+        },
+
+        checkBrowserCapabilities() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                console.warn('⚠️ Voice recording not supported in this browser');
+            }
+            if (!window.FileReader) {
+                console.warn('⚠️ File reading not supported in this browser');
+            }
+        },
+
+        // Voice recording methods
+        async toggleVoiceRecording() {
+            if (this.isRecording) {
+                await this.stopVoiceRecording();
+            } else {
+                await this.startVoiceRecording();
+            }
+        },
+
+        async startVoiceRecording() {
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('Voice recording not supported in this browser');
+                }
+
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        sampleRate: 16000,
+                        channelCount: 1,
+                        echoCancellation: true,
+                        noiseSuppression: true
+                    }
+                });
+
+                this.mediaRecorder = new MediaRecorder(stream);
+                this.audioChunks = [];
+
+                this.mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        this.audioChunks.push(event.data);
+                    }
+                };
+
+                this.mediaRecorder.onstop = async () => {
+                    await this.processVoiceRecording();
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                this.mediaRecorder.start();
+                this.isRecording = true;
+                this.showNotification('🎤 Recording started - click again to stop', 'info');
+
+            } catch (error) {
+                console.error('❌ Error starting voice recording:', error);
+                this.showNotification(`Voice recording error: ${error.message}`, 'error');
+            }
+        },
+
+        async stopVoiceRecording() {
+            if (this.mediaRecorder && this.isRecording) {
+                this.mediaRecorder.stop();
+                this.isRecording = false;
+                this.showNotification('🎤 Recording stopped - processing...', 'info');
+            }
+        },
+
+        async processVoiceRecording() {
+            try {
+                if (this.audioChunks.length === 0) {
+                    throw new Error('No audio data recorded');
+                }
+
+                const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+                const base64Audio = await this.blobToBase64(audioBlob);
+
+                await this.sendMultimodalInput('voice', base64Audio, {
+                    language: 'en',
+                    format: 'wav'
+                });
+
+            } catch (error) {
+                console.error('❌ Error processing voice recording:', error);
+                this.showNotification(`Voice processing error: ${error.message}`, 'error');
+            }
+        },
+
+        // Override sendMessage to use WebSocket
+        async sendMessage() {
+            if (!this.currentMessage.trim() || !this.activeSession) return;
+
+            const message = this.currentMessage.trim();
+            this.currentMessage = '';
+
+            // Add user message to UI
+            const userMessage = {
+                id: Date.now(),
+                type: 'user',
+                content: message,
+                timestamp: new Date()
+            };
+            this.messages.push(userMessage);
+            this.scrollToBottom();
+
+            try {
+                if (window.chatSocket && window.chatSocket.connected) {
+                    // Use WebSocket for real-time communication
+                    this.isTyping = true;
+
+                    window.chatSocket.emit('chat_message', {
+                        message: message,
+                        session_id: this.activeSession,
+                        model_type: this.selectedModel,
+                        user_id: 'demo-user',
+                        stream: true,
+                        enable_memory: true
+                    });
+
+                    console.log('📤 Message sent via WebSocket');
+                } else {
+                    // Fallback to HTTP API
+                    console.log('🔄 WebSocket not available, using HTTP API');
+                    await this.sendMessageHTTP(message);
+                }
+
+            } catch (error) {
+                console.error('❌ Error sending message:', error);
+                this.showNotification('Failed to send message', 'error');
+                this.isTyping = false;
+            }
+        },
+
+        // HTTP fallback method
+        async sendMessageHTTP(message) {
+            try {
+                this.isTyping = true;
+
+                const response = await fetch('/api/chat/message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        session_id: this.activeSession,
+                        model_type: this.selectedModel
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Add AI response
+                    this.messages.push({
+                        id: Date.now() + 1,
+                        type: 'ai',
+                        content: data.response || 'Response received',
+                        timestamp: new Date()
+                    });
+
+                    this.scrollToBottom();
+                } else {
+                    throw new Error('Failed to get AI response');
+                }
+
+            } catch (error) {
+                console.error('❌ HTTP Error:', error);
+                this.messages.push({
+                    id: Date.now() + 2,
+                    type: 'ai',
+                    content: 'Sorry, I encountered an error processing your request. Please try again.',
+                    timestamp: new Date()
+                });
+            } finally {
+                this.isTyping = false;
+            }
+        },
+
+        // Enhanced initialization
+        async init() {
+            console.log('🚀 Initializing Enhanced Chat Interface...');
+
+            // Initialize WebSocket connection
+            if (window.chatSocket) {
+                // Wait a bit for connection
+                setTimeout(() => {
+                    if (window.chatSocket.connected) {
+                        console.log('✅ WebSocket connected');
+                    } else {
+                        console.warn('⚠️ WebSocket connection pending');
+                    }
+                }, 1000);
+            }
+
+            // Call parent initialization
+            await this.loadSuggestions();
+            await this.createNewSession();
+            await this.updateStats();
+            this.setupEventListeners();
+
+            // Initialize multimodal capabilities
+            this.initializeMultimodalCapabilities();
+
+            console.log('✅ Enhanced Chat Interface initialized');
+        },
+
+        // File upload handlers
+        async handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                if (!file.type.startsWith('image/')) {
+                    throw new Error('Please select a valid image file');
+                }
+                if (file.size > 10 * 1024 * 1024) {
+                    throw new Error('Image file too large (max 10MB)');
+                }
+
+                const base64Image = await this.blobToBase64(file);
+                await this.sendMultimodalInput('image', base64Image, {
+                    filename: file.name,
+                    size: file.size,
+                    type: file.type
+                });
+            } catch (error) {
+                console.error('❌ Error processing image:', error);
+                this.showNotification(`Image processing error: ${error.message}`, 'error');
+            } finally {
+                event.target.value = '';
+            }
+        },
+
+        async handleDocumentUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                const allowedTypes = [
+                    'application/pdf', 'application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'text/plain', 'text/rtf', 'application/rtf',
+                    'application/vnd.oasis.opendocument.text'
+                ];
+
+                if (!allowedTypes.includes(file.type) &&
+                    !file.name.match(/\.(pdf|doc|docx|txt|rtf|odt)$/i)) {
+                    throw new Error('Unsupported file type');
+                }
+                if (file.size > 50 * 1024 * 1024) {
+                    throw new Error('Document file too large (max 50MB)');
+                }
+
+                const base64Document = await this.blobToBase64(file);
+                await this.sendMultimodalInput('document', base64Document, {
+                    filename: file.name,
+                    size: file.size,
+                    type: file.type
+                });
+            } catch (error) {
+                console.error('❌ Error processing document:', error);
+                this.showNotification(`Document processing error: ${error.message}`, 'error');
+            } finally {
+                event.target.value = '';
+            }
+        },
+
+        // Multimodal processing
+        async sendMultimodalInput(inputType, content, metadata = {}) {
+            try {
+                this.isProcessingMultimodal = true;
+                this.processingStatus = `Processing ${inputType}...`;
+
+                if (window.chatSocket && window.chatSocket.connected) {
+                    window.chatSocket.emit('multimodal_input', {
+                        type: inputType,
+                        content: content,
+                        session_id: this.activeSession,
+                        user_id: 'demo-user',
+                        metadata: metadata
+                    });
+                    console.log(`📤 ${inputType} sent via WebSocket`);
+                } else {
+                    console.log(`🔄 ${inputType} processing via HTTP API`);
+                    await this.sendMultimodalInputHTTP(inputType, content, metadata);
+                }
+            } catch (error) {
+                console.error(`❌ Error sending ${inputType} input:`, error);
+                this.showNotification(`${inputType} processing error: ${error.message}`, 'error');
+                this.isProcessingMultimodal = false;
+                this.processingStatus = '';
+            }
+        },
+
+        async sendMultimodalInputHTTP(inputType, content, metadata) {
+            try {
+                const formData = new FormData();
+
+                if (inputType === 'voice') {
+                    const audioBlob = await this.base64ToBlob(content, 'audio/wav');
+                    formData.append('audio', audioBlob);
+                } else if (inputType === 'image') {
+                    const imageBlob = await this.base64ToBlob(content, 'image/jpeg');
+                    formData.append('image', imageBlob);
+                } else if (inputType === 'document') {
+                    const documentBlob = await this.base64ToBlob(content, 'application/octet-stream');
+                    formData.append('document', documentBlob);
+                }
+
+                formData.append('session_id', this.activeSession);
+                formData.append('user_id', 'demo-user');
+
+                for (const [key, value] of Object.entries(metadata)) {
+                    formData.append(key, value);
+                }
+
+                const response = await fetch(`/api/multimodal/${inputType}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    this.handleMultimodalProcessed({
+                        input_type: inputType,
+                        processed_content: result.processed_content || 'Content processed successfully',
+                        analysis: result.analysis || {},
+                        session_id: this.activeSession
+                    });
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                console.error('❌ HTTP multimodal processing error:', error);
+                this.showNotification(`Processing error: ${error.message}`, 'error');
+            } finally {
+                this.isProcessingMultimodal = false;
+                this.processingStatus = '';
+            }
+        },
+
+        handleMultimodalProcessed(data) {
+            const processedMessage = {
+                id: Date.now(),
+                type: 'multimodal',
+                input_type: data.input_type,
+                content: data.processed_content,
+                analysis: data.analysis || {},
+                timestamp: new Date()
+            };
+
+            this.messages.push(processedMessage);
+            this.scrollToBottom();
+
+            const inputTypeName = data.input_type.charAt(0).toUpperCase() + data.input_type.slice(1);
+            this.showNotification(`${inputTypeName} processed successfully!`, 'success');
+
+            this.isProcessingMultimodal = false;
+            this.processingStatus = '';
+
+            console.log(`✅ ${data.input_type} processed:`, data);
+        },
+
+        // Utility methods
+        blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const base64Data = reader.result.split(',')[1];
+                    resolve(base64Data);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        },
+
+        base64ToBlob(base64Data, mimeType) {
+            const byteCharacters = atob(base64Data);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            return new Blob([byteArray], { type: mimeType });
+        }
+    };
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Unified Chat Interface loaded successfully');
+
+    // Initialize SocketIO for real-time chat
+    initializeWebSocketChat();
+
+    // Add empty state styles
+    const emptyStateCSS = `
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .empty-state-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            color: #64748b;
+        }
+
+        .empty-state-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .empty-state-message {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin: 0 0 2rem 0;
+            max-width: 400px;
+        }
+
+        .empty-state-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .empty-state-action {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid #3b82f6;
+            background: white;
+            color: #3b82f6;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .empty-state-action:hover {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    `;
+
+    const style = document.createElement('style');
+    style.textContent = emptyStateCSS;
+    document.head.appendChild(style);
+});
+</script>
+{% endblock %}

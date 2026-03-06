@@ -1,0 +1,986 @@
+{% extends "layouts/base.html" %}
+
+{% block head %}
+{{ super() }}
+
+<!-- Sentiment Analysis SEO -->
+{% if seo_manager %}
+{{ seo_manager.generate_meta_tags('sentiment-analysis') }}
+{{ seo_manager.generate_tracking_scripts('sentiment-analysis') }}
+{% endif %}
+
+<!-- Sentiment Analysis CSS -->
+<style>
+/* Sentiment Analysis Container */
+.sentiment-analysis {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    min-height: calc(100vh - 200px);
+}
+
+/* Header Section */
+.sentiment-header {
+    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: white;
+}
+
+.sentiment-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0 0 1rem 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.sentiment-subtitle {
+    font-size: 1.1rem;
+    font-weight: 400;
+    margin: 0 0 1.5rem 0;
+    opacity: 0.9;
+}
+
+.header-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.feature-card {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.feature-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem auto;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 1.25rem;
+}
+
+.feature-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.feature-description {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+/* Analysis Section */
+.analysis-section {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.analysis-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.analysis-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #8b5cf6, #a855f7);
+    color: white;
+    font-size: 1.25rem;
+}
+
+.analysis-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.text-input-container {
+    margin-bottom: 1.5rem;
+}
+
+.text-input-group {
+    margin-bottom: 1rem;
+}
+
+.text-input-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.text-input {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    resize: vertical;
+    min-height: 120px;
+    transition: all 0.2s ease;
+}
+
+.text-input:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.analysis-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.method-select {
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    background: white;
+}
+
+.analyze-button {
+    padding: 0.75rem 2rem;
+    background: linear-gradient(135deg, #8b5cf6, #a855f7);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.analyze-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(139, 92, 246, 0.2);
+}
+
+.analyze-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Results Section */
+.results-section {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.results-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.results-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    font-size: 1.25rem;
+}
+
+.results-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+/* Sentiment Display */
+.sentiment-display {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.sentiment-main {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.sentiment-positive { color: #10b981; }
+.sentiment-negative { color: #ef4444; }
+.sentiment-neutral { color: #6b7280; }
+
+.sentiment-label {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.confidence-bar {
+    width: 200px;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.confidence-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #8b5cf6, #a855f7);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.confidence-text {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+}
+
+/* Metrics Grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.metric-label {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Word Analysis */
+.word-analysis {
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.word-analysis h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 1rem 0;
+}
+
+.word-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.word-tag {
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.word-tag.positive {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+}
+
+.word-tag.negative {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+}
+
+/* Batch Analysis */
+.batch-section {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.batch-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.batch-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    font-size: 1.25rem;
+}
+
+.batch-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.batch-input {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    resize: vertical;
+    min-height: 200px;
+    margin-bottom: 1rem;
+}
+
+.batch-button {
+    padding: 0.75rem 2rem;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.batch-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(245, 158, 11, 0.2);
+}
+
+/* Statistics Section */
+.stats-section {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.stats-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stats-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    color: white;
+    font-size: 1.25rem;
+}
+
+.stats-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Loading States */
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top: 4px solid #8b5cf6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 2rem auto;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #64748b;
+}
+
+.empty-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem auto;
+    font-size: 2rem;
+    color: #94a3b8;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 1024px) {
+    .sentiment-analysis {
+        padding: 1rem;
+    }
+
+    .sentiment-header {
+        padding: 1.5rem;
+    }
+
+    .sentiment-title {
+        font-size: 2rem;
+    }
+
+    .analysis-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .header-features {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .sentiment-main {
+        font-size: 2.5rem;
+    }
+
+    .word-tags {
+        justify-content: center;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .analysis-section,
+    .results-section,
+    .batch-section,
+    .stats-section {
+        background: rgba(30, 41, 59, 0.5);
+        border: 1px solid rgba(71, 85, 105, 0.3);
+    }
+
+    .metric-card,
+    .word-analysis {
+        background: rgba(30, 41, 59, 0.5);
+        border-color: rgba(71, 85, 105, 0.3);
+    }
+
+    .results-title,
+    .analysis-title,
+    .batch-title,
+    .stats-title {
+        color: #f8fafc;
+    }
+
+    .text-input {
+        background: rgba(30, 41, 59, 0.5);
+        border-color: rgba(71, 85, 105, 0.3);
+        color: #f8fafc;
+    }
+
+    .batch-input {
+        background: rgba(30, 41, 59, 0.5);
+        border-color: rgba(71, 85, 105, 0.3);
+        color: #f8fafc;
+    }
+
+    .method-select {
+        background: rgba(30, 41, 59, 0.5);
+        border-color: rgba(71, 85, 105, 0.3);
+        color: #f8fafc;
+    }
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+    .metric-card,
+    .analysis-section,
+    .results-section,
+    .batch-section,
+    .stats-section {
+        border-width: 2px;
+    }
+
+    .analyze-button,
+    .batch-button {
+        border: 2px solid;
+    }
+
+    .text-input,
+    .batch-input,
+    .method-select {
+        border-width: 2px;
+    }
+
+    .confidence-bar {
+        border: 2px solid;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .analyze-button,
+    .batch-button {
+        transition: none;
+    }
+
+    .analyze-button:hover,
+    .batch-button:hover {
+        transform: none;
+    }
+
+    .loading-spinner {
+        animation: none;
+    }
+
+    .confidence-fill {
+        transition: none;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sentiment-analysis" x-data="sentimentAnalysis()">
+    <!-- Header Section -->
+    <div class="sentiment-header">
+        <h1 class="sentiment-title">
+            <i class="fas fa-brain mr-4"></i>
+            Sentiment Analysis
+        </h1>
+        <p class="sentiment-subtitle">
+            Advanced AI-powered sentiment analysis with multiple algorithms and real-time processing
+        </p>
+
+        <!-- Feature Cards -->
+        <div class="header-features">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3 class="feature-title">Real-time Analysis</h3>
+                <p class="feature-description">Instant sentiment analysis with live results</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <h3 class="feature-title">Multiple Methods</h3>
+                <p class="feature-description">AFINN, VADER, Custom, and Hybrid approaches</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="feature-title">Batch Processing</h3>
+                <p class="feature-description">Analyze multiple texts simultaneously</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h3 class="feature-title">Business Focus</h3>
+                <p class="feature-description">Optimized for business and technical domains</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Single Text Analysis -->
+    <div class="analysis-section">
+        <div class="analysis-header">
+            <div class="analysis-icon">
+                <i class="fas fa-comment-alt"></i>
+            </div>
+            <h2 class="analysis-title">Single Text Analysis</h2>
+        </div>
+
+        <form class="text-input-container" @submit.prevent="analyzeText()">
+            <div class="text-input-group">
+                <label class="text-input-label" for="text-input">Enter text to analyze:</label>
+                <textarea
+                    id="text-input"
+                    class="text-input"
+                    x-model="inputText"
+                    placeholder="Type or paste your text here... e.g., 'This product is amazing and works perfectly!'"
+                    required
+                ></textarea>
+            </div>
+
+            <div class="analysis-controls">
+                <select class="method-select" x-model="analysisMethod">
+                    <option value="hybrid">Hybrid Analysis (Recommended)</option>
+                    <option value="afinn">AFINN Lexicon</option>
+                    <option value="vader">VADER Analysis</option>
+                    <option value="custom">Custom Business Lexicon</option>
+                </select>
+                <button type="submit" class="analyze-button" :disabled="!inputText.trim() || isAnalyzing">
+                    <i class="fas fa-search mr-2"></i>
+                    Analyze Sentiment
+                </button>
+            </div>
+        </form>
+
+        <!-- Loading State -->
+        <div class="loading-spinner" x-show="isAnalyzing"></div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="results-section" x-show="analysisResult" x-cloak>
+        <div class="results-header">
+            <div class="results-icon">
+                <i class="fas fa-chart-pie"></i>
+            </div>
+            <h2 class="results-title">Analysis Results</h2>
+        </div>
+
+        <!-- Main Sentiment Display -->
+        <div class="sentiment-display">
+            <div class="sentiment-main" :class="getSentimentClass(analysisResult.sentiment)">
+                <i :class="getSentimentIcon(analysisResult.sentiment)"></i>
+            </div>
+            <div class="sentiment-label" x-text="analysisResult.sentiment.toUpperCase()"></div>
+            <div class="confidence-bar">
+                <div class="confidence-fill" :style="`width: ${analysisResult.confidence * 100}%`"></div>
+            </div>
+            <div class="confidence-text">
+                Confidence: <span x-text="Math.round(analysisResult.confidence * 100)"></span>%
+            </div>
+        </div>
+
+        <!-- Metrics Grid -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value" x-text="formatScore(analysisResult.compound)"></div>
+                <div class="metric-label">Compound Score</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" x-text="formatPercentage(analysisResult.positive)"></div>
+                <div class="metric-label">Positive</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" x-text="formatPercentage(analysisResult.negative)"></div>
+                <div class="metric-label">Negative</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" x-text="formatPercentage(analysisResult.neutral)"></div>
+                <div class="metric-label">Neutral</div>
+            </div>
+        </div>
+
+        <!-- Word Analysis -->
+        <div class="word-analysis" x-show="analysisResult.positive_words.length > 0 || analysisResult.negative_words.length > 0">
+            <h3>Key Words & Phrases</h3>
+            <div class="word-tags">
+                <template x-for="word in analysisResult.positive_words.slice(0, 10)" :key="word">
+                    <span class="word-tag positive" x-text="word"></span>
+                </template>
+                <template x-for="word in analysisResult.negative_words.slice(0, 10)" :key="word">
+                    <span class="word-tag negative" x-text="word"></span>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- Batch Analysis Section -->
+    <div class="batch-section">
+        <div class="batch-header">
+            <div class="batch-icon">
+                <i class="fas fa-list-ul"></i>
+            </div>
+            <h2 class="batch-title">Batch Analysis</h2>
+        </div>
+
+        <div class="text-input-group">
+            <label class="text-input-label" for="batch-input">
+                Enter multiple texts (one per line):
+            </label>
+            <textarea
+                id="batch-input"
+                class="batch-input"
+                x-model="batchText"
+                placeholder="Enter multiple texts, one per line...&#10;This product is excellent!&#10;The service was terrible.&#10;I'm satisfied with the quality."
+            ></textarea>
+        </div>
+
+        <button class="batch-button" @click="analyzeBatch()" :disabled="!batchText.trim() || isAnalyzing">
+            <i class="fas fa-layer-group mr-2"></i>
+            Analyze Batch
+        </button>
+
+        <!-- Batch Results -->
+        <div class="batch-results" x-show="batchResults.length > 0" x-cloak>
+            <h3>Batch Results Summary</h3>
+            <div class="stats-grid">
+                <div class="metric-card">
+                    <div class="metric-value" x-text="batchResults.length"></div>
+                    <div class="metric-label">Total Texts</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" x-text="getBatchSentimentCount('positive')"></div>
+                    <div class="metric-label">Positive</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" x-text="getBatchSentimentCount('negative')"></div>
+                    <div class="metric-label">Negative</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" x-text="getBatchSentimentCount('neutral')"></div>
+                    <div class="metric-label">Neutral</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="stats-section">
+        <div class="stats-header">
+            <div class="stats-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h2 class="stats-title">System Statistics</h2>
+        </div>
+
+        <div class="stats-grid">
+            <div class="metric-card">
+                <div class="metric-value" x-text="systemStats.lexicons_loaded || 0"></div>
+                <div class="metric-label">Active Lexicons</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" x-text="systemStats.total_words_afinn || 0"></div>
+                <div class="metric-label">AFINN Words</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" x-text="systemStats.total_words_vader || 0"></div>
+                <div class="metric-label">VADER Words</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" x-text="systemStats.total_words_custom || 0"></div>
+                <div class="metric-label">Business Words</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sentiment Analysis JavaScript -->
+<script>
+function sentimentAnalysis() {
+    return {
+        // Data
+        inputText: '',
+        analysisMethod: 'hybrid',
+        isAnalyzing: false,
+        analysisResult: null,
+        batchText: '',
+        batchResults: [],
+        systemStats: {},
+
+        // Initialize
+        async init() {
+            console.log('🚀 Initializing Sentiment Analysis...');
+            await this.loadSystemStats();
+            console.log('✅ Sentiment Analysis initialized');
+        },
+
+        // Single text analysis
+        async analyzeText() {
+            if (!this.inputText.trim()) return;
+
+            this.isAnalyzing = true;
+            this.analysisResult = null;
+
+            try {
+                const response = await fetch('/api/sentiment/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: this.inputText,
+                        method: this.analysisMethod,
+                        include_details: true
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    this.analysisResult = data.analysis;
+                } else {
+                    const error = await response.json();
+                    alert('Analysis failed: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Analysis error:', error);
+                alert('Analysis failed: ' + error.message);
+            } finally {
+                this.isAnalyzing = false;
+            }
+        },
+
+        // Batch analysis
+        async analyzeBatch() {
+            if (!this.batchText.trim()) return;
+
+            this.isAnalyzing = true;
+            const texts = this.batchText.split('\\n').filter(text => text.trim());
+
+            if (texts.length === 0) {
+                alert('No valid texts found');
+                this.isAnalyzing = false;
+                return;
+            }
+
+            if (texts.length > 100) {
+                alert('Maximum 100 texts allowed for batch analysis');
+                this.isAnalyzing = false;
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/sentiment/batch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        texts: texts,
+                        method: this.analysisMethod
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    this.batchResults = data.results;
+                } else {
+                    const error = await response.json();
+                    alert('Batch analysis failed: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Batch analysis error:', error);
+                alert('Batch analysis failed: ' + error.message);
+            } finally {
+                this.isAnalyzing = false;
+            }
+        },
+
+        // Load system statistics
+        async loadSystemStats() {
+            try {
+                const response = await fetch('/api/sentiment/stats');
+                if (response.ok) {
+                    const data = await response.json();
+                    this.systemStats = data.stats;
+                }
+            } catch (error) {
+                console.error('Error loading system stats:', error);
+            }
+        },
+
+        // Utility methods
+        getSentimentClass(sentiment) {
+            const classes = {
+                'positive': 'sentiment-positive',
+                'negative': 'sentiment-negative',
+                'neutral': 'sentiment-neutral'
+            };
+            return classes[sentiment] || 'sentiment-neutral';
+        },
+
+        getSentimentIcon(sentiment) {
+            const icons = {
+                'positive': 'fas fa-smile-beam',
+                'negative': 'fas fa-frown',
+                'neutral': 'fas fa-meh'
+            };
+            return icons[sentiment] || 'fas fa-meh';
+        },
+
+        formatScore(score) {
+            return score.toFixed(3);
+        },
+
+        formatPercentage(value) {
+            return Math.round(value * 100) + '%';
+        },
+
+        getBatchSentimentCount(sentiment) {
+            return this.batchResults.filter(result => result.sentiment === sentiment).length;
+        }
+    };
+}
+
+// Auto-initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Sentiment Analysis loaded successfully');
+});
+</script>
+{% endblock %}
