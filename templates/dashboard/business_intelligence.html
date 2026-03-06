@@ -661,6 +661,35 @@
         </div>
     </div>
 
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">AI Finansijska Analiza KPR</h3>
+        </div>
+        <div class="chart-container" style="height: auto;">
+            <div class="space-y-4">
+                <input
+                    type="text"
+                    x-model="kprQuestion"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Postavite pitanje o KPR evidenciji ili finansijskim rizicima"
+                >
+
+                <div class="flex flex-wrap gap-3">
+                    <button
+                        class="chart-button active"
+                        :disabled="kprLoading"
+                        @click="runKPRAnalysis()"
+                    >
+                        Pokreni analizu
+                    </button>
+                    <button class="chart-button" @click="clearKPRResult()">Obriši rezultat</button>
+                </div>
+
+                <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 min-h-[140px]" style="white-space: pre-wrap;" x-text="kprResult || 'Rezultat AI analize će biti prikazan ovde.'"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Real-time Status Indicator -->
     <div class="realtime-status">
         <div class="status-indicator">
@@ -683,6 +712,9 @@ function businessIntelligenceDashboard() {
         regionChartType: 'pie',
         productChartType: 'bar',
         performanceChartType: 'cpu',
+        kprQuestion: '',
+        kprResult: '',
+        kprLoading: false,
         stats: {
             total_metrics: 6,
             active_alerts: 0,
@@ -1074,6 +1106,48 @@ function businessIntelligenceDashboard() {
         dismissAlert(timestamp) {
             this.alerts = this.alerts.filter(alert => alert.timestamp !== timestamp);
             this.stats.active_alerts = this.alerts.length;
+        },
+
+        async runKPRAnalysis() {
+            const pitanje = this.kprQuestion.trim();
+            if (!pitanje) {
+                this.kprResult = 'Unesite pitanje pre pokretanja analize.';
+                return;
+            }
+
+            this.kprLoading = true;
+            this.kprResult = 'Analiza u toku...';
+
+            try {
+                const response = await fetch('/api/kpr/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        mod: 'kombinovano',
+                        pitanje
+                    })
+                });
+
+                const payload = await response.json();
+
+                if (!response.ok || !payload.success) {
+                    this.kprResult = 'Došlo je do greške prilikom AI analize.';
+                    return;
+                }
+
+                this.kprResult = payload.data?.answer || 'Analiza je uspešno završena, ali rezultat nije vraćen.';
+            } catch (error) {
+                console.error('KPR analiza neuspešna:', error);
+                this.kprResult = 'Došlo je do greške prilikom povezivanja sa AI servisom.';
+            } finally {
+                this.kprLoading = false;
+            }
+        },
+
+        clearKPRResult() {
+            this.kprResult = '';
         },
 
         // Chart Control Methods
